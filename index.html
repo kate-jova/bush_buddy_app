@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wildlife Feed Calculator</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2b7a78" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .card { max-width: 400px; padding: 20px; border: 1px solid #ccc; border-radius: 12px; box-shadow: 2px 2px 6px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 12px; }
+    input { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; border: 1px solid #aaa; }
+    button { margin-top: 16px; padding: 10px 15px; border: none; border-radius: 6px; background: #2b7a78; color: white; cursor: pointer; }
+    button:hover { background: #20504f; }
+    .result { margin-top: 20px; padding: 12px; border-radius: 8px; background: #f9f9f9; border: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Wildlife Feed Calculator (Biolac 100)</h2>
+    <label>Body weight (g):
+      <input type="number" id="weight" placeholder="Enter body weight in grams">
+    </label>
+    <label>Number of feeds per day:
+      <input type="number" id="feeds" placeholder="e.g. 6">
+    </label>
+    <button onclick="calculateFeed()">Calculate</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculateFeed() {
+      let weight = parseFloat(document.getElementById('weight').value);
+      let feeds = parseInt(document.getElementById('feeds').value);
+
+      if (isNaN(weight) || isNaN(feeds) || weight <= 0 || feeds <= 0) {
+        document.getElementById('result').innerHTML = "⚠️ Please enter valid values.";
+        return;
+      }
+
+      let dailyMilk = weight * 0.15;
+      let perFeed = dailyMilk / feeds;
+      let dailyPowder = dailyMilk * 0.16;
+      let perFeedPowder = perFeed * 0.16;
+
+      document.getElementById('result').innerHTML = `
+        <strong>Results:</strong><br>
+        Daily milk required: ${dailyMilk.toFixed(1)} g<br>
+        Milk per feed: ${perFeed.toFixed(1)} g<br>
+        Daily Biolac powder: ${dailyPowder.toFixed(1)} g<br>
+        Powder per feed: ${perFeedPowder.toFixed(1)} g
+      `;
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.log('SW registration failed:', err));
+    }
+  </script>
+</body>
+</html>
