@@ -131,15 +131,58 @@ function addWeight() {
 
 function renderWeights(animal) {
   let history = document.getElementById('weightHistory');
-  history.innerHTML = animal.weights.map(w => `${w.date}: ${w.weight} g`).join('<br>');
+  history.innerHTML = '';
+
+  animal.weights.forEach((w, index) => {
+    const entry = document.createElement('div');
+    entry.innerHTML = `${w.date}: ${w.weight} g 
+      <button onclick="deleteWeight(${animal.id}, ${index})">❌</button>`;
+    history.appendChild(entry);
+  });
 
   const labels = animal.weights.map(w => w.date);
   const data = animal.weights.map(w => w.weight);
 
-  // Destroy old chart if it exists
   if (weightChart) {
     weightChart.destroy();
   }
+function deleteWeight(animalId, index) {
+  const animal = animals.find(a => a.id == animalId);
+  if (!animal) return;
+
+  animal.weights.splice(index, 1); // remove that entry
+  localStorage.setItem('animals', JSON.stringify(animals));
+  renderWeights(animal);
+}
+
+  if (labels.length > 0) {
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    weightChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: animal.name + ' Weight (g)',
+          data: data,
+          borderColor: 'rgba(43, 122, 120, 1)',
+          backgroundColor: 'rgba(43, 122, 120, 0.2)',
+          tension: 0.2,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgba(43, 122, 120, 1)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true } },
+        scales: {
+          x: { title: { display: true, text: 'Date' } },
+          y: { title: { display: true, text: 'Weight (g)' }, beginAtZero: true }
+        }
+      }
+    });
+  }
+}
+
 
   if (labels.length > 0) {
     const ctx = document.getElementById('weightChart').getContext('2d');
