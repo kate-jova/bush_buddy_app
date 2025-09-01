@@ -171,6 +171,14 @@ function renderWeights(animal) {
 
 // Rebuild animal list (and first animal’s chart) on page load
 window.onload = renderAnimals;
+// When user selects a different animal, show its data
+document.getElementById('animalSelect').addEventListener('change', function() {
+  const id = this.value;
+  const animal = animals.find(a => a.id == id);
+  if (animal) {
+    renderWeights(animal);
+  }
+});
 
 
   </script>
