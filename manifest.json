@@ -1,6 +1,6 @@
 {
-  "name": "CareKeeper - Possum Edition",
-  "short_name": "CareKeeper",
+  "name": "BushBuddy",
+  "short_name": "BushBuddy",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
