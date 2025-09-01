@@ -14,6 +14,10 @@ input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; 
 button { margin-top: 16px; padding: 10px 15px; border: none; border-radius: 6px; background: #2b7a78; color: white; cursor: pointer; }
 button:hover { background: #20504f; }
 .result { margin-top: 12px; padding: 12px; border-radius: 8px; background: #f9f9f9; border: 1px solid #eee; }
+.info-card { margin-top: 12px; padding: 12px; border-radius: 8px; background: #e8f5f3; border: 1px solid #2b7a78; }
+.info-card h4 { margin-top: 0; color: #2b7a78; }
+.info-section { margin-bottom: 8px; }
+.info-label { font-weight: bold; color: #2b7a78; }
 .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; }
 .modal-content { background:white; padding:20px; border-radius:12px; max-width:300px; width:100%; }
 .modal-content h3 { margin-top:0; }
@@ -28,7 +32,13 @@ button:hover { background: #20504f; }
 <div class="card">
   <h2>Animal Management</h2>
   <label>Name: <input type="text" id="animalName"></label>
-  <label>Species: <input type="text" id="animalSpecies"></label>
+  <label>Species: 
+    <select id="animalSpecies">
+      <option value="Common Brushtail Possum">Common Brushtail Possum</option>
+      <option value="Ringtail Possum">Ringtail Possum</option>
+      <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
+    </select>
+  </label>
   <button onclick="addAnimal()">Add Animal</button>
   <div id="animalList"></div>
 </div>
@@ -39,10 +49,11 @@ button:hover { background: #20504f; }
   <label>Date: <input type="date" id="weightDate"></label>
   <label>Weight (g): 
     <input type="number" id="animalWeight" placeholder="Enter weight in grams" 
-           oninput="document.getElementById('feedResult').innerHTML = calculateFeedForWeight(parseFloat(this.value))">
+           oninput="updateFeedCalculation()">
   </label>
   <button onclick="addWeight()">Add Weight</button>
   <div class="result" id="feedResult"></div>
+  <div class="info-card" id="infoCard" style="display: none;"></div>
   <div id="weightHistory"></div>
   <canvas id="weightChart"></canvas>
 </div>
@@ -51,7 +62,13 @@ button:hover { background: #20504f; }
   <div class="modal-content">
     <h3>Edit Animal</h3>
     <label>Name:<input type="text" id="modalAnimalName"></label>
-    <label>Species:<input type="text" id="modalAnimalSpecies"></label>
+    <label>Species:
+      <select id="modalAnimalSpecies">
+        <option value="Common Brushtail Possum">Common Brushtail Possum</option>
+        <option value="Ringtail Possum">Ringtail Possum</option>
+        <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
+      </select>
+    </label>
     <div class="modal-buttons">
       <button onclick="closeAnimalModal()">Cancel</button>
       <button onclick="saveAnimalEdit()">Save</button>
@@ -72,33 +89,62 @@ button:hover { background: #20504f; }
 </div>
 
 <script>
-// --- Feed Schedule ---
-const feedSchedule = [
-  { weight: 900, feeds: 1 },
-  { weight: 500, feeds: 2 },
-  { weight: 400, feeds: 3 },
-  { weight: 250, feeds: 4 },
-  { weight: 150, feeds: 5 },
-  { weight: 100, feeds: 6 },
-  { weight: 60,  feeds: 8 }
-];
+// --- Species Data ---
+const speciesData = {
+  "Common Brushtail Possum": [
+    { weight: 900, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary (bigger is better) set up as above.", nativeFood: "Native diet as above. Small branchlets of leaf tip up to large branches with fresh leaf.", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed.", comments: "Start weaning off milk – reduce gradually and monitor weight of possum weekly to ensure maintaining weight with reduced milk and increased foliage. If not, wait until weight stable before reducing milk again." },
+    { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary, (minimum 3m x 2m x 2m) in natural surroundings. Nest box, food/ water high in aviary.", nativeFood: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects.", feedingNotes: "2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXIMUM of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage.", comments: "MAXIMUM of 40mls in a single feed." },
+    { weight: 400, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on Mum's back but more confident climbing on its own. Very active at night. Should be climbing on branches and ropes, not on wire.", housing: "Large indoor cage (1m x 1m x 1.2m)", housingNotes: "28°C – no artificial heat. Large cage (1m x 1m x 1.2m) or small walk-in aviary on sheltered verandah. Cage to include nest box, water dish and good variety of branches and ropes for climbing.", nativeFood: "Must be eating good variety of native vegetation cut fresh each day. Soft insects such as small grasshoppers, moths.", feedingNotes: "3 milk feeds per day. Offer early morning, mid afternoon and late evening. Lapping. Do not leave milk in with possums as it goes 'off' very quickly.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds", comments: "" },
+    { weight: 250, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch. Riding on mum's back.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", nativeFood: "Offer a good variety of native vegetation (at least 5 different species cut fresh each day). Fresh leaf tip. Offer soft insects such as tiny grasshoppers, moths.", feedingNotes: "4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds", comments: "" },
+    { weight: 150, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Starting to explore a little outside of mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "30°C check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Housed indoors. Exploring cage.", nativeFood: "A small amount and variety of fresh native leaf tip after each feed.", feedingNotes: "5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equal  ly over 5 feeds.", comments: "" },
+    { weight: 100, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces. Permanently in Mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "30°C Check warmth. Carry cage or basket with secure lid and fine mesh. Provide a couple of pouch 'caves'. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads. Housed indoors.", nativeFood: "Start to introduce soft new leaf tip eucalypt, syzygium, melaleuca etc. Offer a variety as some eucalypt species may be toxic.", feedingNotes: "6 feeds per day. Milk – 4 hourly. May require additional water feeds in between 2 or 3 of the day feeds. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds.", comments: "" },
+    { weight: 60, feeds: 8, predictedAge: "3 months", features: "Furless, eyes closed. Custard-like faeces. Permanently in Mum's pouch. Experienced Carers only", housing: "Humidicrib", housingNotes: "32°C Check for warmth and keep at that temperature. Each animal differs in heat requirements. Place multiple pouches inside each other to form a cosy 'cave.' No loose threads. Wrap in the white car polish cloths with lime green edging, then place in pouches. Cover cage. Humidicrib beneficial for success. Watch for dehydration and diarrhoea.", nativeFood: "Nil", feedingNotes: "Once membranes at side of mouth are fully open the possum will lap from a shallow jar lid. 6-8 feeds per day depending upon hydration. May require additional water feeds in between 2 or 3 of the day feeds. Syringe with syringe teat until membranes at side of mouth fully open. Will then lap.", milkFormula: "Milk: 15% to 20% of body weight. 15% is usual, 20% if possum is compromised. May require additional water feeds between 2 or 3 day feeds to maintain hydration.", comments: "Only very experienced carers should attempt to raise 60g-100g joeys." }
+  ],
+  "Ringtail Possum": [
+    { weight: 400, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary (bigger is better) set up as above.", nativeFood: "As above", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 30mL per feed.", comments: "" },
+    { weight: 300, feeds: 2, predictedAge: "6 months", features: "Fully independent. Very active at night. Should be very confident climbing around enclosure. Reduce human interaction at this point", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary (min 3m x 2m x 2m) situated in natural surroundings. Large variety of fresh native vegetation each day placed in water containers for freshness. Possums should not be able to fall in to foliage water containers. Drey and water placed high in aviary.", nativeFood: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day. Increase native food similar to that of the release site (if known).", feedingNotes: "Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXIMUM of 25mls in a single feed. 15% of body weight divided equally over 2 feeds.", comments: "" },
+    { weight: 175, feeds: 3, predictedAge: "5 months", features: "Thick fur. Dark pellets. Still riding on mum's back but more confident climbing on its own. Very active at night.", housing: "Large indoor cage (1m x 1m x 1.2m)", housingNotes: "Large inside cage (1m x 1m x 1.2m) Introduce drey to cage and place the pouch inside drey. Provide water dish and good variety of branches and rope for climbing.", nativeFood: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day.", feedingNotes: "Offer early morning, mid afternoon and late evening. Lapping. Do not leave milk in with possums as it goes 'off' very quickly.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds", comments: "" },
+    { weight: 130, feeds: 4, predictedAge: "4.5 months", features: "Fluffy fur. Dark Pellets. More confident outside of mum's pouch. Riding on Mum's back.", housing: "Large indoor cage (1m x 1m x 1.2m)", housingNotes: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", nativeFood: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day.", feedingNotes: "Milk – 6 hourly. Lapping from shallow jar lid or small bowl. Feed each ringtail out of a separate bowl, not all feeding from one.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds.", comments: "" },
+    { weight: 100, feeds: 5, predictedAge: "4 months", features: "Fine soft fluffy fur. Teeth. Darker tube-like faeces or pellets. Exploring outside of mum's pouch. Introduce other ringtail possum joeys as soon as possible.", housing: "Large indoor cage (1m x 1m x 1.2m)", housingNotes: "28°C – no artificial heat should be necessary unless animal unwell. Large indoor cage (1m x 1m x 1.2m) with pouch secured up high. Variety of branches and ropes for climbing.", nativeFood: "Offer a variety of fresh native vegetation daily.", feedingNotes: "Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds.", comments: "" },
+    { weight: 80, feeds: 6, predictedAge: "3.5 months", features: "Short fur, eyes open. Dark tube like faeces or pellets. Permanently in Mum's pouch. Introduce other ringtail possum joeys as soon as possible. 4-5 joeys in colony", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "28°C Check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads. Starting to explore cage. Housed indoors.", nativeFood: "Start to introduce soft new leaf tip eucalypt, syzygium, melaleuca etc. after every feed. Offer a variety as some eucalypt species may be toxic.", feedingNotes: "6 feeds per day. Milk – 4 hourly. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds.", comments: "" },
+    { weight: 45, feeds: 8, predictedAge: "3 months", features: "Furless, eyes open. Must have eyes open to be viable. Custard-like faeces. Permanently in Mum's pouch. Experienced Carers only – difficult to save. Introduce other ringtails of same size as soon as possible.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "32°C Check for warmth and keep at that temperature. Each animal differs in heat requirements. Place multiple pouches inside each other to form a cosy 'cave.' No loose threads. Wrap in the white car polish cloths with lime green edging, then place in pouches. Cover cage. Humidicrib beneficial for success. Watch for dehydration and diarrhea.", nativeFood: "Small amount of Oxbow Critical Care added to the warm milk in jar lid at each feed. Oxbow is added until possum reaches 400g. Fresh leaf tip should be put in with possum after each feed from 60g.", feedingNotes: "Once membranes at side of mouth are fully open the possum will lap from a shallow jar lid. 6-8 feeds per day depending upon hydration. May require additional water feeds in between 2 or 3 of the day feeds. Syringe with syringe teat until membranes at side of mouth fully open. Will then lap.", milkFormula: "Milk: 15% to 20% of body weight. 15% is usual, 20% if possum is compromised. May require additional water feeds between 2 - 3 day feeds to maintain hydration.", comments: "" }
+  ],
+  "Short-Eared Brushtail Possum": [
+    { weight: 1100, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary (bigger is better) set up as above.", nativeFood: "Native diet as above. Small branchlets of leaf tip up to large branches with fresh leaf.", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed.", comments: "" },
+    { weight: 650, feeds: 2, predictedAge: "5.6 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary, (minimum 3m x 2m x 2m) in natural surroundings. Nest box, food/ water high in aviary.", nativeFood: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects.", feedingNotes: "2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXIMUM of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage.", comments: "" },
+    { weight: 500, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on Mum's back but more confident climbing on its own. Very active at night. Should be climbing on branches and ropes, not on wire.", housing: "Large cage (1m x 1m x 1.2m) or small walk-in aviary on sheltered verandah.", housingNotes: "28°C – no artificial heat. Large cage (1m x 1m x 1.2m) or small walk-in aviary on sheltered verandah. Cage to include nest box, water dish and good variety of branches and ropes for climbing.", nativeFood: "Must be eating good variety of native vegetation cut fresh each day. Soft insects such as small grasshoppers, moths.", feedingNotes: "3 feeds per day. Offer early morning, mid afternoon and late evening. Lapping. Do not leave milk in with possums as it goes 'off' very quickly.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds", comments: "" },
+    { weight: 275, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch. Riding on mum's back.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", nativeFood: "Offer a good variety of native vegetation (at least 5 different species cut fresh each day). Fresh leaf tip. Offer soft insects such as tiny grasshoppers, moths.", feedingNotes: "4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds.", comments: "" },
+    { weight: 200, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Starting to explore a little outside of mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "30°C check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Housed indoors. Exploring cage.", nativeFood: "A small amount and variety of fresh native leaf tip after each feed.", feedingNotes: "5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds.", comments: "" },
+    { weight: 150, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces. Permanently in Mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "30°C Check warmth. Carry cage or basket with secure lid and fine mesh. Provide a couple of pouch 'caves'. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads. Housed indoors.", nativeFood: "Start to introduce soft new leaf tip eucalypt, syzygium, melaleuca etc. Offer a variety as some eucalypt species may be toxic.", feedingNotes: "6 feeds per day. Milk – 4 hourly. May require additional water feeds in between 2 or 3 of the day feeds. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds.", comments: "" },
+    { weight: 90, feeds: 8, predictedAge: "3 months", features: "Furless, eyes closed. Custard-like faeces. Permanently in Mum's pouch. Experienced Carers only", housing: "Humidicrib", housingNotes: "32°C Check for warmth and keep at that temperature. Each animal differs in heat requirements. Place multiple pouches inside each other to form a cosy 'cave.' No loose threads. Wrap in the white car polish cloths with lime green edging, then place in pouches. Cover cage. Humidicrib beneficial for success. Watch for dehydration and diarrhoea.", nativeFood: "Nil", feedingNotes: "Once membranes at side of mouth are fully open the possum will lap from a shallow jar lid. 6-8 feeds per day depending upon hydration. May require additional water feeds in between 2 or 3 of the day feeds. Syringe with syringe teat until membranes at side of mouth fully open. Will then lap.", milkFormula: "Milk: 15% to 20% of body weight. 15% is usual, 20% if possum is compromised. May require additional water feeds between 2 or 3 day feeds to maintain hydration.", comments: "Only very experienced carers should attempt to raise 60g-100g joeys." }
+  ]
+};
 
-function getFeedsPerDay(weight) {
-  for (const entry of feedSchedule) {
+function getFeedsPerDay(weight, species) {
+  const schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  for (const entry of schedule) {
     if (weight >= entry.weight) return entry.feeds;
   }
-  return 8;
+  return schedule[schedule.length - 1].feeds;
 }
 
-function calculateFeedForWeight(weight) {
+function getAnimalInfo(weight, species) {
+  const schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  for (const entry of schedule) {
+    if (weight >= entry.weight) return entry;
+  }
+  return schedule[schedule.length - 1];
+}
+
+function calculateFeedForWeight(weight, species) {
   if (isNaN(weight) || weight <= 0) return '';
-  const feeds = getFeedsPerDay(weight);
+  const feeds = getFeedsPerDay(weight, species);
   const dailyMilk = weight * 0.15;
   const perFeed = dailyMilk / feeds;
   const dailyPowder = dailyMilk * 0.16;
   const perFeedPowder = perFeed * 0.16;
   return `
-    <strong>Feed Calculation:</strong><br>
+    <strong>Feed Calculation for ${species}:</strong><br>
     Weight: ${weight} g<br>
     Feeds per day: ${feeds}<br>
     Daily milk: ${dailyMilk.toFixed(1)} g<br>
@@ -108,21 +154,75 @@ function calculateFeedForWeight(weight) {
   `;
 }
 
+function showAnimalInfo(weight, species) {
+  const info = getAnimalInfo(weight, species);
+  const infoCard = document.getElementById('infoCard');
+  
+  infoCard.innerHTML = `
+    <h4>Care Information for ${species} - ${weight}g</h4>
+    <div class="info-section">
+      <span class="info-label">Predicted Age:</span> ${info.predictedAge}
+    </div>
+    <div class="info-section">
+      <span class="info-label">Features/Behaviour:</span> ${info.features}
+    </div>
+    <div class="info-section">
+      <span class="info-label">Housing Style:</span> ${info.housing}
+    </div>
+    <div class="info-section">
+      <span class="info-label">Housing Notes:</span> ${info.housingNotes}
+    </div>
+    <div class="info-section">
+      <span class="info-label">Native Food:</span> ${info.nativeFood}
+    </div>
+    <div class="info-section">
+      <span class="info-label">Feeding Schedule Notes:</span> ${info.feedingNotes}
+    </div>
+    <div class="info-section">
+      <span class="info-label">Milk Formula:</span> ${info.milkFormula}
+    </div>
+    ${info.comments ? `<div class="info-section"><span class="info-label">Comments:</span> ${info.comments}</div>` : ''}
+  `;
+  
+  infoCard.style.display = 'block';
+}
+
+function updateFeedCalculation() {
+  const weight = parseFloat(document.getElementById('animalWeight').value);
+  const selectedAnimalId = document.getElementById('animalSelect').value;
+  const selectedAnimal = animals.find(a => a.id == selectedAnimalId);
+  
+  if (selectedAnimal && !isNaN(weight) && weight > 0) {
+    const species = selectedAnimal.species;
+    document.getElementById('feedResult').innerHTML = calculateFeedForWeight(weight, species);
+    showAnimalInfo(weight, species);
+  } else {
+    document.getElementById('feedResult').innerHTML = '';
+    document.getElementById('infoCard').style.display = 'none';
+  }
+}
+
 // --- Animal Management ---
-let animals = JSON.parse(localStorage.getItem('animals')) || [];
+let animals = [];
 let weightChart;
 let editingAnimalId = null;
 let editingWeightIndex = null;
 
+// Initialize from localStorage or default
+try {
+  animals = JSON.parse(localStorage.getItem('animals')) || [];
+} catch (e) {
+  animals = [];
+}
+
 function addAnimal() {
   const name = document.getElementById('animalName').value.trim();
-  const species = document.getElementById('animalSpecies').value.trim();
+  const species = document.getElementById('animalSpecies').value;
   if (!name || !species) return;
   animals.push({ id: Date.now(), name, species, weights: [] });
   localStorage.setItem('animals', JSON.stringify(animals));
   renderAnimals();
   document.getElementById('animalName').value = '';
-  document.getElementById('animalSpecies').value = '';
 }
 
 function deleteAnimal(id) {
@@ -140,35 +240,63 @@ function editAnimal(id) {
   document.getElementById('animalModal').style.display = 'flex';
 }
 
-function closeAnimalModal() { editingAnimalId=null; document.getElementById('animalModal').style.display='none'; }
+function closeAnimalModal() { 
+  editingAnimalId=null; 
+  document.getElementById('animalModal').style.display='none'; 
+}
 
 function saveAnimalEdit() {
   if (editingAnimalId === null) return;
   const a = animals.find(a=>a.id==editingAnimalId);
   const name = document.getElementById('modalAnimalName').value.trim();
-  const species = document.getElementById('modalAnimalSpecies').value.trim();
-  if (name && species) { a.name=name; a.species=species; localStorage.setItem('animals', JSON.stringify(animals)); renderAnimals(); renderWeights(a); }
+  const species = document.getElementById('modalAnimalSpecies').value;
+  if (name && species) { 
+    a.name=name; 
+    a.species=species; 
+    localStorage.setItem('animals', JSON.stringify(animals)); 
+    renderAnimals(); 
+    renderWeights(a); 
+  }
   closeAnimalModal();
 }
 
 function renderAnimals() {
   const list = document.getElementById('animalList');
   const select = document.getElementById('animalSelect');
-  list.innerHTML=''; select.innerHTML='';
+  list.innerHTML=''; 
+  select.innerHTML='';
+  
   animals.forEach(a=>{
     const div=document.createElement('div');
     div.textContent=`${a.name} (${a.species}) `;
-    const delBtn=document.createElement('button'); delBtn.textContent='🗑️'; delBtn.style.marginLeft='8px';
+    const delBtn=document.createElement('button'); 
+    delBtn.textContent='🗑️'; 
+    delBtn.style.marginLeft='8px';
     delBtn.addEventListener('click', ()=>deleteAnimal(a.id));
-    const editBtn=document.createElement('button'); editBtn.textContent='✏️'; editBtn.style.marginLeft='4px';
+    const editBtn=document.createElement('button'); 
+    editBtn.textContent='✏️'; 
+    editBtn.style.marginLeft='4px';
     editBtn.addEventListener('click', ()=>editAnimal(a.id));
-    div.appendChild(delBtn); div.appendChild(editBtn); list.appendChild(div);
-    const opt=document.createElement('option'); opt.value=a.id; opt.textContent=a.name; select.appendChild(opt);
+    div.appendChild(delBtn); 
+    div.appendChild(editBtn); 
+    list.appendChild(div);
+    
+    const opt=document.createElement('option'); 
+    opt.value=a.id; 
+    opt.textContent=`${a.name} (${a.species})`; 
+    select.appendChild(opt);
   });
+  
   if (animals.length>0) {
-    const selectedId=select.value||animals[0].id; select.value=selectedId;
+    const selectedId=select.value||animals[0].id; 
+    select.value=selectedId;
     renderWeights(animals.find(a=>a.id==selectedId));
-  } else { document.getElementById('weightHistory').innerHTML=''; document.getElementById('feedResult').innerHTML=''; if(weightChart) weightChart.destroy(); }
+  } else { 
+    document.getElementById('weightHistory').innerHTML=''; 
+    document.getElementById('feedResult').innerHTML=''; 
+    document.getElementById('infoCard').style.display='none';
+    if(weightChart) weightChart.destroy(); 
+  }
 }
 
 // --- Weight Management ---
@@ -178,31 +306,122 @@ function addWeight() {
   const weight=parseFloat(document.getElementById('animalWeight').value);
   const a=animals.find(a=>a.id==id);
   if(!a||!date||isNaN(weight)) return;
-  a.weights.push({date,weight}); localStorage.setItem('animals',JSON.stringify(animals));
+  
+  a.weights.push({date,weight}); 
+  localStorage.setItem('animals',JSON.stringify(animals));
   renderWeights(a);
-  document.getElementById('feedResult').innerHTML = calculateFeedForWeight(weight);
-  document.getElementById('weightDate').value=''; document.getElementById('animalWeight').value='';
+  
+  const species = a.species;
+  document.getElementById('feedResult').innerHTML = calculateFeedForWeight(weight, species);
+  showAnimalInfo(weight, species);
+  
+  document.getElementById('weightDate').value=''; 
+  document.getElementById('animalWeight').value='';
 }
 
-function deleteWeight(animalId,index){const a=animals.find(a=>a.id==animalId); if(!a) return; a.weights.splice(index,1); localStorage.setItem('animals',JSON.stringify(animals)); renderWeights(a);}
-function editWeight(animalId,index){const a=animals.find(a=>a.id==animalId); if(!a) return; editingAnimalId=animalId; editingWeightIndex=index; const w=a.weights[index]; document.getElementById('modalWeightDate').value=w.date; document.getElementById('modalWeightValue').value=w.weight; document.getElementById('weightModal').style.display='flex';}
-function closeWeightModal(){ editingAnimalId=null; editingWeightIndex=null; document.getElementById('weightModal').style.display='none';}
-function saveWeightEdit(){ if(editingAnimalId===null||editingWeightIndex===null) return; const a=animals.find(a=>a.id==editingAnimalId); const d=document.getElementById('modalWeightDate').value; const w=parseFloat(document.getElementById('modalWeightValue').value); if(d&&!isNaN(w)){ a.weights[editingWeightIndex]={date:d,weight:w}; localStorage.setItem('animals',JSON.stringify(animals)); renderWeights(a); } closeWeightModal();}
+function deleteWeight(animalId,index){
+  const a=animals.find(a=>a.id==animalId); 
+  if(!a) return; 
+  a.weights.splice(index,1); 
+  localStorage.setItem('animals',JSON.stringify(animals)); 
+  renderWeights(a);
+}
+
+function editWeight(animalId,index){
+  const a=animals.find(a=>a.id==animalId); 
+  if(!a) return; 
+  editingAnimalId=animalId; 
+  editingWeightIndex=index; 
+  const w=a.weights[index]; 
+  document.getElementById('modalWeightDate').value=w.date; 
+  document.getElementById('modalWeightValue').value=w.weight; 
+  document.getElementById('weightModal').style.display='flex';
+}
+
+function closeWeightModal(){ 
+  editingAnimalId=null; 
+  editingWeightIndex=null; 
+  document.getElementById('weightModal').style.display='none';
+}
+
+function saveWeightEdit(){ 
+  if(editingAnimalId===null||editingWeightIndex===null) return; 
+  const a=animals.find(a=>a.id==editingAnimalId); 
+  const d=document.getElementById('modalWeightDate').value; 
+  const w=parseFloat(document.getElementById('modalWeightValue').value); 
+  if(d&&!isNaN(w)){ 
+    a.weights[editingWeightIndex]={date:d,weight:w}; 
+    localStorage.setItem('animals',JSON.stringify(animals)); 
+    renderWeights(a); 
+  } 
+  closeWeightModal();
+}
 
 function renderWeights(a){
-  const history=document.getElementById('weightHistory'); history.innerHTML='';
+  const history=document.getElementById('weightHistory'); 
+  history.innerHTML='';
+  
   a.weights.sort((w1,w2)=>new Date(w1.date)-new Date(w2.date));
   a.weights.forEach((w,i)=>{
-    const div=document.createElement('div'); div.innerHTML=`${w.date}: ${w.weight} g `;
-    const delBtn=document.createElement('button'); delBtn.textContent='❌'; delBtn.style.marginLeft='4px'; delBtn.addEventListener('click',()=>deleteWeight(a.id,i));
-    const editBtn=document.createElement('button'); editBtn.textContent='✏️'; editBtn.style.marginLeft='4px'; editBtn.addEventListener('click',()=>editWeight(a.id,i));
-    div.appendChild(delBtn); div.appendChild(editBtn); history.appendChild(div);
+    const div=document.createElement('div'); 
+    div.innerHTML=`${w.date}: ${w.weight} g `;
+    const delBtn=document.createElement('button'); 
+    delBtn.textContent='❌'; 
+    delBtn.style.marginLeft='4px'; 
+    delBtn.addEventListener('click',()=>deleteWeight(a.id,i));
+    const editBtn=document.createElement('button'); 
+    editBtn.textContent='✏️'; 
+    editBtn.style.marginLeft='4px'; 
+    editBtn.addEventListener('click',()=>editWeight(a.id,i));
+    div.appendChild(delBtn); 
+    div.appendChild(editBtn); 
+    history.appendChild(div);
   });
-  const labels=a.weights.map(w=>w.date); const data=a.weights.map(w=>w.weight);
+  
+  const labels=a.weights.map(w=>w.date); 
+  const data=a.weights.map(w=>w.weight);
+  
   if(weightChart) weightChart.destroy();
   if(labels.length>0){
     const ctx=document.getElementById('weightChart').getContext('2d');
-    weightChart=new Chart(ctx,{type:'line',data:{labels, datasets:[{label:a.name+' Weight (g)', data, borderColor:'rgba(43,122,120,1)', backgroundColor:'rgba(43,122,120,0.2)', tension:0.2, pointRadius:4, pointBackgroundColor:'rgba(43,122,120,1)'}]}, options:{responsive:true, plugins:{legend:{display:true}, tooltip:{callbacks:{label:function(context){ const weight=context.raw; const feeds=getFeedsPerDay(weight); const dailyMilk=weight*0.15; const perFeed=dailyMilk/feeds; const dailyPowder=dailyMilk*0.16; const perFeedPowder=perFeed*0.16; return `Weight: ${weight}g, ${feeds} feeds/day, Milk/feed: ${perFeed.toFixed(1)}g, Powder/feed: ${perFeedPowder.toFixed(1)}g`; }}}}, scales:{x:{title:{display:true,text:'Date'}}, y:{title:{display:true,text:'Weight (g)'} , beginAtZero:true}}}});
+    weightChart=new Chart(ctx,{
+      type:'line',
+      data:{
+        labels, 
+        datasets:[{
+          label:a.name+' Weight (g)', 
+          data, 
+          borderColor:'rgba(43,122,120,1)', 
+          backgroundColor:'rgba(43,122,120,0.2)', 
+          tension:0.2, 
+          pointRadius:4, 
+          pointBackgroundColor:'rgba(43,122,120,1)'
+        }]
+      }, 
+      options:{
+        responsive:true, 
+        plugins:{
+          legend:{display:true}, 
+          tooltip:{
+            callbacks:{
+              label:function(context){ 
+                const weight=context.raw; 
+                const feeds=getFeedsPerDay(weight, a.species); 
+                const dailyMilk=weight*0.15; 
+                const perFeed=dailyMilk/feeds; 
+                const dailyPowder=dailyMilk*0.16; 
+                const perFeedPowder=perFeed*0.16; 
+                return `Weight: ${weight}g, ${feeds} feeds/day, Milk/feed: ${perFeed.toFixed(1)}g, Powder/feed: ${perFeedPowder.toFixed(1)}g`; 
+              }
+            }
+          }
+        }, 
+        scales:{
+          x:{title:{display:true,text:'Date'}}, 
+          y:{title:{display:true,text:'Weight (g)'}, beginAtZero:true}
+        }
+      }
+    });
   }
 }
 
@@ -211,8 +430,18 @@ window.onload=function(){
   renderAnimals();
   document.getElementById('animalSelect').addEventListener('change',function(){
     const a=animals.find(a=>a.id==this.value);
-    if(a) renderWeights(a);
+    if(a) {
+      renderWeights(a);
+      // Clear feed calculation when switching animals
+      document.getElementById('animalWeight').value = '';
+      document.getElementById('feedResult').innerHTML = '';
+      document.getElementById('infoCard').style.display = 'none';
+    }
   });
+  
+  // Set today's date as default
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('weightDate').value = today;
 };
 </script>
 </body>
