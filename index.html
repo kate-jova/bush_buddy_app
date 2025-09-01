@@ -114,6 +114,22 @@ function deleteAnimal(animalId) {
   }
 }
 
+function editAnimal(animalId) {
+  const animal = animals.find(a => a.id == animalId);
+  if (!animal) return;
+
+  const newName = prompt("Enter new name:", animal.name);
+  const newSpecies = prompt("Enter new species:", animal.species);
+
+  if (newName && newSpecies) {
+    animal.name = newName.trim();
+    animal.species = newSpecies.trim();
+    localStorage.setItem('animals', JSON.stringify(animals));
+    renderAnimals();
+    renderWeights(animal);
+  }
+}
+
 function renderAnimals() {
   const list = document.getElementById('animalList');
   const select = document.getElementById('animalSelect');
@@ -121,17 +137,23 @@ function renderAnimals() {
   select.innerHTML = '';
 
   animals.forEach(animal => {
-    // Animal list div
     const div = document.createElement('div');
     div.textContent = `${animal.name} (${animal.species}) `;
 
     // Delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '🗑️ Delete';
-    deleteBtn.style.marginLeft = '10px';
+    deleteBtn.style.marginLeft = '8px';
     deleteBtn.addEventListener('click', () => deleteAnimal(animal.id));
-
     div.appendChild(deleteBtn);
+
+    // Edit button
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '✏️ Edit';
+    editBtn.style.marginLeft = '4px';
+    editBtn.addEventListener('click', () => editAnimal(animal.id));
+    div.appendChild(editBtn);
+
     list.appendChild(div);
 
     // Add to select
@@ -179,6 +201,22 @@ function deleteWeight(animalId, index) {
   renderWeights(animal);
 }
 
+function editWeight(animalId, index) {
+  const animal = animals.find(a => a.id == animalId);
+  if (!animal) return;
+
+  const w = animal.weights[index];
+  const newDate = prompt("Edit date (YYYY-MM-DD):", w.date);
+  const newWeight = prompt("Edit weight (g):", w.weight);
+
+  if (newDate && newWeight && !isNaN(newWeight)) {
+    w.date = newDate.trim();
+    w.weight = parseFloat(newWeight);
+    localStorage.setItem('animals', JSON.stringify(animals));
+    renderWeights(animal);
+  }
+}
+
 function renderWeights(animal) {
   const history = document.getElementById('weightHistory');
   history.innerHTML = '';
@@ -187,12 +225,20 @@ function renderWeights(animal) {
     const entry = document.createElement('div');
     entry.textContent = `${w.date}: ${w.weight} g `;
 
+    // Edit weight
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '✏️';
+    editBtn.style.marginLeft = '8px';
+    editBtn.addEventListener('click', () => editWeight(animal.id, index));
+    entry.appendChild(editBtn);
+
+    // Delete weight
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '❌';
-    deleteBtn.style.marginLeft = '8px';
+    deleteBtn.style.marginLeft = '4px';
     deleteBtn.addEventListener('click', () => deleteWeight(animal.id, index));
-
     entry.appendChild(deleteBtn);
+
     history.appendChild(entry);
   });
 
@@ -240,6 +286,7 @@ window.onload = () => {
   });
 };
 </script>
+
 
 </body>
 </html>
