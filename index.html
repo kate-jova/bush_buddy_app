@@ -59,175 +59,171 @@
   <div id="weightHistory"></div>
   <canvas id="weightChart"></canvas>
   <script>
-  function calculateFeed() {
-    let weight = parseFloat(document.getElementById('weight').value);
-    let feeds = parseInt(document.getElementById('feeds').value);
+    function calculateFeed() {
+      let weight = parseFloat(document.getElementById('weight').value);
+      let feeds = parseInt(document.getElementById('feeds').value);
 
-    if (isNaN(weight) || isNaN(feeds) || weight <= 0 || feeds <= 0) {
-      document.getElementById('result').innerHTML = "⚠️ Please enter valid values.";
-      return;
+      if (isNaN(weight) || isNaN(feeds) || weight <= 0 || feeds <= 0) {
+        document.getElementById('result').innerHTML = "⚠️ Please enter valid values.";
+        return;
+      }
+
+      let dailyMilk = weight * 0.15;
+      let perFeed = dailyMilk / feeds;
+      let dailyPowder = dailyMilk * 0.16;
+      let perFeedPowder = perFeed * 0.16;
+
+      document.getElementById('result').innerHTML = `
+        <strong>Results:</strong><br>
+        Daily milk required: ${dailyMilk.toFixed(1)} g<br>
+        Milk per feed: ${perFeed.toFixed(1)} g<br>
+        Daily Biolac powder: ${dailyPowder.toFixed(1)} g<br>
+        Powder per feed: ${perFeedPowder.toFixed(1)} g
+      `;
     }
 
-    let dailyMilk = weight * 0.15;
-    let perFeed = dailyMilk / feeds;
-    let dailyPowder = dailyMilk * 0.16;
-    let perFeedPowder = perFeed * 0.16;
-
-    document.getElementById('result').innerHTML = `
-      <strong>Results:</strong><br>
-      Daily milk required: ${dailyMilk.toFixed(1)} g<br>
-      Milk per feed: ${perFeed.toFixed(1)} g<br>
-      Daily Biolac powder: ${dailyPowder.toFixed(1)} g<br>
-      Powder per feed: ${perFeedPowder.toFixed(1)} g
-    `;
-  }
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('Service Worker registered'))
-      .catch(err => console.log('SW registration failed:', err));
-  }
-
-  // ---- Animal tracking ----
-  let animals = JSON.parse(localStorage.getItem('animals')) || [];
-  let weightChart = null;
-
-  function save() {
-    localStorage.setItem('animals', JSON.stringify(animals));
-  }
-
-  function addAnimal() {
-    const name = document.getElementById('animalName').value.trim();
-    const species = document.getElementById('animalSpecies').value.trim();
-    if (!name || !species) return;
-
-    const newAnimal = { id: Date.now(), name, species, weights: [] };
-    animals.push(newAnimal);
-    save();
-    renderAnimals();
-
-    // set selection to the new animal
-    const select = document.getElementById('animalSelect');
-    select.value = String(newAnimal.id);
-    renderWeights(newAnimal);
-
-    document.getElementById('animalName').value = '';
-    document.getElementById('animalSpecies').value = '';
-  }
-
-  function renderAnimals() {
-    const list = document.getElementById('animalList');
-    const select = document.getElementById('animalSelect');
-
-    list.innerHTML = '';
-    select.innerHTML = '';
-
-    animals.forEach(animal => {
-      list.innerHTML += `<div>${animal.name} (${animal.species})</div>`;
-      select.innerHTML += `<option value="${animal.id}">${animal.name}</option>`;
-    });
-
-    // show currently selected animal (or first) on load
-    if (animals.length > 0) {
-      const selectedId = select.value || String(animals[0].id);
-      select.value = selectedId;
-      const animal = animals.find(a => String(a.id) === selectedId);
-      if (animal) renderWeights(animal);
-    } else {
-      // no animals: clear UI + chart
-      document.getElementById('weightHistory').innerHTML = '';
-      if (weightChart) { weightChart.destroy(); weightChart = null; }
-      const canvas = document.getElementById('weightChart');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.log('SW registration failed:', err));
     }
+    let animals = JSON.parse(localStorage.getItem('animals')) || [];
+let weightChart; // global chart variable
+
+function addAnimal() {
+  let name = document.getElementById('animalName').value;
+  let species = document.getElementById('animalSpecies').value;
+  if (!name || !species) return;
+  let newAnimal = { id: Date.now(), name, species, weights: [] };
+  animals.push(newAnimal);
+  localStorage.setItem('animals', JSON.stringify(animals));
+  renderAnimals();
+}
+
+function renderAnimals() {
+  let list = document.getElementById('animalList');
+  let select = document.getElementById('animalSelect');
+  list.innerHTML = '';
+  select.innerHTML = '';
+  animals.forEach(animal => {
+    list.innerHTML += `<div>${animal.name} (${animal.species})</div>`;
+    select.innerHTML += `<option value="${animal.id}">${animal.name}</option>`;
+  });
+
+  // Auto-render first animal’s weights on load
+  if (animals.length > 0) {
+    renderWeights(animals[0]);
+    select.value = animals[0].id;
   }
+}
 
-  function addWeight() {
-    const id = document.getElementById('animalSelect').value;
-    const date = document.getElementById('weightDate').value;
-    const weight = parseFloat(document.getElementById('animalWeight').value);
+function addWeight() {
+  let id = document.getElementById('animalSelect').value;
+  let date = document.getElementById('weightDate').value;
+  let weight = parseFloat(document.getElementById('animalWeight').value);
+  let animal = animals.find(a => a.id == id);
+  if (!animal || !date || isNaN(weight)) return;
 
-    const animal = animals.find(a => String(a.id) === id);
-    if (!animal || !date || isNaN(weight)) return;
+  animal.weights.push({ date, weight });
+  localStorage.setItem('animals', JSON.stringify(animals));
+  renderWeights(animal);
+}
 
-    animal.weights.push({ date, weight });
-    save();
-    renderWeights(animal);
+function renderWeights(animal) {
+  let history = document.getElementById('weightHistory');
+  history.innerHTML = '';
 
-    document.getElementById('weightDate').value = '';
-    document.getElementById('animalWeight').value = '';
+  animal.weights.forEach((w, index) => {
+    const entry = document.createElement('div');
+    entry.innerHTML = `${w.date}: ${w.weight} g 
+      <button onclick="deleteWeight(${animal.id}, ${index})">❌</button>`;
+    history.appendChild(entry);
+  });
+
+  const labels = animal.weights.map(w => w.date);
+  const data = animal.weights.map(w => w.weight);
+
+  if (weightChart) {
+    weightChart.destroy();
   }
+function deleteWeight(animalId, index) {
+  const animal = animals.find(a => a.id == animalId);
+  if (!animal) return;
 
-  // ✅ GLOBAL function so inline onclick can find it
-  function deleteWeight(animalId, index) {
-    const animal = animals.find(a => a.id === animalId);
-    if (!animal) return;
+  animal.weights.splice(index, 1); // remove that entry
+  localStorage.setItem('animals', JSON.stringify(animals));
+  renderWeights(animal);
+}
 
-    animal.weights.splice(index, 1);
-    save();
-    renderWeights(animal);
-  }
-
-  function renderWeights(animal) {
-    const history = document.getElementById('weightHistory');
-    history.innerHTML = '';
-
-    animal.weights.forEach((w, idx) => {
-      const entry = document.createElement('div');
-      entry.innerHTML = `${w.date}: ${w.weight} g 
-        <button onclick="deleteWeight(${animal.id}, ${idx})">❌</button>`;
-      history.appendChild(entry);
-    });
-
-    const labels = animal.weights.map(w => w.date);
-    const data = animal.weights.map(w => w.weight);
-
-    // tear down previous chart
-    if (weightChart) { weightChart.destroy(); weightChart = null; }
-
-    if (labels.length > 0) {
-      const ctx = document.getElementById('weightChart').getContext('2d');
-      weightChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: animal.name + ' Weight (g)',
-            data,
-            borderColor: 'rgba(43, 122, 120, 1)',
-            backgroundColor: 'rgba(43, 122, 120, 0.2)',
-            tension: 0.2,
-            pointRadius: 4,
-            pointBackgroundColor: 'rgba(43, 122, 120, 1)'
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: true } },
-          scales: {
-            x: { title: { display: true, text: 'Date' } },
-            y: { title: { display: true, text: 'Weight (g)' }, beginAtZero: true }
-          }
+  if (labels.length > 0) {
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    weightChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: animal.name + ' Weight (g)',
+          data: data,
+          borderColor: 'rgba(43, 122, 120, 1)',
+          backgroundColor: 'rgba(43, 122, 120, 0.2)',
+          tension: 0.2,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgba(43, 122, 120, 1)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true } },
+        scales: {
+          x: { title: { display: true, text: 'Date' } },
+          y: { title: { display: true, text: 'Weight (g)' }, beginAtZero: true }
         }
-      });
-    } else {
-      // if no weights left, clear canvas
-      const canvas = document.getElementById('weightChart');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  }
-
-  // init + dropdown change
-  window.onload = () => {
-    renderAnimals();
-    document.getElementById('animalSelect').addEventListener('change', function () {
-      const animal = animals.find(a => String(a.id) === this.value);
-      if (animal) renderWeights(animal);
+      }
     });
-  };
-</script>
+  }
+}
 
+
+  if (labels.length > 0) {
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    weightChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: animal.name + ' Weight (g)',
+          data: data,
+          borderColor: 'rgba(43, 122, 120, 1)',
+          backgroundColor: 'rgba(43, 122, 120, 0.2)',
+          tension: 0.2,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgba(43, 122, 120, 1)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true } },
+        scales: {
+          x: { title: { display: true, text: 'Date' } },
+          y: { title: { display: true, text: 'Weight (g)' }, beginAtZero: true }
+        }
+      }
+    });
+  }
+}
+
+// Rebuild animal list (and first animal’s chart) on page load
+window.onload = renderAnimals;
+// When user selects a different animal, show its data
+document.getElementById('animalSelect').addEventListener('change', function() {
+  const id = this.value;
+  const animal = animals.find(a => a.id == id);
+  if (animal) {
+    renderWeights(animal);
+  }
+});
+
+
+  </script>
 </body>
 </html>
