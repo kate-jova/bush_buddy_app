@@ -151,6 +151,41 @@
         <button onclick="deleteWeight(${animal.id}, ${index})">❌</button>`;
       history.appendChild(entry);
     });
+function deleteAnimal(animalId) {
+  if (!confirm("Are you sure you want to delete this animal and all its weight data?")) return;
+
+  animals = animals.filter(a => a.id != animalId); // remove the animal
+  localStorage.setItem('animals', JSON.stringify(animals));
+  renderAnimals();
+
+  // Clear weight history and chart if no animals left
+  if (animals.length === 0) {
+    document.getElementById('weightHistory').innerHTML = '';
+    if (weightChart) weightChart.destroy();
+  }
+}
+function renderAnimals() {
+  let list = document.getElementById('animalList');
+  let select = document.getElementById('animalSelect');
+  list.innerHTML = '';
+  select.innerHTML = '';
+  
+  animals.forEach(animal => {
+    list.innerHTML += `<div>
+      ${animal.name} (${animal.species}) 
+      <button onclick="deleteAnimal(${animal.id})">🗑️ Delete</button>
+    </div>`;
+    select.innerHTML += `<option value="${animal.id}">${animal.name}</option>`;
+  });
+
+  if (animals.length > 0) {
+    renderWeights(animals[0]);
+    select.value = animals[0].id;
+  } else {
+    document.getElementById('weightHistory').innerHTML = '';
+    if (weightChart) weightChart.destroy();
+  }
+}
 
     const labels = animal.weights.map(w => w.date);
     const data = animal.weights.map(w => w.weight);
