@@ -85,6 +85,49 @@
         .then(() => console.log('Service Worker registered'))
         .catch(err => console.log('SW registration failed:', err));
     }
+    let animals = JSON.parse(localStorage.getItem('animals')) || [];
+
+function addAnimal() {
+  let name = document.getElementById('animalName').value;
+  let species = document.getElementById('animalSpecies').value;
+  if (!name || !species) return;
+  let newAnimal = { id: Date.now(), name, species, weights: [] };
+  animals.push(newAnimal);
+  localStorage.setItem('animals', JSON.stringify(animals));
+  renderAnimals();
+}
+
+function renderAnimals() {
+  let list = document.getElementById('animalList');
+  let select = document.getElementById('animalSelect');
+  list.innerHTML = '';
+  select.innerHTML = '';
+  animals.forEach(animal => {
+    list.innerHTML += `<div>${animal.name} (${animal.species})</div>`;
+    select.innerHTML += `<option value="${animal.id}">${animal.name}</option>`;
+  });
+}
+
+function addWeight() {
+  let id = document.getElementById('animalSelect').value;
+  let date = document.getElementById('weightDate').value;
+  let weight = parseFloat(document.getElementById('animalWeight').value);
+  let animal = animals.find(a => a.id == id);
+  if (!animal) return;
+  animal.weights.push({ date, weight });
+  localStorage.setItem('animals', JSON.stringify(animals));
+  renderWeights(animal);
+}
+
+function renderWeights(animal) {
+  let history = document.getElementById('weightHistory');
+  history.innerHTML = animal.weights.map(w => `${w.date}: ${w.weight} g`).join('<br>');
+  // Later: draw chart with Chart.js here
+}
+
+// Initialise animal list on page load
+renderAnimals();
+
   </script>
 </body>
 </html>
