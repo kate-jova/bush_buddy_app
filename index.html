@@ -108,7 +108,6 @@ function deleteAnimal(animalId) {
   localStorage.setItem('animals', JSON.stringify(animals));
   renderAnimals();
 
-  // Clear weight history and chart if no animals left
   if (animals.length === 0) {
     document.getElementById('weightHistory').innerHTML = '';
     if (weightChart) weightChart.destroy();
@@ -122,11 +121,24 @@ function renderAnimals() {
   select.innerHTML = '';
 
   animals.forEach(animal => {
-    list.innerHTML += `<div>
-      ${animal.name} (${animal.species}) 
-      <button onclick="deleteAnimal(${animal.id})">🗑️ Delete</button>
-    </div>`;
-    select.innerHTML += `<option value="${animal.id}">${animal.name}</option>`;
+    // Animal list div
+    const div = document.createElement('div');
+    div.textContent = `${animal.name} (${animal.species}) `;
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '🗑️ Delete';
+    deleteBtn.style.marginLeft = '10px';
+    deleteBtn.addEventListener('click', () => deleteAnimal(animal.id));
+
+    div.appendChild(deleteBtn);
+    list.appendChild(div);
+
+    // Add to select
+    const option = document.createElement('option');
+    option.value = animal.id;
+    option.textContent = animal.name;
+    select.appendChild(option);
   });
 
   // Render first animal by default
@@ -173,8 +185,14 @@ function renderWeights(animal) {
 
   animal.weights.forEach((w, index) => {
     const entry = document.createElement('div');
-    entry.innerHTML = `${w.date}: ${w.weight} g 
-      <button onclick="deleteWeight(${animal.id}, ${index})">❌</button>`;
+    entry.textContent = `${w.date}: ${w.weight} g `;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '❌';
+    deleteBtn.style.marginLeft = '8px';
+    deleteBtn.addEventListener('click', () => deleteWeight(animal.id, index));
+
+    entry.appendChild(deleteBtn);
     history.appendChild(entry);
   });
 
@@ -222,5 +240,6 @@ window.onload = () => {
   });
 };
 </script>
+
 </body>
 </html>
