@@ -15,6 +15,8 @@
     button:hover { background: #20504f; }
     .result { margin-top: 20px; padding: 12px; border-radius: 8px; background: #f9f9f9; border: 1px solid #eee; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
   <div class="card">
@@ -127,6 +129,49 @@ function renderWeights(animal) {
 
 // Initialise animal list on page load
 renderAnimals();
+let weightChart; // global chart variable
+
+function renderWeights(animal) {
+  let history = document.getElementById('weightHistory');
+  history.innerHTML = animal.weights.map(w => `${w.date}: ${w.weight} g`).join('<br>');
+
+  // Prepare chart data
+  const labels = animal.weights.map(w => w.date);
+  const data = animal.weights.map(w => w.weight);
+
+  // Destroy old chart if it exists
+  if (weightChart) {
+    weightChart.destroy();
+  }
+
+  // Create new chart
+  const ctx = document.getElementById('weightChart').getContext('2d');
+  weightChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: animal.name + ' Weight (g)',
+        data: data,
+        borderColor: 'rgba(43, 122, 120, 1)',
+        backgroundColor: 'rgba(43, 122, 120, 0.2)',
+        tension: 0.2,
+        pointRadius: 4,
+        pointBackgroundColor: 'rgba(43, 122, 120, 1)'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Date' } },
+        y: { title: { display: true, text: 'Weight (g)' }, beginAtZero: true }
+      }
+    }
+  });
+}
 
   </script>
 </body>
