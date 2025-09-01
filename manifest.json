@@ -1,6 +1,6 @@
 {
-  "name": "Wildlife Feed Calculator",
-  "short_name": "FeedCalc",
+  "name": "CareKeeper - Possum Edition",
+  "short_name": "CareKeeper",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
