@@ -29,6 +29,33 @@
     <div class="result" id="result"></div>
   </div>
 
+  <hr>
+
+  <h2>Animal Management</h2>
+  <label>Name:
+    <input type="text" id="animalName">
+  </label>
+  <label>Species:
+    <input type="text" id="animalSpecies">
+  </label>
+  <button onclick="addAnimal()">Add Animal</button>
+
+  <div id="animalList"></div>
+
+  <h2>Weight Tracking</h2>
+  <label>Select Animal:
+    <select id="animalSelect"></select>
+  </label>
+  <label>Date:
+    <input type="date" id="weightDate">
+  </label>
+  <label>Weight (g):
+    <input type="number" id="animalWeight">
+  </label>
+  <button onclick="addWeight()">Add Weight</button>
+
+  <div id="weightHistory"></div>
+  <canvas id="weightChart"></canvas>
   <script>
     function calculateFeed() {
       let weight = parseFloat(document.getElementById('weight').value);
