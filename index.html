@@ -350,6 +350,15 @@ let currentFeedingAnimalId = null;
 let currentFeedIndex = null;
 let currentPhotoFile = null;
 
+function formatDateDMY(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date)) return dateStr; // fallback for invalid dates
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}  
 // Initialize from memory storage
 animals = [];
 
@@ -573,7 +582,7 @@ function renderAnimals() {
       </div>
       <h4>${a.name}</h4>
       <p><strong>Species:</strong> ${a.species}</p>
-      <p><strong>Intake:</strong> ${a.intakeDate || 'Not recorded'} (${daysSinceIntake} days ago)</p>
+      <p><strong>Intake:</strong> ${formatDateDMY(a.intakeDate) || 'Not recorded'} (${daysSinceIntake} days ago)</p>
       <p><strong>Current Weight:</strong> ${currentWeight ? currentWeight + 'g' : 'Not recorded'}</p>
       <p><strong>Records:</strong> ${a.weights.length} weights, ${a.feedingLog.length} feeds, ${a.healthEntries.length} health entries</p>
       ${a.intakeNotes ? `<p><strong>Notes:</strong> ${a.intakeNotes}</p>` : ''}
@@ -795,7 +804,7 @@ function renderWeights(a) {
   a.weights.sort((w1, w2) => new Date(w1.date) - new Date(w2.date));
   a.weights.forEach((w, i) => {
     const div = document.createElement('div'); 
-    div.innerHTML = `${w.date}: ${w.weight} g `;
+    div.innerHTML = `${formatDateDMY(w.date)}: ${w.weight} g `;
     const delBtn = document.createElement('button'); 
     delBtn.textContent = '❌'; 
     delBtn.className = 'small danger';
@@ -953,7 +962,7 @@ function updatePhotoGallery() {
     div.innerHTML = `
       <img src="${photo.dataUrl}" alt="Animal photo">
       <div class="photo-info">
-        <div><strong>${photo.date}</strong></div>
+        <div><strong>${formatDateDMY(photo.date)}</strong></div>
         ${photo.notes ? `<div>${photo.notes}</div>` : ''}
         <div style="font-size: 10px; color: #999;">${(photo.size / 1024).toFixed(1)}KB</div>
       </div>
@@ -1133,7 +1142,7 @@ function renderFeedingHistory(animal) {
     const div = document.createElement('div');
     div.className = 'feed-log';
     div.innerHTML = `
-      <strong>${feed.date} ${feed.actualTime}</strong><br>
+      <strong>${formatDateDMY(feed.date)} ${feed.actualTime}</strong><br>
       Scheduled: ${feed.scheduledTime} (${feed.recommendedAmount}g)<br>
       Actually fed: ${feed.actualAmount}g<br>
       ${feed.notes ? `<em>${feed.notes}</em>` : ''}
@@ -1209,7 +1218,7 @@ function renderHealthHistory(animal) {
     const div = document.createElement('div');
     div.className = 'health-entry';
     div.innerHTML = `
-      <div class="health-date">${entry.date}</div>
+      <div class="health-date">${formatDateDMY(entry.date)}</div>
       <div class="condition-grid">
         <div class="condition-item">
           <div>Body Condition</div>
@@ -1307,13 +1316,13 @@ Feeds per day: ${schedule.length}`;
 
   report += `\n\nRECENT WEIGHT HISTORY`;
   animal.weights.slice(-5).reverse().forEach(w => {
-    report += `\n${w.date}: ${w.weight}g`;
+    report += `\n${formatDateDMY(w.date)}: ${w.weight}g`;
   });
 
   if (exportData.recentHealth.length > 0) {
     report += `\n\nRECENT HEALTH OBSERVATIONS`;
     exportData.recentHealth.forEach(entry => {
-      report += `\n${entry.date}: Body:${entry.bodyCondition}, Alertness:${entry.alertness}, Appetite:${entry.appetite}`;
+      report += `\n${formatDateDMY(entry.date)}: Body:${entry.bodyCondition}, Alertness:${entry.alertness}, Appetite:${entry.appetite}`;
       if (entry.temperature) report += `, Temp:${entry.temperature}°C`;
       if (entry.notes) report += `\n  Notes: ${entry.notes}`;
     });
@@ -1322,7 +1331,7 @@ Feeds per day: ${schedule.length}`;
   if (exportData.recentFeeding.length > 0) {
     report += `\n\nRECENT FEEDING LOG`;
     exportData.recentFeeding.slice(0, 10).forEach(feed => {
-      report += `\n${feed.date} ${feed.actualTime}: ${feed.actualAmount}g (scheduled ${feed.scheduledTime}, ${feed.recommendedAmount}g)`;
+      report += `\n${formatDateDMY(feed.date)} ${feed.actualTime}: ${feed.actualAmount}g (scheduled ${feed.scheduledTime}, ${feed.recommendedAmount}g)`;
       if (feed.notes) report += ` - ${feed.notes}`;
     });
   }
