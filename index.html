@@ -1284,7 +1284,7 @@ Generated: ${new Date().toLocaleString()}
 ANIMAL INFORMATION
 Name: ${animal.name}
 Species: ${animal.species}
-Intake Date: ${animal.intakeDate || 'Not recorded'}
+Intake Date: ${formatDateDMY(animal.intakeDate) || 'Not recorded'}
 Current Weight: ${currentWeight || 'Not recorded'}g
 Predicted Age: ${animalInfo?.predictedAge || 'Unknown'}
 Photos: ${animal.photos?.length || 0} images stored
