@@ -69,6 +69,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .nav-tab:hover .nav-tab-icon {
   transform: scale(1.1);
 }
+
+.nav-tab.active { 
+  background: linear-gradient(135deg, #698167, #a0b2af); 
+  color: white; 
+  box-shadow: 0 4px 15px rgba(43,122,120,0.3); 
+}
+
 /* Desktop nav tabs - larger size */
 @media (min-width: 769px) {
   .nav-tab { 
@@ -84,12 +91,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   .nav-tab-text {
     font-size: 12px;
   }
-}
-  
-.nav-tab.active { 
-  background: linear-gradient(135deg, #698167, #a0b2af); 
-  color: white; 
-  box-shadow: 0 4px 15px rgba(43,122,120,0.3); 
 }
 
 /* Card Styles */
@@ -168,9 +169,10 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 </head>
 <body>
 
-<div class="header">
-   <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 80px; margin-bottom: 0;" />
-   </div>
+<div class="container">
+  <div class="header">
+    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 80px; margin-bottom: 0;" />
+  </div>
 
   <!-- Main Navigation with Icons -->
   <div class="main-nav">
@@ -609,6 +611,35 @@ function renderWeights(animal) {
   }
   
   animal.weights.sort((w1, w2) => new Date(w2.date) - new Date(w1.date));
+  
+  // Show feed calculation for most recent weight
+  const mostRecentWeight = animal.weights[0];
+  if (mostRecentWeight) {
+    const feeds = getFeedsPerDay(mostRecentWeight.weight, animal.species);
+    const dailyMilk = mostRecentWeight.weight * 0.15;
+    const perFeed = dailyMilk / feeds;
+    const dailyPowder = dailyMilk * 0.16;
+    const perFeedPowder = perFeed * 0.16;
+    const animalInfo = getAnimalInfo(mostRecentWeight.weight, animal.species);
+    
+    document.getElementById('feedResult').innerHTML = `
+      <strong>Current Feed Calculation for ${animal.species} - ${mostRecentWeight.weight}g:</strong><br>
+      <em>Based on most recent weight (${formatDateDMY(mostRecentWeight.date)})</em><br><br>
+      Feeds per day: ${feeds}<br>
+      Daily milk: ${dailyMilk.toFixed(1)} g<br>
+      Milk per feed: ${perFeed.toFixed(1)} g<br>
+      Daily powder: ${dailyPowder.toFixed(1)} g<br>
+      Powder per feed: ${perFeedPowder.toFixed(1)} g<br><br>
+      
+      <strong>Care Information:</strong><br>
+      <strong>Predicted Age:</strong> ${animalInfo.predictedAge}<br>
+      <strong>Features/Behaviour:</strong> ${animalInfo.features}<br>
+      <strong>Housing:</strong> ${animalInfo.housing}<br>
+      <strong>Feeding Notes:</strong> ${animalInfo.feedingNotes}<br>
+      <strong>Milk Formula:</strong> ${animalInfo.milkFormula}
+    `;
+  }
+  
   animal.weights.forEach((w, i) => {
     const div = document.createElement('div');
     div.style.cssText = 'padding: 10px; margin: 5px 0; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);';
