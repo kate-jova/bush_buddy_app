@@ -911,11 +911,15 @@ function restoreData() {
 
 // Update all select dropdowns
 function updateAllSelects() {
+  console.log('updateAllSelects called, animals count:', animals.length);
   const selects = ['animalSelect', 'feedingAnimalSelect', 'healthAnimalSelect', 'photoAnimalSelect', 'exportAnimalSelect'];
   
   selects.forEach(selectId => {
     const select = document.getElementById(selectId);
-    if (!select) return;
+    if (!select) {
+      console.error('Select element not found:', selectId);
+      return;
+    }
     
     const currentValue = select.value;
     select.innerHTML = '';
@@ -934,11 +938,14 @@ function updateAllSelects() {
       select.appendChild(opt);
     });
     
+    console.log(`Updated ${selectId} with ${animals.length} animals`);
+    
     // Restore previous selection if it still exists
     if (currentValue && animals.find(a => a.id == currentValue)) {
       select.value = currentValue;
     } else if (animals.length > 0 && selectId !== 'exportAnimalSelect') {
       select.value = animals[0].id;
+      console.log(`Set ${selectId} to first animal:`, animals[0].name);
     }
   });
 }
