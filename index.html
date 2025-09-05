@@ -76,25 +76,11 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   box-shadow: 0 4px 15px rgba(43,122,120,0.3); 
 }
 
-.nav-tab::before { 
-  content: ''; 
-  position: absolute; 
-  top: 0; 
-  left: -100%; 
-  width: 100%; 
-  height: 100%; 
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); 
-  transition: left 0.5s; 
-}
-
-.nav-tab:hover::before { left: 100%; }
-
 /* Card Styles */
 .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
 .card h2 { margin-top: 0; color: #698167; font-size: 1.8em; }
-.card h3 { color: #698167; border-bottom: 2px solid #e8f5e9; padding-bottom: 10px; }
 
-/* Form Elements - Improved for mobile */
+/* Form Elements */
 label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
 input, select, textarea { 
   width: 100%; 
@@ -104,8 +90,7 @@ input, select, textarea {
   border: 2px solid #e1e8ed; 
   box-sizing: border-box; 
   transition: all 0.3s ease; 
-  font-size: 16px; /* Prevents zoom on iOS */
-  -webkit-appearance: none; /* Better mobile styling */
+  font-size: 16px;
 }
 input:focus, select:focus, textarea:focus { 
   outline: none; 
@@ -114,7 +99,7 @@ input:focus, select:focus, textarea:focus {
 }
 textarea { resize: vertical; min-height: 80px; }
 
-/* Buttons - Better mobile touch targets */
+/* Buttons */
 button { 
   margin: 8px 4px; 
   padding: 12px 20px; 
@@ -125,206 +110,74 @@ button {
   cursor: pointer; 
   font-weight: 600; 
   transition: all 0.3s ease; 
-  position: relative; 
-  overflow: hidden;
-  min-height: 44px; /* Apple's recommended touch target */
+  min-height: 44px;
   font-size: 14px;
 }
 button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(43,122,120,0.3); }
-button:active { transform: translateY(0); }
-button.secondary { background: linear-gradient(135deg, #6c757d, #7a8086); }
-button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 button.small { padding: 8px 12px; font-size: 12px; margin: 2px; min-height: 36px; }
-button::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,0.2); border-radius: 50%; transition: width 0.3s, height 0.3s; transform: translate(-50%, -50%); }
-button:active::before { width: 300px; height: 300px; }
-
-/* Photo Upload */
-.photo-section { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 15px; border: 2px dashed #dee2e6; text-align: center; }
-.photo-preview { max-width: 200px; max-height: 200px; border-radius: 10px; margin: 10px; }
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
-.photo-item { position: relative; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-.photo-item img { width: 100%; height: 150px; object-fit: cover; }
-.photo-item .photo-info { padding: 10px; font-size: 12px; color: #666; }
-.photo-delete { position: absolute; top: 5px; right: 5px; background: rgba(220,53,69,0.9); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 /* Content Sections */
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Animal List - Improved grid */
+/* Animal List */
 .animal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
 .animal-item { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 6px 25px rgba(0,0,0,0.1); position: relative; }
 .animal-item h4 { margin-top: 0; color: #698167; }
 .animal-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
 
-/* Results and Info Cards */
-.result { margin-top: 15px; padding: 15px; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-left: 4px solid #698167; }
-.info-card { margin-top: 15px; padding: 20px; border-radius: 15px; background: linear-gradient(135deg, #e8f5e9, #d4edda); border: 1px solid #698167; }
-.info-card h4 { margin-top: 0; color: #698167; }
-
-/* Feeding and Health */
-.feed-log, .health-entry { border: 1px solid #e9ecef; border-radius: 12px; padding: 15px; margin: 10px 0; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-.feed-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
-.feed-item:last-child { border-bottom: none; }
-.feed-status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.status-pending { background: #fff3cd; color: #856404; }
-.status-completed { background: #d1e7dd; color: #0f5132; }
-.status-overdue { background: #f8d7da; color: #721c24; }
-
-.next-feed { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 1px solid #2196f3; padding: 15px; border-radius: 12px; margin: 15px 0; }
-
-/* Condition Grid */
-.condition-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 15px 0; }
-.condition-item { text-align: center; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-.condition-value { font-weight: bold; font-size: 20px; margin-top: 5px; }
-.condition-poor { color: #dc3545; }
-.condition-fair { color: #ffc107; }
-.condition-good { color: #28a745; }
-
-/* Modal Styles */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
-.modal-content { background: white; padding: 30px; border-radius: 20px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-.modal-content h3 { margin-top: 0; color: #698167; }
-.modal-buttons { margin-top: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
-
-/* Export Section */
-.export-section { margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 15px; }
-
 /* Responsive Design */
 @media (max-width: 768px) {
   body { padding: 10px; }
-  
   .header h1 { font-size: 2em; }
-  
-  .main-nav { 
-    padding: 8px; 
-    margin-bottom: 20px;
-  }
-  
-  .nav-tab { 
-    padding: 10px 12px; 
-    margin: 0 2px;
-    min-width: 70px;
-  }
-  
-  .nav-tab-icon {
-    font-size: 18px;
-    margin-bottom: 3px;
-  }
-  
-  .nav-tab-text {
-    font-size: 10px;
-  }
-  
+  .main-nav { padding: 8px; margin-bottom: 20px; }
+  .nav-tab { padding: 10px 12px; margin: 0 2px; min-width: 70px; }
+  .nav-tab-icon { font-size: 18px; margin-bottom: 3px; }
+  .nav-tab-text { font-size: 10px; }
   .card { padding: 20px; }
-  
   .animal-grid { grid-template-columns: 1fr; }
-  
-  .condition-grid { grid-template-columns: repeat(2, 1fr); }
-  
-  .photo-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-  
-  .feed-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .modal-content {
-    padding: 20px;
-    margin: 10px;
-  }
-  
-  .modal-buttons {
-    justify-content: stretch;
-  }
-  
-  .modal-buttons button {
-    flex: 1;
-    margin: 5px 0;
-  }
 }
 
 @media (max-width: 480px) {
-  .nav-tab {
-    min-width: 60px;
-    padding: 8px 10px;
-  }
-  
-  .nav-tab-icon {
-    font-size: 16px;
-  }
-  
-  .nav-tab-text {
-    font-size: 9px;
-  }
-  
-  .animal-actions {
-    position: static;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: flex-end;
-  }
-}
-
-/* Loading Animation */
-.loading { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .nav-tab {
-    border: 2px solid currentColor;
-  }
-  
-  .card {
-    border: 2px solid #333;
-  }
+  .nav-tab { min-width: 60px; padding: 8px 10px; }
+  .nav-tab-icon { font-size: 16px; }
+  .nav-tab-text { font-size: 9px; }
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-      <img src="Bush (2).png" alt="Site Logo" /><h1>BushBuddy</h1>
+    <h1>BushBuddy</h1>
     <p>Professional Wildlife Care Management System</p>
   </div>
 
-  <!-- Improved Main Navigation with Icons -->
+  <!-- Main Navigation with Icons -->
   <div class="main-nav">
-    <button class="nav-tab active" onclick="showMainTab('animals')">
+    <button class="nav-tab active" onclick="showTab('animals')">
       <div class="nav-tab-icon">🐾</div>
       <div class="nav-tab-text">Animal<br>Management</div>
     </button>
-    <button class="nav-tab" onclick="showMainTab('weight')">
+    <button class="nav-tab" onclick="showTab('weight')">
       <div class="nav-tab-icon">⚖️</div>
       <div class="nav-tab-text">Weight &<br>Feed</div>
     </button>
-    <button class="nav-tab" onclick="showMainTab('feeding')">
+    <button class="nav-tab" onclick="showTab('feeding')">
       <div class="nav-tab-icon">🍼</div>
       <div class="nav-tab-text">Feeding<br>Log</div>
     </button>
-    <button class="nav-tab" onclick="showMainTab('health')">
+    <button class="nav-tab" onclick="showTab('health')">
       <div class="nav-tab-icon">🏥</div>
       <div class="nav-tab-text">Health<br>Tracking</div>
     </button>
-    <button class="nav-tab" onclick="showMainTab('photos')">
+    <button class="nav-tab" onclick="showTab('photos')">
       <div class="nav-tab-icon">📷</div>
       <div class="nav-tab-text">Photo<br>Gallery</div>
     </button>
-    <button class="nav-tab" onclick="showMainTab('export')">
+    <button class="nav-tab" onclick="showTab('export')">
       <div class="nav-tab-icon">📋</div>
       <div class="nav-tab-text">Care<br>Handover</div>
     </button>
@@ -344,233 +197,176 @@ button:active::before { width: 300px; height: 300px; }
       </label>
       <label>Intake Date: <input type="date" id="intakeDate"></label>
       <label>Intake Notes: <textarea id="intakeNotes" placeholder="Circumstances of rescue, initial condition, etc."></textarea></label>
-      <button onclick="
-        try {
-          const name = document.getElementById('animalName').value.trim();
-          const species = document.getElementById('animalSpecies').value;
-          const intakeDate = document.getElementById('intakeDate').value;
-          const intakeNotes = document.getElementById('intakeNotes').value.trim();
-          
-          if (!name || !species) {
-            alert('Please enter animal name and species.');
-            return;
-          }
-          
-          const newAnimal = { 
-            id: Date.now(), 
-            name, 
-            species, 
-            intakeDate: intakeDate || new Date().toISOString().split('T')[0],
-            intakeNotes: intakeNotes || '',
-            weights: [], 
-            feedingLog: [], 
-            healthEntries: [],
-            photos: []
-          };
-          
-          if (typeof animals === 'undefined') window.animals = [];
-          animals.push(newAnimal);
-          
-          if (typeof renderAnimals === 'function') {
-            renderAnimals();
-          } else {
-            // Fallback rendering
-            const list = document.getElementById('animalList');
-            list.innerHTML = '';
-            animals.forEach(a => {
-              const div = document.createElement('div');
-              div.className = 'animal-item';
-              div.innerHTML = '<h4>' + a.name + '</h4><p>Species: ' + a.species + '</p>';
-              list.appendChild(div);
-            });
-          }
-          
-          // Clear form
-          document.getElementById('animalName').value = '';
-          document.getElementById('intakeDate').value = new Date().toISOString().split('T')[0];
-          document.getElementById('intakeNotes').value = '';
-          
-          alert(name + ' has been added successfully!');
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error adding animal: ' + error.message);
-        }
-      ">Add Animal</button>
+      <button onclick="addNewAnimal()">Add Animal</button>
     </div>
 
     <div class="card">
       <h2>Your Animals</h2>
-      <div id="animalList" class="animal-grid"></div>
+      <div id="animalList" class="animal-grid">
+        <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>
+      </div>
     </div>
   </div>
 
-  <!-- Weight & Feed Tab -->
+  <!-- Other tabs (simplified for testing) -->
   <div id="weightTab" class="tab-content">
     <div class="card">
-      <h2>Weight Tracking & Feed Calculator</h2>
-      <label>Select Animal: <select id="animalSelect"></select></label>
-      <label>Date: <input type="date" id="weightDate"></label>
-      <label>Weight (g): 
-        <input type="number" id="animalWeight" placeholder="Enter weight in grams" 
-               oninput="updateFeedCalculation()">
-      </label>
-      <button onclick="addWeight()">Add Weight</button>
-      <div class="result" id="feedResult"></div>
-      <div class="info-card" id="infoCard" style="display: none;"></div>
-      <div id="weightHistory"></div>
-      <canvas id="weightChart" style="max-height: 400px;"></canvas>
+      <h2>Weight Tracking</h2>
+      <p>Weight tracking functionality will be available once you add animals.</p>
     </div>
   </div>
 
-  <!-- Feeding Log Tab -->
   <div id="feedingTab" class="tab-content">
     <div class="card">
-      <h2>Daily Feeding Log</h2>
-      <label>Select Animal: <select id="feedingAnimalSelect"></select></label>
-      <div class="next-feed" id="nextFeedInfo"></div>
-      <div id="todayFeedings"></div>
-      <h4>Feeding History</h4>
-      <div id="feedingHistory"></div>
+      <h2>Feeding Log</h2>
+      <p>Feeding log functionality will be available once you add animals.</p>
     </div>
   </div>
 
-  <!-- Health Tracking Tab -->
   <div id="healthTab" class="tab-content">
     <div class="card">
-      <h2>Health Condition Tracking</h2>
-      <label>Select Animal: <select id="healthAnimalSelect"></select></label>
-      <label>Date: <input type="date" id="healthDate"></label>
-      <div class="condition-grid">
-        <div class="condition-item">
-          <label>Body Condition:</label>
-          <select id="bodyCondition">
-            <option value="poor">Poor</option>
-            <option value="fair">Fair</option>
-            <option value="good" selected>Good</option>
-          </select>
-        </div>
-        <div class="condition-item">
-          <label>Alertness:</label>
-          <select id="alertness">
-            <option value="poor">Poor</option>
-            <option value="fair">Fair</option>
-            <option value="good" selected>Good</option>
-          </select>
-        </div>
-        <div class="condition-item">
-          <label>Appetite:</label>
-          <select id="appetite">
-            <option value="poor">Poor</option>
-            <option value="fair">Fair</option>
-            <option value="good" selected>Good</option>
-          </select>
-        </div>
-        <div class="condition-item">
-          <label>Temperature (°C):</label>
-          <input type="number" id="temperature" step="0.1" placeholder="e.g. 36.5">
-        </div>
-      </div>
-      <label>Health Notes: <textarea id="healthNotes" placeholder="Observations, concerns, treatments..."></textarea></label>
-      <button onclick="addHealthEntry()">Add Health Entry</button>
-      <div id="healthHistory"></div>
+      <h2>Health Tracking</h2>
+      <p>Health tracking functionality will be available once you add animals.</p>
     </div>
   </div>
 
-  <!-- Photo Gallery Tab -->
   <div id="photosTab" class="tab-content">
     <div class="card">
       <h2>Photo Gallery</h2>
-      <label>Select Animal: <select id="photoAnimalSelect"></select></label>
-      
-      <div class="photo-section">
-        <h4>Add New Photo</h4>
-        <input type="file" id="photoInput" accept="image/*">
-        <button onclick="document.getElementById('photoInput').click()">Take/Select Photo</button>
-        <div id="photoPreview"></div>
-        <label>Photo Notes: <input type="text" id="photoNotes" placeholder="Description, date, observations..."></label>
-        <button onclick="savePhoto()" id="savePhotoBtn" style="display: none;">Save Photo</button>
-      </div>
-
-      <div id="photoGallery" class="photo-grid"></div>
+      <p>Photo gallery functionality will be available once you add animals.</p>
     </div>
   </div>
 
-  <!-- Care Handover Tab -->
   <div id="exportTab" class="tab-content">
     <div class="card">
       <h2>Care Handover</h2>
-      <label>Select Animal for Export: 
-        <select id="exportAnimalSelect">
-          <option value="">Select an animal...</option>
-        </select>
-      </label>
-      <button onclick="exportAnimalData()" class="secondary">Export Care Data</button>
-      
-      <div class="export-section">
-        <h4>Backup & Restore</h4>
-        <button onclick="exportAllData()" class="secondary">Backup All Data</button>
-        <label>Restore Data: <input type="file" id="restoreInput" accept=".json"></label>
-        <button onclick="restoreData()">Restore from Backup</button>
-      </div>
+      <p>Export functionality will be available once you add animals.</p>
     </div>
   </div>
 
-</div>
-
-<!-- Modals (same as before but with updated styling) -->
-<div id="animalModal" class="modal">
-  <div class="modal-content">
-    <h3>Edit Animal</h3>
-    <label>Name:<input type="text" id="modalAnimalName"></label>
-    <label>Species:
-      <select id="modalAnimalSpecies">
-        <option value="Common Brushtail Possum">Common Brushtail Possum</option>
-        <option value="Ringtail Possum">Ringtail Possum</option>
-        <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
-      </select>
-    </label>
-    <label>Intake Date:<input type="date" id="modalIntakeDate"></label>
-    <label>Intake Notes:<textarea id="modalIntakeNotes"></textarea></label>
-    <div class="modal-buttons">
-      <button onclick="closeAnimalModal()">Cancel</button>
-      <button onclick="saveAnimalEdit()">Save</button>
-    </div>
-  </div>
-</div>
-
-<div id="weightModal" class="modal">
-  <div class="modal-content">
-    <h3>Edit Weight</h3>
-    <label>Date:<input type="date" id="modalWeightDate"></label>
-    <label>Weight (g):<input type="number" id="modalWeightValue"></label>
-    <div class="modal-buttons">
-      <button onclick="closeWeightModal()">Cancel</button>
-      <button onclick="saveWeightEdit()">Save</button>
-    </div>
-  </div>
-</div>
-
-<div id="feedModal" class="modal">
-  <div class="modal-content">
-    <h3>Record Feeding</h3>
-    <p id="feedModalInfo"></p>
-    <label>Time Fed:<input type="time" id="feedTime"></label>
-    <label>Amount Fed (g):<input type="number" id="feedAmount" step="0.1"></label>
-    <label>Notes:<textarea id="feedNotes" placeholder="Any observations..."></textarea></label>
-    <div class="modal-buttons">
-      <button onclick="closeFeedModal()">Cancel</button>
-      <button onclick="saveFeedEntry()">Record Feed</button>
-    </div>
-  </div>
 </div>
 
 <script>
-// --- Species Data ---
-const speciesData = {
-  "Common Brushtail Possum": [
-    { weight: 900, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary (bigger is better) set up as above.", nativeFood: "Native diet as above. Small branchlets of leaf tip up to large branches with fresh leaf.", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed.", comments: "Start weaning off milk – reduce gradually and monitor weight of possum weekly to ensure maintaining weight with reduced milk and increased foliage. If not, wait until weight stable before reducing milk again." },
-    { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", housingNotes: "Large outdoor release aviary, (minimum 3m x 2m x 2m) in natural surroundings. Nest box, food/ water high in aviary.", nativeFood: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects.", feedingNotes: "2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXIMUM of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage.", comments: "MAXIMUM of 40mls in a single feed." },
-    { weight: 400, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on Mum's back but more confident climbing on its own. Very active at night. Should be climbing on branches and ropes, not on wire.", housing: "Large indoor cage (1m x 1m x 1.2m)", housingNotes: "28°C – no artificial heat. Large cage (1m x 1m x 1.2m) or small walk-in aviary on sheltered verandah. Cage to include nest box, water dish and good variety of branches and ropes for climbing.", nativeFood: "Must be eating good variety of native vegetation cut fresh each day. Soft insects such as small grasshoppers, moths.", feedingNotes: "3 milk feeds per day. Offer early morning, mid afternoon and late evening. Lapping. Do not leave milk in with possums as it goes 'off' very quickly.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds", comments: "" },
-    { weight: 250, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch. Riding on mum's back.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", nativeFood: "Offer a good variety of native vegetation (at least 5 different species cut fresh each day). Fresh leaf tip. Offer soft insects such as tiny grasshoppers, moths.", feedingNotes: "4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds", comments: "" },
-    { weight: 150, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Starting to explore a little outside of mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "30°C check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Housed indoors. Exploring cage.", nativeFood: "A small amount and variety of fresh native leaf tip after each feed.", feedingNotes: "5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds.", comments: "" },
-    { weight: 100, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces. Permanently in Mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", housingNotes: "30°C Check warmth. Carry cage or basket with secure lid and fine mesh. Provide a couple of pouch 'caves'. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads
+// Initialize animals array
+let animals = [];
+
+// Format date function
+function formatDateDMY(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date)) return dateStr;
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+// Tab navigation function
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  // Show selected tab
+  event.target.classList.add('active');
+  document.getElementById(tabName + 'Tab').classList.add('active');
+}
+
+// Add animal function
+function addNewAnimal() {
+  console.log('addNewAnimal function called');
+  
+  const name = document.getElementById('animalName').value.trim();
+  const species = document.getElementById('animalSpecies').value;
+  const intakeDate = document.getElementById('intakeDate').value;
+  const intakeNotes = document.getElementById('intakeNotes').value.trim();
+  
+  console.log('Form values:', { name, species, intakeDate, intakeNotes });
+  
+  if (!name || !species) {
+    alert('Please enter animal name and species.');
+    return;
+  }
+  
+  const newAnimal = { 
+    id: Date.now(), 
+    name, 
+    species, 
+    intakeDate: intakeDate || new Date().toISOString().split('T')[0],
+    intakeNotes: intakeNotes || '',
+    weights: [], 
+    feedingLog: [], 
+    healthEntries: [],
+    photos: []
+  };
+  
+  console.log('New animal object:', newAnimal);
+  
+  animals.push(newAnimal);
+  console.log('Animals array:', animals);
+  
+  renderAnimalList();
+  
+  // Clear form
+  document.getElementById('animalName').value = '';
+  document.getElementById('intakeDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('intakeNotes').value = '';
+  
+  alert(name + ' has been added successfully!');
+}
+
+// Render animals list
+function renderAnimalList() {
+  const list = document.getElementById('animalList');
+  list.innerHTML = '';
+  
+  if (animals.length === 0) {
+    list.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>';
+    return;
+  }
+  
+  animals.forEach(animal => {
+    const div = document.createElement('div');
+    div.className = 'animal-item';
+    
+    const daysSinceIntake = animal.intakeDate ? 
+      Math.floor((new Date() - new Date(animal.intakeDate)) / (1000 * 60 * 60 * 24)) : 
+      'Unknown';
+    
+    div.innerHTML = `
+      <div class="animal-actions">
+        <button class="small danger" onclick="deleteAnimal(${animal.id})">🗑️</button>
+      </div>
+      <h4>${animal.name}</h4>
+      <p><strong>Species:</strong> ${animal.species}</p>
+      <p><strong>Intake:</strong> ${formatDateDMY(animal.intakeDate) || 'Not recorded'} (${daysSinceIntake} days ago)</p>
+      ${animal.intakeNotes ? `<p><strong>Notes:</strong> ${animal.intakeNotes}</p>` : ''}
+    `;
+    
+    list.appendChild(div);
+  });
+}
+
+// Delete animal function
+function deleteAnimal(id) {
+  const animal = animals.find(a => a.id == id);
+  if (!animal) return;
+  
+  if (!confirm(`Delete ${animal.name}? This cannot be undone.`)) return;
+  
+  animals = animals.filter(a => a.id != id);
+  renderAnimalList();
+}
+
+// Initialize the app
+document.addEventListener('DOMContentLoaded', function() {
+  // Set today's date as default
+  const today = new Date().toISOString().split('T')[0];
+  const intakeDateEl = document.getElementById('intakeDate');
+  if (intakeDateEl) intakeDateEl.value = today;
+  
+  console.log('App initialized');
+});
+</script>
+</body>
+</html>
