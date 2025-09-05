@@ -344,7 +344,58 @@ button:active::before { width: 300px; height: 300px; }
       </label>
       <label>Intake Date: <input type="date" id="intakeDate"></label>
       <label>Intake Notes: <textarea id="intakeNotes" placeholder="Circumstances of rescue, initial condition, etc."></textarea></label>
-      <button onclick="addAnimal()">Add Animal</button>
+      <button onclick="
+        try {
+          const name = document.getElementById('animalName').value.trim();
+          const species = document.getElementById('animalSpecies').value;
+          const intakeDate = document.getElementById('intakeDate').value;
+          const intakeNotes = document.getElementById('intakeNotes').value.trim();
+          
+          if (!name || !species) {
+            alert('Please enter animal name and species.');
+            return;
+          }
+          
+          const newAnimal = { 
+            id: Date.now(), 
+            name, 
+            species, 
+            intakeDate: intakeDate || new Date().toISOString().split('T')[0],
+            intakeNotes: intakeNotes || '',
+            weights: [], 
+            feedingLog: [], 
+            healthEntries: [],
+            photos: []
+          };
+          
+          if (typeof animals === 'undefined') window.animals = [];
+          animals.push(newAnimal);
+          
+          if (typeof renderAnimals === 'function') {
+            renderAnimals();
+          } else {
+            // Fallback rendering
+            const list = document.getElementById('animalList');
+            list.innerHTML = '';
+            animals.forEach(a => {
+              const div = document.createElement('div');
+              div.className = 'animal-item';
+              div.innerHTML = '<h4>' + a.name + '</h4><p>Species: ' + a.species + '</p>';
+              list.appendChild(div);
+            });
+          }
+          
+          // Clear form
+          document.getElementById('animalName').value = '';
+          document.getElementById('intakeDate').value = new Date().toISOString().split('T')[0];
+          document.getElementById('intakeNotes').value = '';
+          
+          alert(name + ' has been added successfully!');
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error adding animal: ' + error.message);
+        }
+      ">Add Animal</button>
     </div>
 
     <div class="card">
