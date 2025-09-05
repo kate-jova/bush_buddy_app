@@ -406,6 +406,12 @@ function showTab(tabName) {
   switch(tabName) {
     case 'weight':
       updateAllSelects();
+      // Show care info for selected animal if they have weights
+      const weightAnimalId = document.getElementById('animalSelect').value;
+      const weightAnimal = animals.find(a => a.id == weightAnimalId);
+      if (weightAnimal && weightAnimal.weights && weightAnimal.weights.length > 0) {
+        renderWeights(weightAnimal);
+      }
       break;
     case 'feeding':
       updateAllSelects();
