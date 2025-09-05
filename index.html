@@ -612,7 +612,7 @@ function renderWeights(animal) {
   
   animal.weights.sort((w1, w2) => new Date(w2.date) - new Date(w1.date));
   
-  // Show feed calculation for most recent weight
+  // Show feed calculation and care info for most recent weight
   const mostRecentWeight = animal.weights[0];
   if (mostRecentWeight) {
     const feeds = getFeedsPerDay(mostRecentWeight.weight, animal.species);
