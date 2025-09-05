@@ -519,18 +519,35 @@ function updateFeedCalculation() {
     const dailyPowder = dailyMilk * 0.16;
     const perFeedPowder = perFeed * 0.16;
     
+    // Get detailed animal info based on weight and species
+    const animalInfo = getAnimalInfo(weight, species);
+    
     document.getElementById('feedResult').innerHTML = `
-      <strong>Feed Calculation for ${species}:</strong><br>
-      Weight: ${weight} g<br>
+      <strong>Feed Calculation for ${species} - ${weight}g:</strong><br>
       Feeds per day: ${feeds}<br>
       Daily milk: ${dailyMilk.toFixed(1)} g<br>
       Milk per feed: ${perFeed.toFixed(1)} g<br>
       Daily powder: ${dailyPowder.toFixed(1)} g<br>
-      Powder per feed: ${perFeedPowder.toFixed(1)} g
+      Powder per feed: ${perFeedPowder.toFixed(1)} g<br><br>
+      
+      <strong>Care Information:</strong><br>
+      <strong>Predicted Age:</strong> ${animalInfo.predictedAge}<br>
+      <strong>Features/Behaviour:</strong> ${animalInfo.features}<br>
+      <strong>Housing:</strong> ${animalInfo.housing}<br>
+      <strong>Feeding Notes:</strong> ${animalInfo.feedingNotes}<br>
+      <strong>Milk Formula:</strong> ${animalInfo.milkFormula}
     `;
   } else {
     document.getElementById('feedResult').innerHTML = '';
   }
+}
+
+function getAnimalInfo(weight, species) {
+  const schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  for (const entry of schedule) {
+    if (weight >= entry.weight) return entry;
+  }
+  return schedule[schedule.length - 1];
 }
 
 // Weight management functions
