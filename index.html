@@ -955,6 +955,12 @@ document.addEventListener('DOMContentLoaded', function() {
   if (weightDateEl) weightDateEl.value = today;
   if (healthDateEl) healthDateEl.value = today;
   
+  // Load and display any existing animals from localStorage
+  if (animals.length > 0) {
+    renderAnimalList();
+    updateAllSelects();
+  }
+  
   // Setup photo input
   setupPhotoInput();
   
