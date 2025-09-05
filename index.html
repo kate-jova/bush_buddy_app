@@ -1010,6 +1010,21 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   console.log('BushBuddy PWA initialized successfully');
+  
+  // Test localStorage functionality
+  console.log('Testing localStorage...');
+  try {
+    localStorage.setItem('bushbuddy_test', 'test');
+    if (localStorage.getItem('bushbuddy_test') === 'test') {
+      console.log('localStorage is working');
+      localStorage.removeItem('bushbuddy_test');
+    } else {
+      console.error('localStorage test failed');
+    }
+  } catch (error) {
+    console.error('localStorage is not available:', error);
+    alert('Warning: Data storage is not available. Your data will be lost when you refresh the page.');
+  }
 });
 </script>
 </body>
