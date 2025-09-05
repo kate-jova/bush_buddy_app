@@ -904,6 +904,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (animal) {
         renderWeights(animal);
         document.getElementById('animalWeight').value = '';
+        // Don't clear feedResult here - let renderWeights handle it
+      } else {
         document.getElementById('feedResult').innerHTML = '';
       }
     });
