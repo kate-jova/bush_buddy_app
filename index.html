@@ -225,12 +225,19 @@ var speciesData = {
 };
 
 // Initialize app on page load
-document.addEventListener('DOMContentLoaded', function() {
+function initApp() {
   loadData();
   setDefaultDates();
   updateSelects();
   renderAnimals();
-});
+}
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // Utility functions
 function formatDate(dateStr) {
