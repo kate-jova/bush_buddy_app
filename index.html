@@ -426,6 +426,62 @@ function addAnimal() {
   alert(name + ' has been added successfully!');
 }
 
+function editAnimal(id) {
+  var animal = animals.find(function(a) { return a.id == id; });
+  if (!animal) return;
+  
+  // Populate form with existing data
+  document.getElementById('animalName').value = animal.name;
+  document.getElementById('animalSpecies').value = animal.species;
+  document.getElementById('intakeDate').value = animal.intakeDate;
+  document.getElementById('intakeNotes').value = animal.intakeNotes || '';
+  
+  // Change button to update mode
+  var button = document.querySelector('#animalsTab button[onclick="addAnimal()"]');
+  button.textContent = 'Update Animal';
+  button.onclick = function() { updateAnimal(id); };
+  
+  // Scroll to form
+  document.getElementById('animalsTab').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('animalName').focus();
+}
+
+function updateAnimal(id) {
+  var animal = animals.find(function(a) { return a.id == id; });
+  if (!animal) return;
+  
+  var name = document.getElementById('animalName').value.trim();
+  var species = document.getElementById('animalSpecies').value;
+  var intakeDate = document.getElementById('intakeDate').value;
+  var intakeNotes = document.getElementById('intakeNotes').value.trim();
+  
+  if (!name || !species) {
+    alert('Please enter animal name and species.');
+    return;
+  }
+  
+  // Update animal data
+  animal.name = name;
+  animal.species = species;
+  animal.intakeDate = intakeDate;
+  animal.intakeNotes = intakeNotes;
+  
+  saveData();
+  
+  // Clear form and reset button
+  document.getElementById('animalName').value = '';
+  document.getElementById('intakeDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('intakeNotes').value = '';
+  
+  var button = document.querySelector('#animalsTab button[onclick="updateAnimal(' + id + ')"]');
+  button.textContent = 'Add Animal';
+  button.onclick = addAnimal;
+  
+  renderAnimals();
+  updateSelects();
+  alert(name + ' has been updated successfully!');
+}
+
 function deleteAnimal(id) {
   var animal = animals.find(function(a) { return a.id == id; });
   if (!animal) return;
