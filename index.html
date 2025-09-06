@@ -70,7 +70,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 <div class="container">
   <div class="header">
-    <h1>🐾 BushBuddy</h1>
+    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 80px; margin-bottom: 0;">
   </div>
 
   <div class="main-nav">
@@ -85,6 +85,14 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     <button class="nav-tab" onclick="showTab('health')">
       <div class="nav-tab-icon">🏥</div>
       <div class="nav-tab-text">Health<br>Tracking</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('schedule')">
+      <div class="nav-tab-icon">📅</div>
+      <div class="nav-tab-text">Feeding<br>Schedule</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('gallery')">
+      <div class="nav-tab-icon">📸</div>
+      <div class="nav-tab-text">Photo<br>Gallery</div>
     </button>
     <button class="nav-tab" onclick="showTab('export')">
       <div class="nav-tab-icon">📋</div>
@@ -222,7 +230,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 // Global variables
 var animals = [];
 
-// Species data
+// Species data with feeding schedules
 var speciesData = {
   "Common Brushtail Possum": [
     { weight: 900, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed." },
@@ -250,7 +258,7 @@ var speciesData = {
   ]
 };
 
-// Initialize app on page load
+// Initialize app when DOM is ready
 function initApp() {
   loadData();
   setDefaultDates();
@@ -258,7 +266,6 @@ function initApp() {
   renderAnimals();
 }
 
-// Wait for DOM to be ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
 } else {
@@ -327,7 +334,6 @@ function getAnimalInfo(weight, species) {
 
 // Tab navigation
 function showTab(tabName) {
-  // Remove active class from all tabs and content
   document.querySelectorAll('.nav-tab').forEach(function(tab) { 
     tab.classList.remove('active'); 
   });
@@ -335,14 +341,11 @@ function showTab(tabName) {
     content.classList.remove('active'); 
   });
   
-  // Add active class to clicked tab and its content
   event.target.closest('.nav-tab').classList.add('active');
   document.getElementById(tabName + 'Tab').classList.add('active');
   
-  // Update selects and trigger any necessary updates
   updateSelects();
   
-  // If switching to weight tab, show current calculation if animal is selected
   if (tabName === 'weight') {
     var animalSelect = document.getElementById('animalSelect');
     if (animalSelect.value) {
@@ -353,16 +356,15 @@ function showTab(tabName) {
 
 // Update all select dropdowns
 function updateSelects() {
-  var selects = ['animalSelect', 'healthAnimalSelect', 'exportAnimalSelect'];
+  var selects = ['animalSelect', 'healthAnimalSelect', 'scheduleAnimalSelect', 'galleryAnimalSelect', 'exportAnimalSelect'];
   
   selects.forEach(function(selectId) {
     var select = document.getElementById(selectId);
+    if (!select) return;
     var currentValue = select.value;
     
-    // Clear options
     select.innerHTML = '<option value="">Select an animal...</option>';
     
-    // Add animal options
     animals.forEach(function(animal) {
       var option = document.createElement('option');
       option.value = animal.id;
@@ -370,7 +372,6 @@ function updateSelects() {
       select.appendChild(option);
     });
     
-    // Restore previous selection if it still exists
     if (currentValue && animals.some(function(a) { return a.id == currentValue; })) {
       select.value = currentValue;
     }
@@ -396,13 +397,13 @@ function addAnimal() {
     intakeDate: intakeDate || new Date().toISOString().split('T')[0],
     intakeNotes: intakeNotes,
     weights: [],
-    healthEntries: []
+    healthEntries: [],
+    photos: []
   };
   
   animals.push(newAnimal);
   saveData();
   
-  // Clear form
   document.getElementById('animalName').value = '';
   document.getElementById('intakeDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('intakeNotes').value = '';
@@ -462,7 +463,6 @@ function onAnimalSelectChange() {
     var animal = animals.find(function(a) { return a.id == animalId; });
     if (animal) {
       showWeightHistory(animal);
-      // If there's a weight entered, show the calculation immediately
       var weight = parseFloat(document.getElementById('animalWeight').value);
       if (weight > 0) {
         showFeedCalc();
@@ -527,7 +527,6 @@ function addWeight() {
   showFeedCalc();
   showWeightHistory(animal);
   
-  // Clear form
   document.getElementById('weightDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('animalWeight').value = '';
   
@@ -543,7 +542,6 @@ function showWeightHistory(animal) {
     return;
   }
   
-  // Show most recent weight calculation
   var sorted = animal.weights.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
   var mostRecent = sorted[0];
   
@@ -554,7 +552,6 @@ function showWeightHistory(animal) {
     var perFeed = dailyMilk / feeds;
     var info = getAnimalInfo(mostRecent.weight, species);
     
-    // Only show this if no weight is currently being entered
     var currentWeight = parseFloat(document.getElementById('animalWeight').value);
     if (!currentWeight || currentWeight <= 0) {
       document.getElementById('feedResult').innerHTML = 
@@ -572,7 +569,6 @@ function showWeightHistory(animal) {
     }
   }
   
-  // Show weight history table
   history.innerHTML += '<div style="margin-top: 15px;"><strong>Weight Records:</strong></div>';
   
   sorted.forEach(function(w, index) {
@@ -662,11 +658,10 @@ function addHealthEntry() {
   saveData();
   showHealthHistory(animal);
   
-  // Clear form
   document.getElementById('healthDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('bodyCondition').selectedIndex = 2; // Good
-  document.getElementById('alertness').selectedIndex = 2; // Good
-  document.getElementById('appetite').selectedIndex = 2; // Good
+  document.getElementById('bodyCondition').selectedIndex = 2;
+  document.getElementById('alertness').selectedIndex = 2;
+  document.getElementById('appetite').selectedIndex = 2;
   document.getElementById('healthNotes').value = '';
   
   alert('Health entry added successfully!');
@@ -751,7 +746,6 @@ function showFeedingSchedule(animal) {
     return;
   }
   
-  // Get most recent weight
   var sorted = animal.weights.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
   var mostRecent = sorted[0];
   var species = animal.species;
@@ -764,7 +758,6 @@ function showFeedingSchedule(animal) {
   display.innerHTML += '<p><strong>Total feeds per day:</strong> ' + feeds + '</p>';
   display.innerHTML += '<p><strong>Milk per feed:</strong> ' + perFeed.toFixed(1) + 'g</p><br>';
   
-  // Generate schedule times
   var scheduleDiv = document.createElement('div');
   scheduleDiv.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;';
   
@@ -819,6 +812,7 @@ function addPhotos() {
   if (!animal.photos) animal.photos = [];
   
   var addedCount = 0;
+  var totalFiles = files.length;
   
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
@@ -832,7 +826,7 @@ function addPhotos() {
       });
       
       addedCount++;
-      if (addedCount === files.length) {
+      if (addedCount === totalFiles) {
         saveData();
         showPhotoGallery(animal);
         fileInput.value = '';
@@ -952,7 +946,6 @@ function restoreData() {
       if (importData.animals) {
         animals = importData.animals;
       } else if (importData.animal) {
-        // Single animal import
         var existingIndex = animals.findIndex(function(a) { return a.id === importData.animal.id; });
         if (existingIndex >= 0) {
           animals[existingIndex] = importData.animal;
