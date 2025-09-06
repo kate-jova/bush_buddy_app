@@ -9,14 +9,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .container { max-width: 1200px; margin: 0 auto; }
 .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
 
-/* Logo responsive styling */
-.header img {
-  max-height: 120px;
-  max-width: 100%;
-  height: auto;
-  margin-bottom: 0;
-}
-
 /* Navigation */
 .main-nav { display: flex; justify-content: center; margin-bottom: 30px; background: white; border-radius: 15px; padding: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); overflow-x: auto; }
 .nav-tab { display: flex; flex-direction: column; align-items: center; padding: 12px 16px; margin: 0 4px; border: none; background: transparent; color: #666; cursor: pointer; border-radius: 10px; transition: all 0.3s ease; font-weight: 600; min-width: 80px; font-size: 12px; }
@@ -98,7 +90,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 <div class="container">
   <div class="header">
-    <img src="BushBuddyLogo.png" alt="BushBuddy Logo">
+    <img src="BushBuddyLogo.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
   </div>
 
   <div class="main-nav">
@@ -618,6 +610,64 @@ function addWeight() {
   alert('Weight added successfully!');
 }
 
+function editWeight(animalId, date, weight) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  // Set the animal select
+  document.getElementById('animalSelect').value = animalId;
+  
+  // Populate form with existing data
+  document.getElementById('weightDate').value = date;
+  document.getElementById('animalWeight').value = weight;
+  
+  // Change button to update mode
+  var button = document.querySelector('#weightTab button[onclick="addWeight()"]');
+  button.textContent = 'Update Weight';
+  button.onclick = function() { updateWeight(animalId, date, weight); };
+  
+  // Scroll to form
+  document.getElementById('weightTab').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('animalWeight').focus();
+}
+
+function updateWeight(animalId, originalDate, originalWeight) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var date = document.getElementById('weightDate').value;
+  var weight = parseFloat(document.getElementById('animalWeight').value);
+  
+  if (!date || !weight || weight <= 0) {
+    alert('Please enter a valid date and weight.');
+    return;
+  }
+  
+  // Find and update the weight entry
+  var weightEntry = animal.weights.find(function(w) { 
+    return w.date === originalDate && w.weight === originalWeight; 
+  });
+  
+  if (weightEntry) {
+    weightEntry.date = date;
+    weightEntry.weight = weight;
+  }
+  
+  saveData();
+  
+  // Clear form and reset button
+  document.getElementById('weightDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('animalWeight').value = '';
+  
+  var button = document.querySelector('#weightTab button');
+  button.textContent = 'Add Weight';
+  button.onclick = addWeight;
+  
+  showWeightHistory(animal);
+  onAnimalSelectChange();
+  alert('Weight updated successfully!');
+}
+
 function showWeightHistory(animal) {
   var history = document.getElementById('weightHistory');
   history.innerHTML = '<h4>Weight History for ' + animal.name + '</h4>';
@@ -676,7 +726,10 @@ function showWeightHistory(animal) {
       '<strong>' + formatDate(w.date) + '</strong><br>' +
       w.weight + 'g' + weightChange +
       '</div>' +
-      '<button class="small danger" onclick="deleteWeight(' + animal.id + ', \'' + w.date + '\', ' + w.weight + ')">🗑️</button>';
+      '<div style="display: flex; gap: 5px;">' +
+      '<button class="small" onclick="editWeight(' + animal.id + ', \'' + w.date + '\', ' + w.weight + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">✏️</button>' +
+      '<button class="small danger" onclick="deleteWeight(' + animal.id + ', \'' + w.date + '\', ' + w.weight + ')">🗑️</button>' +
+      '</div>';
     
     history.appendChild(div);
   });
@@ -752,50 +805,6 @@ function addHealthEntry() {
   alert('Health entry added successfully!');
 }
 
-function showHealthHistory(animal) {
-  var history = document.getElementById('healthHistory');
-  history.innerHTML = '<h4>Health History for ' + animal.name + '</h4>';
-  
-  if (!animal.healthEntries || animal.healthEntries.length === 0) {
-    history.innerHTML += '<p style="color: #666; font-style: italic;">No health records yet.</p>';
-    return;
-  }
-  
-  var sorted = animal.healthEntries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-  
-  sorted.forEach(function(entry) {
-    var div = document.createElement('div');
-    div.style.cssText = 'padding: 15px; margin: 10px 0; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
-    
-    var conditionColor = entry.bodyCondition === 'good' ? '#28a745' : entry.bodyCondition === 'fair' ? '#ffc107' : '#dc3545';
-    var alertnessColor = entry.alertness === 'good' ? '#28a745' : entry.alertness === 'fair' ? '#ffc107' : '#dc3545';
-    var appetiteColor = entry.appetite === 'good' ? '#28a745' : entry.appetite === 'fair' ? '#ffc107' : '#dc3545';
-    
-    div.innerHTML = 
-      '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">' +
-      '<strong>' + formatDate(entry.date) + '</strong>' +
-      '<button class="small danger" onclick="deleteHealthEntry(' + animal.id + ', \'' + entry.date + '\')">🗑️</button>' +
-      '</div>' +
-      '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">' +
-      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
-      '<div style="font-size: 12px; color: #666;">Body Condition</div>' +
-      '<div style="color: ' + conditionColor + '; font-weight: bold; text-transform: capitalize;">' + entry.bodyCondition + '</div>' +
-      '</div>' +
-      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
-      '<div style="font-size: 12px; color: #666;">Alertness</div>' +
-      '<div style="color: ' + alertnessColor + '; font-weight: bold; text-transform: capitalize;">' + entry.alertness + '</div>' +
-      '</div>' +
-      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
-      '<div style="font-size: 12px; color: #666;">Appetite</div>' +
-      '<div style="color: ' + appetiteColor + '; font-weight: bold; text-transform: capitalize;">' + entry.appetite + '</div>' +
-      '</div>' +
-      '</div>' +
-      (entry.notes ? '<div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px;"><strong>Notes:</strong> ' + entry.notes + '</div>' : '');
-    
-    history.appendChild(div);
-  });
-}
-
 function editHealthEntry(animalId, date) {
   var animal = animals.find(function(a) { return a.id == animalId; });
   if (!animal || !animal.healthEntries) return;
@@ -860,12 +869,59 @@ function updateHealthEntry(animalId, originalDate) {
   document.getElementById('appetite').selectedIndex = 2;
   document.getElementById('healthNotes').value = '';
   
-  var button = document.querySelector('#healthTab button[onclick="updateHealthEntry(\'' + animalId + '\', \'' + originalDate + '\')"]');
+  var button = document.querySelector('#healthTab button');
   button.textContent = 'Add Health Entry';
   button.onclick = addHealthEntry;
   
   showHealthHistory(animal);
   alert('Health entry updated successfully!');
+}
+
+function showHealthHistory(animal) {
+  var history = document.getElementById('healthHistory');
+  history.innerHTML = '<h4>Health History for ' + animal.name + '</h4>';
+  
+  if (!animal.healthEntries || animal.healthEntries.length === 0) {
+    history.innerHTML += '<p style="color: #666; font-style: italic;">No health records yet.</p>';
+    return;
+  }
+  
+  var sorted = animal.healthEntries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  
+  sorted.forEach(function(entry) {
+    var div = document.createElement('div');
+    div.style.cssText = 'padding: 15px; margin: 10px 0; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+    
+    var conditionColor = entry.bodyCondition === 'good' ? '#28a745' : entry.bodyCondition === 'fair' ? '#ffc107' : '#dc3545';
+    var alertnessColor = entry.alertness === 'good' ? '#28a745' : entry.alertness === 'fair' ? '#ffc107' : '#dc3545';
+    var appetiteColor = entry.appetite === 'good' ? '#28a745' : entry.appetite === 'fair' ? '#ffc107' : '#dc3545';
+    
+    div.innerHTML = 
+      '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">' +
+      '<strong>' + formatDate(entry.date) + '</strong>' +
+      '<div style="display: flex; gap: 5px;">' +
+      '<button class="small" onclick="editHealthEntry(' + animal.id + ', \'' + entry.date + '\')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">✏️</button>' +
+      '<button class="small" onclick="deleteHealthEntry(' + animal.id + ', \'' + entry.date + '\')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>' +
+      '</div>' +
+      '</div>' +
+      '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">' +
+      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
+      '<div style="font-size: 12px; color: #666;">Body Condition</div>' +
+      '<div style="color: ' + conditionColor + '; font-weight: bold; text-transform: capitalize;">' + entry.bodyCondition + '</div>' +
+      '</div>' +
+      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
+      '<div style="font-size: 12px; color: #666;">Alertness</div>' +
+      '<div style="color: ' + alertnessColor + '; font-weight: bold; text-transform: capitalize;">' + entry.alertness + '</div>' +
+      '</div>' +
+      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
+      '<div style="font-size: 12px; color: #666;">Appetite</div>' +
+      '<div style="color: ' + appetiteColor + '; font-weight: bold; text-transform: capitalize;">' + entry.appetite + '</div>' +
+      '</div>' +
+      '</div>' +
+      (entry.notes ? '<div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px;"><strong>Notes:</strong> ' + entry.notes + '</div>' : '');
+    
+    history.appendChild(div);
+  });
 }
 
 function deleteHealthEntry(animalId, date) {
