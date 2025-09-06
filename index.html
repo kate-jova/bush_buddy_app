@@ -1,169 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BushBuddy</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#698167" />
 <style>
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #e7f5e4 100%); min-height: 100vh; }
 .container { max-width: 1200px; margin: 0 auto; }
 .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
-.header h1 { margin: 0; font-size: 2.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
 
-/* Navigation Tabs */
-.main-nav { 
-  display: flex; 
-  justify-content: center; 
-  margin-bottom: 30px; 
-  background: white; 
-  border-radius: 15px; 
-  padding: 10px; 
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
-  backdrop-filter: blur(10px);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.main-nav::-webkit-scrollbar { display: none; }
+/* Navigation */
+.main-nav { display: flex; justify-content: center; margin-bottom: 30px; background: white; border-radius: 15px; padding: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); overflow-x: auto; }
+.nav-tab { display: flex; flex-direction: column; align-items: center; padding: 12px 16px; margin: 0 4px; border: none; background: transparent; color: #666; cursor: pointer; border-radius: 10px; transition: all 0.3s ease; font-weight: 600; min-width: 80px; font-size: 12px; }
+.nav-tab-icon { font-size: 20px; margin-bottom: 4px; }
+.nav-tab-text { font-size: 11px; text-align: center; line-height: 1.2; }
+.nav-tab:hover { background: rgba(43,122,120,0.1); color: #657a6b; }
+.nav-tab.active { background: linear-gradient(135deg, #698167, #a0b2af); color: white; box-shadow: 0 4px 15px rgba(43,122,120,0.3); }
 
-.nav-tab { 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 16px; 
-  margin: 0 4px; 
-  border: none; 
-  background: transparent; 
-  color: #666; 
-  cursor: pointer; 
-  border-radius: 10px; 
-  transition: all 0.3s ease; 
-  font-weight: 600; 
-  position: relative; 
-  overflow: hidden;
-  white-space: nowrap;
-  min-width: 80px;
-  font-size: 12px;
-}
-
-.nav-tab-icon {
-  font-size: 20px;
-  margin-bottom: 4px;
-  transition: transform 0.3s ease;
-}
-
-.nav-tab-text {
-  font-size: 11px;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.nav-tab:hover { 
-  background: rgba(43,122,120,0.1); 
-  color: #657a6b; 
-}
-
-.nav-tab:hover .nav-tab-icon {
-  transform: scale(1.1);
-}
-
-.nav-tab.active { 
-  background: linear-gradient(135deg, #698167, #a0b2af); 
-  color: white; 
-  box-shadow: 0 4px 15px rgba(43,122,120,0.3); 
-}
-
-/* Desktop nav tabs - larger size */
+/* Desktop larger tabs */
 @media (min-width: 769px) {
-  .nav-tab { 
-    padding: 16px 20px; 
-    min-width: 100px;
-  }
-  
-  .nav-tab-icon {
-    font-size: 24px;
-    margin-bottom: 6px;
-  }
-  
-  .nav-tab-text {
-    font-size: 12px;
-  }
+  .nav-tab { padding: 16px 20px; min-width: 100px; }
+  .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
+  .nav-tab-text { font-size: 12px; }
 }
 
-/* Card Styles */
-.card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+/* Cards */
+.card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 25px; }
 .card h2 { margin-top: 0; color: #698167; font-size: 1.8em; }
 
-/* Form Elements */
+/* Forms */
 label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
-input, select, textarea { 
-  width: 100%; 
-  padding: 12px; 
-  margin-top: 6px; 
-  border-radius: 10px; 
-  border: 2px solid #e1e8ed; 
-  box-sizing: border-box; 
-  transition: all 0.3s ease; 
-  font-size: 16px;
-}
-input:focus, select:focus, textarea:focus { 
-  outline: none; 
-  border-color: #698167; 
-  box-shadow: 0 0 0 3px rgba(43,122,120,0.1); 
-}
+input, select, textarea { width: 100%; padding: 12px; margin-top: 6px; border-radius: 10px; border: 2px solid #e1e8ed; box-sizing: border-box; font-size: 16px; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #698167; box-shadow: 0 0 0 3px rgba(43,122,120,0.1); }
 textarea { resize: vertical; min-height: 80px; }
 
 /* Buttons */
-button { 
-  margin: 8px 4px; 
-  padding: 12px 20px; 
-  border: none; 
-  border-radius: 10px; 
-  background: linear-gradient(135deg, #698167, #a0b2af); 
-  color: white; 
-  cursor: pointer; 
-  font-weight: 600; 
-  transition: all 0.3s ease; 
-  min-height: 44px;
-  font-size: 14px;
-}
+button { margin: 8px 4px; padding: 12px 20px; border: none; border-radius: 10px; background: linear-gradient(135deg, #698167, #a0b2af); color: white; cursor: pointer; font-weight: 600; transition: all 0.3s ease; min-height: 44px; font-size: 14px; }
 button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(43,122,120,0.3); }
 button.small { padding: 8px 12px; font-size: 12px; margin: 2px; min-height: 36px; }
 button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
-/* Content Sections */
+/* Content */
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Animal List */
+/* Animal grid */
 .animal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
 .animal-item { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 6px 25px rgba(0,0,0,0.1); position: relative; }
 .animal-item h4 { margin-top: 0; color: #698167; }
 .animal-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
 
-/* Result cards */
+/* Results */
 .result { margin-top: 15px; padding: 15px; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-left: 4px solid #698167; }
 
-/* Responsive Design */
+/* Mobile */
 @media (max-width: 768px) {
   body { padding: 10px; }
-  .header h1 { font-size: 2em; }
-  .main-nav { padding: 8px; margin-bottom: 20px; }
+  .main-nav { padding: 8px; }
   .nav-tab { padding: 10px 12px; margin: 0 2px; min-width: 70px; }
-  .nav-tab-icon { font-size: 18px; margin-bottom: 3px; }
+  .nav-tab-icon { font-size: 18px; }
   .nav-tab-text { font-size: 10px; }
   .card { padding: 20px; }
   .animal-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-  .nav-tab { min-width: 60px; padding: 8px 10px; }
-  .nav-tab-icon { font-size: 16px; }
-  .nav-tab-text { font-size: 9px; }
 }
 </style>
 </head>
@@ -171,10 +70,9 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 <div class="container">
   <div class="header">
-    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 80px; margin-bottom: 0;" />
+    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 80px; margin-bottom: 0;">
   </div>
 
-  <!-- Main Navigation with Icons -->
   <div class="main-nav">
     <button class="nav-tab active" onclick="showTab('animals')">
       <div class="nav-tab-icon">🐾</div>
@@ -184,17 +82,9 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
       <div class="nav-tab-icon">⚖️</div>
       <div class="nav-tab-text">Weight &<br>Feed</div>
     </button>
-    <button class="nav-tab" onclick="showTab('feeding')">
-      <div class="nav-tab-icon">🍼</div>
-      <div class="nav-tab-text">Feeding<br>Log</div>
-    </button>
     <button class="nav-tab" onclick="showTab('health')">
       <div class="nav-tab-icon">🏥</div>
       <div class="nav-tab-text">Health<br>Tracking</div>
-    </button>
-    <button class="nav-tab" onclick="showTab('photos')">
-      <div class="nav-tab-icon">📷</div>
-      <div class="nav-tab-text">Photo<br>Gallery</div>
     </button>
     <button class="nav-tab" onclick="showTab('export')">
       <div class="nav-tab-icon">📋</div>
@@ -202,7 +92,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     </button>
   </div>
 
-  <!-- Animal Management Tab -->
+  <!-- Animals Tab -->
   <div id="animalsTab" class="tab-content active">
     <div class="card">
       <h2>Add New Animal</h2>
@@ -216,7 +106,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
       </label>
       <label>Intake Date: <input type="date" id="intakeDate"></label>
       <label>Intake Notes: <textarea id="intakeNotes" placeholder="Circumstances of rescue, initial condition, etc."></textarea></label>
-      <button onclick="addNewAnimal()">Add Animal</button>
+      <button onclick="addAnimal()">Add Animal</button>
     </div>
 
     <div class="card">
@@ -227,34 +117,20 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     </div>
   </div>
 
-  <!-- Weight Tracking Tab -->
+  <!-- Weight Tab -->
   <div id="weightTab" class="tab-content">
     <div class="card">
       <h2>Weight Tracking & Feed Calculator</h2>
       <label>Select Animal: <select id="animalSelect"></select></label>
       <label>Date: <input type="date" id="weightDate"></label>
-      <label>Weight (g): 
-        <input type="number" id="animalWeight" placeholder="Enter weight in grams" 
-               oninput="updateFeedCalculation()">
-      </label>
+      <label>Weight (g): <input type="number" id="animalWeight" placeholder="Enter weight in grams" oninput="showFeedCalc()"></label>
       <button onclick="addWeight()">Add Weight</button>
       <div id="feedResult" class="result"></div>
       <div id="weightHistory" style="margin-top: 20px;"></div>
     </div>
   </div>
 
-  <!-- Feeding Log Tab -->
-  <div id="feedingTab" class="tab-content">
-    <div class="card">
-      <h2>Daily Feeding Log</h2>
-      <label>Select Animal: <select id="feedingAnimalSelect"></select></label>
-      <div id="feedingContent">
-        <p>Select an animal to view feeding schedule.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Health Tracking Tab -->
+  <!-- Health Tab -->
   <div id="healthTab" class="tab-content">
     <div class="card">
       <h2>Health Condition Tracking</h2>
@@ -285,10 +161,6 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
             <option value="good" selected>Good</option>
           </select>
         </div>
-        <div style="text-align: center; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <label>Temperature (°C):</label>
-          <input type="number" id="temperature" step="0.1" placeholder="e.g. 36.5">
-        </div>
       </div>
       <label>Health Notes: <textarea id="healthNotes" placeholder="Observations, concerns, treatments..."></textarea></label>
       <button onclick="addHealthEntry()">Add Health Entry</button>
@@ -296,34 +168,11 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     </div>
   </div>
 
-  <!-- Photo Gallery Tab -->
-  <div id="photosTab" class="tab-content">
-    <div class="card">
-      <h2>Photo Gallery</h2>
-      <label>Select Animal: <select id="photoAnimalSelect"></select></label>
-      
-      <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 15px; border: 2px dashed #dee2e6; text-align: center;">
-        <h4>Add New Photo</h4>
-        <input type="file" id="photoInput" accept="image/*">
-        <button onclick="document.getElementById('photoInput').click()">Take/Select Photo</button>
-        <div id="photoPreview"></div>
-        <label>Photo Notes: <input type="text" id="photoNotes" placeholder="Description, date, observations..."></label>
-        <button onclick="savePhoto()" id="savePhotoBtn" style="display: none;">Save Photo</button>
-      </div>
-
-      <div id="photoGallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;"></div>
-    </div>
-  </div>
-
-  <!-- Care Handover Tab -->
+  <!-- Export Tab -->
   <div id="exportTab" class="tab-content">
     <div class="card">
       <h2>Care Handover</h2>
-      <label>Select Animal for Export: 
-        <select id="exportAnimalSelect">
-          <option value="">Select an animal...</option>
-        </select>
-      </label>
+      <label>Select Animal for Export: <select id="exportAnimalSelect"><option value="">Select an animal...</option></select></label>
       <button onclick="exportAnimalData()">Export Care Data</button>
       
       <div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 15px;">
@@ -334,171 +183,152 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
       </div>
     </div>
   </div>
-
 </div>
 
-<!-- Footer with Disclaimer -->
 <footer style="margin-top: 50px; padding: 30px 20px; background: rgba(255,255,255,0.9); border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #666;">
   <div style="max-width: 1200px; margin: 0 auto;">
-    <p><strong>Disclaimer:</strong> BushBuddy is a record-keeping tool designed to assist qualified wildlife carers. This application does not provide veterinary or professional wildlife care advice. Always consult with licensed wildlife veterinarians and follow established wildlife care protocols. Users are responsible for ensuring compliance with local wildlife care regulations and licensing requirements. The feeding calculations and care information are based on general guidelines and may not be suitable for all animals or circumstances.</p>
-    
-    <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
-      © 2025 BushBuddy. All rights reserved. Unauthorized copying, distribution, or use of this application is prohibited.
-    </p>
+    <p><strong>Disclaimer:</strong> BushBuddy is a record-keeping tool designed to assist qualified wildlife carers. This application does not provide veterinary or professional wildlife care advice. Always consult with licensed wildlife veterinarians and follow established wildlife care protocols.</p>
+    <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">© 2025 BushBuddy. All rights reserved.</p>
   </div>
 </footer>
 
 <script>
-// Initialize animals array
-let animals = [];
-let currentPhotoFile = null;
+// Global variables
+var animals = [];
 
-// Species feeding data
-const speciesData = {
+// Species data
+var speciesData = {
   "Common Brushtail Possum": [
     { weight: 900, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed." },
-    { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", feedingNotes: "2 milk feeds per day. Offer early morning and late evening.", milkFormula: "MAXIMUM of 40mls in a single feed. 15% of body weight divided equally over 2 feeds." },
-    { weight: 400, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on Mum's back but more confident climbing on its own.", housing: "Large indoor cage (1m x 1m x 1.2m)", feedingNotes: "3 milk feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
+    { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", feedingNotes: "2 milk feeds per day. Offer early morning and late evening.", milkFormula: "MAXIMUM of 40mls in a single feed. 15% of body weight divided equally over 2 feeds." },
+    { weight: 400, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on Mum's back but more confident climbing.", housing: "Large indoor cage (1m x 1m x 1.2m)", feedingNotes: "3 milk feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
     { weight: 250, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "4 feeds per day. Milk – 6 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds" },
     { weight: 150, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "5 feeds per day. Milk approximately 5 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
     { weight: 100, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "6 feeds per day. Milk – 4 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." }
   ],
   "Ringtail Possum": [
-    { weight: 400, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 30mL per feed." },
+    { weight: 400, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 30mL per feed." },
     { weight: 300, feeds: 2, predictedAge: "6 months", features: "Fully independent. Very active at night.", housing: "Large outdoor release aviary (min 3m x 2m x 2m)", feedingNotes: "Offer early morning and late evening.", milkFormula: "MAXIMUM of 25mls in a single feed. 15% of body weight divided equally over 2 feeds." },
-    { weight: 175, feeds: 3, predictedAge: "5 months", features: "Thick fur. Dark pellets. Still riding on mum's back but more confident climbing.", housing: "Large indoor cage (1m x 1m x 1.2m)", feedingNotes: "Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
+    { weight: 175, feeds: 3, predictedAge: "5 months", features: "Thick fur. Dark pellets. Still riding on mum's back.", housing: "Large indoor cage (1m x 1m x 1.2m)", feedingNotes: "Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
     { weight: 130, feeds: 4, predictedAge: "4.5 months", features: "Fluffy fur. Dark Pellets. More confident outside of mum's pouch.", housing: "Large indoor cage (1m x 1m x 1.2m)", feedingNotes: "Milk – 6 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
     { weight: 100, feeds: 5, predictedAge: "4 months", features: "Fine soft fluffy fur. Teeth. Darker tube-like faeces or pellets.", housing: "Large indoor cage (1m x 1m x 1.2m)", feedingNotes: "Milk approximately 5 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
     { weight: 80, feeds: 6, predictedAge: "3.5 months", features: "Short fur, eyes open. Dark tube like faeces or pellets.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "6 feeds per day. Milk – 4 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." }
   ],
   "Short-Eared Brushtail Possum": [
-    { weight: 1100, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild. No human interaction.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m)", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed." },
+    { weight: 1100, feeds: 1, predictedAge: "7 months", features: "Fully independent from Mum in the wild.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m)", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed." },
     { weight: 650, feeds: 2, predictedAge: "5.6 - 6 months", features: "Would still cling to mother's back in wild.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m)", feedingNotes: "2 milk feeds per day. Offer early morning and late evening.", milkFormula: "MAXIMUM of 40mls in a single feed. 15% of body weight divided equally over 2 feeds." },
-    { weight: 500, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on Mum's back but more confident climbing.", housing: "Large cage (1m x 1m x 1.2m)", feedingNotes: "3 feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
+    { weight: 500, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on Mum's back.", housing: "Large cage (1m x 1m x 1.2m)", feedingNotes: "3 feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
     { weight: 275, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "4 feeds per day. Milk – 6 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
     { weight: 200, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "5 feeds per day. Milk approximately 5 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
     { weight: 150, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "6 feeds per day. Milk – 4 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." }
   ]
 };
 
-// Format date function
-function formatDateDMY(dateStr) {
+// Utility functions
+function formatDate(dateStr) {
   if (!dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date)) return dateStr;
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
+  var date = new Date(dateStr);
+  var day = String(date.getDate()).padStart(2, '0');
+  var month = String(date.getMonth() + 1).padStart(2, '0');
+  var year = date.getFullYear();
+  return day + '-' + month + '-' + year;
 }
 
-// Tab navigation function
-function showTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-  
-  // Show selected tab
-  event.target.classList.add('active');
-  document.getElementById(tabName + 'Tab').classList.add('active');
-  
-  // Update content when switching tabs
-  switch(tabName) {
-    case 'weight':
-      updateAllSelects();
-      // Show care info for selected animal if they have weights
-      const weightAnimalId = document.getElementById('animalSelect').value;
-      const weightAnimal = animals.find(a => a.id == weightAnimalId);
-      if (weightAnimal && weightAnimal.weights && weightAnimal.weights.length > 0) {
-        renderWeights(weightAnimal);
-      }
-      break;
-    case 'feeding':
-      updateAllSelects();
-      break;
-    case 'health':
-      updateAllSelects();
-      break;
-    case 'photos':
-      updateAllSelects();
-      break;
-    case 'export':
-      updateAllSelects();
-      break;
+function saveData() {
+  localStorage.setItem('bushbuddy_animals', JSON.stringify(animals));
+}
+
+function loadData() {
+  var saved = localStorage.getItem('bushbuddy_animals');
+  if (saved) {
+    animals = JSON.parse(saved);
   }
 }
 
-// Add animal function
-function addNewAnimal() {
-  console.log('addNewAnimal function called');
+function getFeedsPerDay(weight, species) {
+  var schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  for (var i = 0; i < schedule.length; i++) {
+    if (weight >= schedule[i].weight) return schedule[i].feeds;
+  }
+  return schedule[schedule.length - 1].feeds;
+}
+
+function getAnimalInfo(weight, species) {
+  var schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  for (var i = 0; i < schedule.length; i++) {
+    if (weight >= schedule[i].weight) return schedule[i];
+  }
+  return schedule[schedule.length - 1];
+}
+
+// Tab navigation
+function showTab(tabName) {
+  document.querySelectorAll('.nav-tab').forEach(function(tab) { tab.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(content) { content.classList.remove('active'); });
   
-  const name = document.getElementById('animalName').value.trim();
-  const species = document.getElementById('animalSpecies').value;
-  const intakeDate = document.getElementById('intakeDate').value;
-  const intakeNotes = document.getElementById('intakeNotes').value.trim();
+  event.target.classList.add('active');
+  document.getElementById(tabName + 'Tab').classList.add('active');
+  
+  updateSelects();
+  
+  if (tabName === 'weight' && animals.length > 0) {
+    var select = document.getElementById('animalSelect');
+    if (select.value) {
+      var animal = animals.find(function(a) { return a.id == select.value; });
+      if (animal) showWeightHistory(animal);
+    }
+  }
+}
+
+// Animal management
+function addAnimal() {
+  var name = document.getElementById('animalName').value.trim();
+  var species = document.getElementById('animalSpecies').value;
+  var intakeDate = document.getElementById('intakeDate').value;
+  var intakeNotes = document.getElementById('intakeNotes').value.trim();
   
   if (!name || !species) {
     alert('Please enter animal name and species.');
     return;
   }
   
-  const newAnimal = { 
-    id: Date.now(), 
-    name, 
-    species, 
+  var newAnimal = {
+    id: Date.now(),
+    name: name,
+    species: species,
     intakeDate: intakeDate || new Date().toISOString().split('T')[0],
-    intakeNotes: intakeNotes || '',
-    weights: [], 
-    feedingLog: [], 
-    healthEntries: [],
-    photos: []
+    intakeNotes: intakeNotes,
+    weights: [],
+    healthEntries: []
   };
   
   animals.push(newAnimal);
-  renderAnimalList();
-  updateAllSelects();
+  saveData();
   
   // Clear form
   document.getElementById('animalName').value = '';
   document.getElementById('intakeDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('intakeNotes').value = '';
   
+  renderAnimals();
+  updateSelects();
   alert(name + ' has been added successfully!');
 }
 
-// Edit animal function
-function editAnimal(id) {
-  const animal = animals.find(a => a.id == id);
-  if (!animal) return;
-  
-  const newName = prompt('Enter new name:', animal.name);
-  if (!newName || newName.trim() === '') return;
-  
-  const newSpecies = prompt('Enter species:', animal.species);
-  if (!newSpecies) return;
-  
-  animal.name = newName.trim();
-  animal.species = newSpecies;
-  
-  renderAnimalList();
-  updateAllSelects();
-}
-
-// Delete animal function
 function deleteAnimal(id) {
-  const animal = animals.find(a => a.id == id);
+  var animal = animals.find(function(a) { return a.id == id; });
   if (!animal) return;
   
-  if (!confirm(`Delete ${animal.name}? This cannot be undone.`)) return;
+  if (!confirm('Delete ' + animal.name + '? This cannot be undone.')) return;
   
-  animals = animals.filter(a => a.id != id);
-  renderAnimalList();
-  updateAllSelects();
+  animals = animals.filter(function(a) { return a.id != id; });
+  saveData();
+  renderAnimals();
+  updateSelects();
 }
 
-// Render animals list
-function renderAnimalList() {
-  const list = document.getElementById('animalList');
+function renderAnimals() {
+  var list = document.getElementById('animalList');
   list.innerHTML = '';
   
   if (animals.length === 0) {
@@ -506,109 +336,91 @@ function renderAnimalList() {
     return;
   }
   
-  animals.forEach(animal => {
-    const div = document.createElement('div');
+  animals.forEach(function(animal) {
+    var div = document.createElement('div');
     div.className = 'animal-item';
     
-    const daysSinceIntake = animal.intakeDate ? 
+    var daysSinceIntake = animal.intakeDate ? 
       Math.floor((new Date() - new Date(animal.intakeDate)) / (1000 * 60 * 60 * 24)) : 
       'Unknown';
     
-    div.innerHTML = `
-      <div class="animal-actions">
-        <button class="small" onclick="editAnimal(${animal.id})">✏️</button>
-        <button class="small danger" onclick="deleteAnimal(${animal.id})">🗑️</button>
-      </div>
-      <h4>${animal.name}</h4>
-      <p><strong>Species:</strong> ${animal.species}</p>
-      <p><strong>Intake:</strong> ${formatDateDMY(animal.intakeDate) || 'Not recorded'} (${daysSinceIntake} days ago)</p>
-      <p><strong>Records:</strong> ${animal.weights?.length || 0} weights, ${animal.feedingLog?.length || 0} feeds, ${animal.healthEntries?.length || 0} health entries</p>
-      ${animal.intakeNotes ? `<p><strong>Notes:</strong> ${animal.intakeNotes}</p>` : ''}
-    `;
+    div.innerHTML = 
+      '<div class="animal-actions">' +
+      '<button class="small danger" onclick="deleteAnimal(' + animal.id + ')">🗑️</button>' +
+      '</div>' +
+      '<h4>' + animal.name + '</h4>' +
+      '<p><strong>Species:</strong> ' + animal.species + '</p>' +
+      '<p><strong>Intake:</strong> ' + formatDate(animal.intakeDate) + ' (' + daysSinceIntake + ' days ago)</p>' +
+      '<p><strong>Records:</strong> ' + (animal.weights ? animal.weights.length : 0) + ' weights, ' + (animal.healthEntries ? animal.healthEntries.length : 0) + ' health entries</p>' +
+      (animal.intakeNotes ? '<p><strong>Notes:</strong> ' + animal.intakeNotes + '</p>' : '');
     
     list.appendChild(div);
   });
 }
 
-// Feed calculation functions
-function getFeedsPerDay(weight, species) {
-  const schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
-  for (const entry of schedule) {
-    if (weight >= entry.weight) return entry.feeds;
-  }
-  return schedule[schedule.length - 1].feeds;
-}
-
-function updateFeedCalculation() {
-  const weight = parseFloat(document.getElementById('animalWeight').value);
-  const selectedAnimalId = document.getElementById('animalSelect').value;
-  const selectedAnimal = animals.find(a => a.id == selectedAnimalId);
+// Weight and feed calculations
+function showFeedCalc() {
+  var weight = parseFloat(document.getElementById('animalWeight').value);
+  var animalId = document.getElementById('animalSelect').value;
+  var animal = animals.find(function(a) { return a.id == animalId; });
   
-  if (selectedAnimal && !isNaN(weight) && weight > 0) {
-    const species = selectedAnimal.species;
-    const feeds = getFeedsPerDay(weight, species);
-    const dailyMilk = weight * 0.15;
-    const perFeed = dailyMilk / feeds;
-    const dailyPowder = dailyMilk * 0.16;
-    const perFeedPowder = perFeed * 0.16;
-    
-    // Get detailed animal info based on weight and species
-    const animalInfo = getAnimalInfo(weight, species);
-    
-    document.getElementById('feedResult').innerHTML = `
-      <strong>Feed Calculation for ${species} - ${weight}g:</strong><br>
-      Feeds per day: ${feeds}<br>
-      Daily milk: ${dailyMilk.toFixed(1)} g<br>
-      Milk per feed: ${perFeed.toFixed(1)} g<br>
-      Daily powder: ${dailyPowder.toFixed(1)} g<br>
-      Powder per feed: ${perFeedPowder.toFixed(1)} g<br><br>
-      
-      <strong>Care Information:</strong><br>
-      <strong>Predicted Age:</strong> ${animalInfo.predictedAge}<br>
-      <strong>Features/Behaviour:</strong> ${animalInfo.features}<br>
-      <strong>Housing:</strong> ${animalInfo.housing}<br>
-      <strong>Feeding Notes:</strong> ${animalInfo.feedingNotes}<br>
-      <strong>Milk Formula:</strong> ${animalInfo.milkFormula}
-    `;
-  } else {
+  if (!animal || !weight || weight <= 0) {
     document.getElementById('feedResult').innerHTML = '';
+    return;
   }
-}
-
-function getAnimalInfo(weight, species) {
-  const schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
-  for (const entry of schedule) {
-    if (weight >= entry.weight) return entry;
-  }
-  return schedule[schedule.length - 1];
-}
-
-// Weight management functions
-function addWeight() {
-  const id = document.getElementById('animalSelect').value;
-  const date = document.getElementById('weightDate').value;
-  const weight = parseFloat(document.getElementById('animalWeight').value);
-  const animal = animals.find(a => a.id == id);
   
-  if (!animal || !date || isNaN(weight)) {
-    alert('Please fill in all fields correctly.');
+  var species = animal.species;
+  var feeds = getFeedsPerDay(weight, species);
+  var dailyMilk = weight * 0.15;
+  var perFeed = dailyMilk / feeds;
+  var info = getAnimalInfo(weight, species);
+  
+  document.getElementById('feedResult').innerHTML = 
+    '<strong>Feed Calculation for ' + species + ' - ' + weight + 'g:</strong><br>' +
+    'Feeds per day: ' + feeds + '<br>' +
+    'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
+    'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
+    '<strong>Care Information:</strong><br>' +
+    '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
+    '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
+    '<strong>Housing:</strong> ' + info.housing + '<br>' +
+    '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
+    '<strong>Milk Formula:</strong> ' + info.milkFormula;
+}
+
+function addWeight() {
+  var animalId = document.getElementById('animalSelect').value;
+  var date = document.getElementById('weightDate').value;
+  var weight = parseFloat(document.getElementById('animalWeight').value);
+  
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  
+  if (!animal) {
+    alert('Please select an animal first.');
+    return;
+  }
+  
+  if (!date || !weight || weight <= 0) {
+    alert('Please enter a valid date and weight.');
     return;
   }
   
   if (!animal.weights) animal.weights = [];
-  animal.weights.push({date, weight});
-  renderWeights(animal);
+  animal.weights.push({ date: date, weight: weight });
+  
+  saveData();
+  showFeedCalc();
+  showWeightHistory(animal);
   
   // Clear form
   document.getElementById('weightDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('animalWeight').value = '';
   
-  // Update feed calculation
-  updateFeedCalculation();
+  alert('Weight added successfully!');
 }
 
-function renderWeights(animal) {
-  const history = document.getElementById('weightHistory');
+function showWeightHistory(animal) {
+  var history = document.getElementById('weightHistory');
   history.innerHTML = '<h4>Weight History</h4>';
   
   if (!animal.weights || animal.weights.length === 0) {
@@ -616,423 +428,31 @@ function renderWeights(animal) {
     return;
   }
   
-  animal.weights.sort((w1, w2) => new Date(w2.date) - new Date(w1.date));
+  // Show most recent weight calculation
+  var sorted = animal.weights.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  var mostRecent = sorted[0];
   
-  // Show feed calculation and care info for most recent weight
-  const mostRecentWeight = animal.weights[0];
-  if (mostRecentWeight) {
-    const feeds = getFeedsPerDay(mostRecentWeight.weight, animal.species);
-    const dailyMilk = mostRecentWeight.weight * 0.15;
-    const perFeed = dailyMilk / feeds;
-    const dailyPowder = dailyMilk * 0.16;
-    const perFeedPowder = perFeed * 0.16;
-    const animalInfo = getAnimalInfo(mostRecentWeight.weight, animal.species);
+  if (mostRecent) {
+    var species = animal.species;
+    var feeds = getFeedsPerDay(mostRecent.weight, species);
+    var dailyMilk = mostRecent.weight * 0.15;
+    var perFeed = dailyMilk / feeds;
+    var info = getAnimalInfo(mostRecent.weight, species);
     
-    document.getElementById('feedResult').innerHTML = `
-      <strong>Current Feed Calculation for ${animal.species} - ${mostRecentWeight.weight}g:</strong><br>
-      <em>Based on most recent weight (${formatDateDMY(mostRecentWeight.date)})</em><br><br>
-      Feeds per day: ${feeds}<br>
-      Daily milk: ${dailyMilk.toFixed(1)} g<br>
-      Milk per feed: ${perFeed.toFixed(1)} g<br>
-      Daily powder: ${dailyPowder.toFixed(1)} g<br>
-      Powder per feed: ${perFeedPowder.toFixed(1)} g<br><br>
-      
-      <strong>Care Information:</strong><br>
-      <strong>Predicted Age:</strong> ${animalInfo.predictedAge}<br>
-      <strong>Features/Behaviour:</strong> ${animalInfo.features}<br>
-      <strong>Housing:</strong> ${animalInfo.housing}<br>
-      <strong>Feeding Notes:</strong> ${animalInfo.feedingNotes}<br>
-      <strong>Milk Formula:</strong> ${animalInfo.milkFormula}
-    `;
+    document.getElementById('feedResult').innerHTML = 
+      '<strong>Current Feed Calculation for ' + species + ' - ' + mostRecent.weight + 'g:</strong><br>' +
+      '<em>Based on most recent weight (' + formatDate(mostRecent.date) + ')</em><br><br>' +
+      'Feeds per day: ' + feeds + '<br>' +
+      'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
+      'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
+      '<strong>Care Information:</strong><br>' +
+      '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
+      '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
+      '<strong>Housing:</strong> ' + info.housing + '<br>' +
+      '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
+      '<strong>Milk Formula:</strong> ' + info.milkFormula;
   }
   
-  animal.weights.forEach((w, i) => {
-    const div = document.createElement('div');
-    div.style.cssText = 'padding: 10px; margin: 5px 0; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);';
-    div.innerHTML = `${formatDateDMY(w.date)}: ${w.weight}g`;
-    history.appendChild(div);
-  });
-}
-
-// Health tracking functions
-function addHealthEntry() {
-  const animalId = document.getElementById('healthAnimalSelect').value;
-  const animal = animals.find(a => a.id == animalId);
-  if (!animal) {
-    alert('Please select an animal first.');
-    return;
-  }
-  
-  const date = document.getElementById('healthDate').value;
-  const bodyCondition = document.getElementById('bodyCondition').value;
-  const alertness = document.getElementById('alertness').value;
-  const appetite = document.getElementById('appetite').value;
-  const temperature = parseFloat(document.getElementById('temperature').value);
-  const notes = document.getElementById('healthNotes').value;
-  
-  if (!date) {
-    alert('Please select a date.');
-    return;
-  }
-  
-  const healthEntry = {
-    date,
-    bodyCondition,
-    alertness,
-    appetite,
-    temperature: isNaN(temperature) ? null : temperature,
-    notes,
-    timestamp: new Date().toISOString()
-  };
-  
-  if (!animal.healthEntries) animal.healthEntries = [];
-  animal.healthEntries.push(healthEntry);
-  
-  // Clear form
-  document.getElementById('healthDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('bodyCondition').value = 'good';
-  document.getElementById('alertness').value = 'good';
-  document.getElementById('appetite').value = 'good';
-  document.getElementById('temperature').value = '';
-  document.getElementById('healthNotes').value = '';
-  
-  renderHealthHistory(animal);
-  alert('Health entry added successfully!');
-}
-
-function renderHealthHistory(animal) {
-  const historyDiv = document.getElementById('healthHistory');
-  historyDiv.innerHTML = '<h4>Health History</h4>';
-  
-  if (!animal.healthEntries || animal.healthEntries.length === 0) {
-    historyDiv.innerHTML += '<p style="color: #666; font-style: italic;">No health records yet.</p>';
-    return;
-  }
-  
-  const recentEntries = animal.healthEntries
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
-    
-  recentEntries.forEach(entry => {
-    const div = document.createElement('div');
-    div.style.cssText = 'border: 1px solid #e9ecef; border-radius: 12px; padding: 15px; margin: 10px 0; background: white;';
-    div.innerHTML = `
-      <div><strong>${formatDateDMY(entry.date)}</strong></div>
-      <div>Body: ${entry.bodyCondition}, Alertness: ${entry.alertness}, Appetite: ${entry.appetite}</div>
-      ${entry.temperature ? `<div>Temperature: ${entry.temperature}°C</div>` : ''}
-      ${entry.notes ? `<div><em>${entry.notes}</em></div>` : ''}
-    `;
-    historyDiv.appendChild(div);
-  });
-}
-
-// Photo management functions
-function setupPhotoInput() {
-  const photoInput = document.getElementById('photoInput');
-  if (!photoInput) return;
-  
-  photoInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file.');
-      return;
-    }
-    
-    currentPhotoFile = file;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const preview = document.getElementById('photoPreview');
-      preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px; border-radius: 10px; margin: 10px;" alt="Photo preview">`;
-      document.getElementById('savePhotoBtn').style.display = 'inline-block';
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function savePhoto() {
-  const animalId = document.getElementById('photoAnimalSelect').value;
-  const notes = document.getElementById('photoNotes').value.trim();
-  const animal = animals.find(a => a.id == animalId);
-  
-  if (!animal || !currentPhotoFile) {
-    alert('Please select an animal and photo.');
-    return;
-  }
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const photoData = {
-      id: Date.now(),
-      dataUrl: e.target.result,
-      filename: currentPhotoFile.name,
-      notes: notes,
-      date: new Date().toISOString().split('T')[0],
-      timestamp: new Date().toISOString()
-    };
-    
-    if (!animal.photos) animal.photos = [];
-    animal.photos.push(photoData);
-    
-    // Clear form
-    document.getElementById('photoPreview').innerHTML = '';
-    document.getElementById('photoNotes').value = '';
-    document.getElementById('savePhotoBtn').style.display = 'none';
-    document.getElementById('photoInput').value = '';
-    currentPhotoFile = null;
-    
-    updatePhotoGallery();
-    alert('Photo saved successfully!');
-  };
-  reader.readAsDataURL(currentPhotoFile);
-}
-
-function updatePhotoGallery() {
-  const animalId = document.getElementById('photoAnimalSelect').value;
-  const animal = animals.find(a => a.id == animalId);
-  const gallery = document.getElementById('photoGallery');
-  
-  if (!animal || !animal.photos || animal.photos.length === 0) {
-    gallery.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No photos yet for this animal.</p>';
-    return;
-  }
-  
-  gallery.innerHTML = '';
-  animal.photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(photo => {
-    const div = document.createElement('div');
-    div.style.cssText = 'position: relative; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);';
-    div.innerHTML = `
-      <img src="${photo.dataUrl}" style="width: 100%; height: 150px; object-fit: cover;" alt="Animal photo">
-      <div style="padding: 10px; font-size: 12px; color: #666;">
-        <div><strong>${formatDateDMY(photo.date)}</strong></div>
-        ${photo.notes ? `<div>${photo.notes}</div>` : ''}
-      </div>
-    `;
-    gallery.appendChild(div);
-  });
-}
-
-// Export functions
-function exportAnimalData() {
-  const animalId = document.getElementById('exportAnimalSelect').value;
-  if (!animalId) {
-    alert('Please select an animal to export.');
-    return;
-  }
-  
-  const animal = animals.find(a => a.id == animalId);
-  if (!animal) return;
-  
-  const exportData = {
-    animalInfo: animal,
-    exportDate: new Date().toISOString()
-  };
-  
-  const report = `WILDLIFE CARE HANDOVER REPORT
-Generated: ${new Date().toLocaleString()}
-
-ANIMAL INFORMATION
-Name: ${animal.name}
-Species: ${animal.species}
-Intake Date: ${formatDateDMY(animal.intakeDate) || 'Not recorded'}
-
-INTAKE NOTES
-${animal.intakeNotes || 'No intake notes recorded'}
-
-WEIGHT HISTORY
-${animal.weights?.map(w => `${formatDateDMY(w.date)}: ${w.weight}g`).join('\n') || 'No weights recorded'}
-
-HEALTH HISTORY
-${animal.healthEntries?.map(h => `${formatDateDMY(h.date)}: Body:${h.bodyCondition}, Alert:${h.alertness}, Appetite:${h.appetite}`).join('\n') || 'No health records'}
-
-JSON DATA:
-${JSON.stringify(exportData, null, 2)}`;
-
-  const blob = new Blob([report], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${animal.name}_care_handover_${new Date().toISOString().split('T')[0]}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function exportAllData() {
-  const backupData = {
-    version: '2.0',
-    exportDate: new Date().toISOString(),
-    animals: animals
-  };
-  
-  const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `wildlife_tracker_backup_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function restoreData() {
-  const fileInput = document.getElementById('restoreInput');
-  const file = fileInput.files[0];
-  
-  if (!file) {
-    alert('Please select a backup file.');
-    return;
-  }
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const backupData = JSON.parse(e.target.result);
-      
-      if (!backupData.animals || !Array.isArray(backupData.animals)) {
-        throw new Error('Invalid backup file format');
-      }
-      
-      if (!confirm('This will replace all current data. Are you sure?')) {
-        return;
-      }
-      
-      animals = backupData.animals;
-      renderAnimalList();
-      updateAllSelects();
-      alert('Data restored successfully!');
-      
-    } catch (error) {
-      alert('Error reading backup file: ' + error.message);
-    }
-  };
-  reader.readAsText(file);
-}
-
-// Update all select dropdowns
-function updateAllSelects() {
-  console.log('updateAllSelects called, animals count:', animals.length);
-  const selects = ['animalSelect', 'feedingAnimalSelect', 'healthAnimalSelect', 'photoAnimalSelect', 'exportAnimalSelect'];
-  
-  selects.forEach(selectId => {
-    const select = document.getElementById(selectId);
-    if (!select) {
-      console.error('Select element not found:', selectId);
-      return;
-    }
-    
-    const currentValue = select.value;
-    select.innerHTML = '';
-    
-    if (selectId === 'exportAnimalSelect') {
-      const defaultOpt = document.createElement('option');
-      defaultOpt.value = '';
-      defaultOpt.textContent = 'Select an animal...';
-      select.appendChild(defaultOpt);
-    }
-    
-    animals.forEach(a => {
-      const opt = document.createElement('option');
-      opt.value = a.id;
-      opt.textContent = `${a.name} (${a.species})`;
-      select.appendChild(opt);
-    });
-    
-    console.log(`Updated ${selectId} with ${animals.length} animals`);
-    
-    // Restore previous selection if it still exists
-    if (currentValue && animals.find(a => a.id == currentValue)) {
-      select.value = currentValue;
-    } else if (animals.length > 0 && selectId !== 'exportAnimalSelect') {
-      select.value = animals[0].id;
-      console.log(`Set ${selectId} to first animal:`, animals[0].name);
-    }
-  });
-}
-
-// Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
-  // Set today's date as default
-  const today = new Date().toISOString().split('T')[0];
-  const intakeDateEl = document.getElementById('intakeDate');
-  const weightDateEl = document.getElementById('weightDate');
-  const healthDateEl = document.getElementById('healthDate');
-  
-  if (intakeDateEl) intakeDateEl.value = today;
-  if (weightDateEl) weightDateEl.value = today;
-  if (healthDateEl) healthDateEl.value = today;
-  
-  // Load and display any existing animals from localStorage
-  if (animals.length > 0) {
-    renderAnimalList();
-    updateAllSelects();
-  }
-  
-  // Setup photo input
-  setupPhotoInput();
-  
-  // Add event listeners for animal selection changes
-  const animalSelect = document.getElementById('animalSelect');
-  if (animalSelect) {
-    animalSelect.addEventListener('change', function() {
-      const animal = animals.find(a => a.id == this.value);
-      if (animal) {
-        renderWeights(animal);
-        document.getElementById('animalWeight').value = '';
-        // Don't clear feedResult here - let renderWeights handle it
-      } else {
-        document.getElementById('feedResult').innerHTML = '';
-      }
-    });
-  }
-  
-  const feedingAnimalSelect = document.getElementById('feedingAnimalSelect');
-  if (feedingAnimalSelect) {
-    feedingAnimalSelect.addEventListener('change', function() {
-      const animal = animals.find(a => a.id == this.value);
-      if (animal) {
-        document.getElementById('feedingContent').innerHTML = `
-          <p><strong>Feeding schedule for ${animal.name}:</strong></p>
-          <p>Enter a weight in the Weight & Feed tab to generate feeding calculations.</p>
-        `;
-      }
-    });
-  }
-  
-  const healthAnimalSelect = document.getElementById('healthAnimalSelect');
-  if (healthAnimalSelect) {
-    healthAnimalSelect.addEventListener('change', function() {
-      const animal = animals.find(a => a.id == this.value);
-      if (animal) {
-        renderHealthHistory(animal);
-      }
-    });
-  }
-  
-  const photoAnimalSelect = document.getElementById('photoAnimalSelect');
-  if (photoAnimalSelect) {
-    photoAnimalSelect.addEventListener('change', function() {
-      updatePhotoGallery();
-    });
-  }
-  
-  console.log('BushBuddy PWA initialized successfully');
-  
-  // Test localStorage functionality
-  console.log('Testing localStorage...');
-  try {
-    localStorage.setItem('bushbuddy_test', 'test');
-    if (localStorage.getItem('bushbuddy_test') === 'test') {
-      console.log('localStorage is working');
-      localStorage.removeItem('bushbuddy_test');
-    } else {
-      console.error('localStorage test failed');
-    }
-  } catch (error) {
-    console.error('localStorage is not available:', error);
-    alert('Warning: Data storage is not available. Your data will be lost when you refresh the page.');
-  }
-});
-</script>
-</body>
-</html>
+  sorted.forEach(function(w) {
+    var div = document.createElement('div');
+    div.style.cssText = 'padding: 10px; margin:
