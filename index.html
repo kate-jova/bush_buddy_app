@@ -57,10 +57,23 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 /* Mobile */
 @media (max-width: 768px) {
   body { padding: 10px; }
-  .main-nav { padding: 8px; }
-  .nav-tab { padding: 10px 12px; margin: 0 2px; min-width: 70px; }
-  .nav-tab-icon { font-size: 18px; }
-  .nav-tab-text { font-size: 10px; }
+  .main-nav { 
+    padding: 8px; 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    justify-content: flex-start;
+  }
+  .main-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+  .nav-tab { 
+    padding: 10px 8px; 
+    margin: 0 1px; 
+    min-width: 65px; 
+    flex-shrink: 0;
+  }
+  .nav-tab-icon { font-size: 16px; margin-bottom: 2px; }
+  .nav-tab-text { font-size: 9px; line-height: 1.1; }
   .card { padding: 20px; }
   .animal-grid { grid-template-columns: 1fr; }
 }
