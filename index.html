@@ -70,7 +70,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 <div class="container">
   <div class="header">
-    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 80px; margin-bottom: 0;">
+    <h1>🐾 BushBuddy</h1>
   </div>
 
   <div class="main-nav">
@@ -121,7 +121,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
   <div id="weightTab" class="tab-content">
     <div class="card">
       <h2>Weight Tracking & Feed Calculator</h2>
-      <label>Select Animal: <select id="animalSelect"></select></label>
+      <label>Select Animal: <select id="animalSelect" onchange="onAnimalSelectChange()"></select></label>
       <label>Date: <input type="date" id="weightDate"></label>
       <label>Weight (g): <input type="number" id="animalWeight" placeholder="Enter weight in grams" oninput="showFeedCalc()"></label>
       <button onclick="addWeight()">Add Weight</button>
@@ -134,7 +134,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
   <div id="healthTab" class="tab-content">
     <div class="card">
       <h2>Health Condition Tracking</h2>
-      <label>Select Animal: <select id="healthAnimalSelect"></select></label>
+      <label>Select Animal: <select id="healthAnimalSelect" onchange="onHealthAnimalSelectChange()"></select></label>
       <label>Date: <input type="date" id="healthDate"></label>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 15px 0;">
         <div style="text-align: center; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -224,6 +224,14 @@ var speciesData = {
   ]
 };
 
+// Initialize app on page load
+document.addEventListener('DOMContentLoaded', function() {
+  loadData();
+  setDefaultDates();
+  updateSelects();
+  renderAnimals();
+});
+
 // Utility functions
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -235,14 +243,37 @@ function formatDate(dateStr) {
 }
 
 function saveData() {
-  localStorage.setItem('bushbuddy_animals', JSON.stringify(animals));
+  try {
+    localStorage.setItem('bushbuddy_animals', JSON.stringify(animals));
+    console.log('Data saved successfully');
+  } catch (e) {
+    console.error('Error saving data:', e);
+    alert('Error saving data. Please try again.');
+  }
 }
 
 function loadData() {
-  var saved = localStorage.getItem('bushbuddy_animals');
-  if (saved) {
-    animals = JSON.parse(saved);
+  try {
+    var saved = localStorage.getItem('bushbuddy_animals');
+    if (saved) {
+      animals = JSON.parse(saved);
+      console.log('Data loaded successfully:', animals.length, 'animals');
+    } else {
+      animals = [];
+      console.log('No saved data found');
+    }
+  } catch (e) {
+    console.error('Error loading data:', e);
+    animals = [];
+    alert('Error loading saved data. Starting fresh.');
   }
+}
+
+function setDefaultDates() {
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('intakeDate').value = today;
+  document.getElementById('weightDate').value = today;
+  document.getElementById('healthDate').value = today;
 }
 
 function getFeedsPerDay(weight, species) {
@@ -263,21 +294,54 @@ function getAnimalInfo(weight, species) {
 
 // Tab navigation
 function showTab(tabName) {
-  document.querySelectorAll('.nav-tab').forEach(function(tab) { tab.classList.remove('active'); });
-  document.querySelectorAll('.tab-content').forEach(function(content) { content.classList.remove('active'); });
+  // Remove active class from all tabs and content
+  document.querySelectorAll('.nav-tab').forEach(function(tab) { 
+    tab.classList.remove('active'); 
+  });
+  document.querySelectorAll('.tab-content').forEach(function(content) { 
+    content.classList.remove('active'); 
+  });
   
-  event.target.classList.add('active');
+  // Add active class to clicked tab and its content
+  event.target.closest('.nav-tab').classList.add('active');
   document.getElementById(tabName + 'Tab').classList.add('active');
   
+  // Update selects and trigger any necessary updates
   updateSelects();
   
-  if (tabName === 'weight' && animals.length > 0) {
-    var select = document.getElementById('animalSelect');
-    if (select.value) {
-      var animal = animals.find(function(a) { return a.id == select.value; });
-      if (animal) showWeightHistory(animal);
+  // If switching to weight tab, show current calculation if animal is selected
+  if (tabName === 'weight') {
+    var animalSelect = document.getElementById('animalSelect');
+    if (animalSelect.value) {
+      onAnimalSelectChange();
     }
   }
+}
+
+// Update all select dropdowns
+function updateSelects() {
+  var selects = ['animalSelect', 'healthAnimalSelect', 'exportAnimalSelect'];
+  
+  selects.forEach(function(selectId) {
+    var select = document.getElementById(selectId);
+    var currentValue = select.value;
+    
+    // Clear options
+    select.innerHTML = '<option value="">Select an animal...</option>';
+    
+    // Add animal options
+    animals.forEach(function(animal) {
+      var option = document.createElement('option');
+      option.value = animal.id;
+      option.textContent = animal.name + ' (' + animal.species + ')';
+      select.appendChild(option);
+    });
+    
+    // Restore previous selection if it still exists
+    if (currentValue && animals.some(function(a) { return a.id == currentValue; })) {
+      select.value = currentValue;
+    }
+  });
 }
 
 // Animal management
@@ -359,6 +423,24 @@ function renderAnimals() {
 }
 
 // Weight and feed calculations
+function onAnimalSelectChange() {
+  var animalId = document.getElementById('animalSelect').value;
+  if (animalId) {
+    var animal = animals.find(function(a) { return a.id == animalId; });
+    if (animal) {
+      showWeightHistory(animal);
+      // If there's a weight entered, show the calculation immediately
+      var weight = parseFloat(document.getElementById('animalWeight').value);
+      if (weight > 0) {
+        showFeedCalc();
+      }
+    }
+  } else {
+    document.getElementById('feedResult').innerHTML = '';
+    document.getElementById('weightHistory').innerHTML = '';
+  }
+}
+
 function showFeedCalc() {
   var weight = parseFloat(document.getElementById('animalWeight').value);
   var animalId = document.getElementById('animalSelect').value;
@@ -421,7 +503,7 @@ function addWeight() {
 
 function showWeightHistory(animal) {
   var history = document.getElementById('weightHistory');
-  history.innerHTML = '<h4>Weight History</h4>';
+  history.innerHTML = '<h4>Weight History for ' + animal.name + '</h4>';
   
   if (!animal.weights || animal.weights.length === 0) {
     history.innerHTML += '<p style="color: #666; font-style: italic;">No weight records yet.</p>';
@@ -439,20 +521,275 @@ function showWeightHistory(animal) {
     var perFeed = dailyMilk / feeds;
     var info = getAnimalInfo(mostRecent.weight, species);
     
-    document.getElementById('feedResult').innerHTML = 
-      '<strong>Current Feed Calculation for ' + species + ' - ' + mostRecent.weight + 'g:</strong><br>' +
-      '<em>Based on most recent weight (' + formatDate(mostRecent.date) + ')</em><br><br>' +
-      'Feeds per day: ' + feeds + '<br>' +
-      'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
-      'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
-      '<strong>Care Information:</strong><br>' +
-      '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
-      '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
-      '<strong>Housing:</strong> ' + info.housing + '<br>' +
-      '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
-      '<strong>Milk Formula:</strong> ' + info.milkFormula;
+    // Only show this if no weight is currently being entered
+    var currentWeight = parseFloat(document.getElementById('animalWeight').value);
+    if (!currentWeight || currentWeight <= 0) {
+      document.getElementById('feedResult').innerHTML = 
+        '<strong>Current Feed Calculation for ' + species + ' - ' + mostRecent.weight + 'g:</strong><br>' +
+        '<em>Based on most recent weight (' + formatDate(mostRecent.date) + ')</em><br><br>' +
+        'Feeds per day: ' + feeds + '<br>' +
+        'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
+        'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
+        '<strong>Care Information:</strong><br>' +
+        '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
+        '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
+        '<strong>Housing:</strong> ' + info.housing + '<br>' +
+        '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
+        '<strong>Milk Formula:</strong> ' + info.milkFormula;
+    }
   }
   
-  sorted.forEach(function(w) {
+  // Show weight history table
+  history.innerHTML += '<div style="margin-top: 15px;"><strong>Weight Records:</strong></div>';
+  
+  sorted.forEach(function(w, index) {
     var div = document.createElement('div');
-    div.style.cssText = 'padding: 10px; margin:
+    div.style.cssText = 'padding: 10px; margin: 5px 0; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;';
+    
+    var weightChange = '';
+    if (index < sorted.length - 1) {
+      var prevWeight = sorted[index + 1].weight;
+      var change = w.weight - prevWeight;
+      if (change > 0) {
+        weightChange = ' <span style="color: #28a745;">(+' + change.toFixed(0) + 'g)</span>';
+      } else if (change < 0) {
+        weightChange = ' <span style="color: #dc3545;">(' + change.toFixed(0) + 'g)</span>';
+      }
+    }
+    
+    div.innerHTML = 
+      '<div>' +
+      '<strong>' + formatDate(w.date) + '</strong><br>' +
+      w.weight + 'g' + weightChange +
+      '</div>' +
+      '<button class="small danger" onclick="deleteWeight(' + animal.id + ', \'' + w.date + '\', ' + w.weight + ')">🗑️</button>';
+    
+    history.appendChild(div);
+  });
+}
+
+function deleteWeight(animalId, date, weight) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.weights) return;
+  
+  if (!confirm('Delete weight record: ' + weight + 'g on ' + formatDate(date) + '?')) return;
+  
+  animal.weights = animal.weights.filter(function(w) { 
+    return !(w.date === date && w.weight === weight); 
+  });
+  
+  saveData();
+  showWeightHistory(animal);
+  onAnimalSelectChange();
+}
+
+// Health tracking
+function onHealthAnimalSelectChange() {
+  var animalId = document.getElementById('healthAnimalSelect').value;
+  if (animalId) {
+    var animal = animals.find(function(a) { return a.id == animalId; });
+    if (animal) {
+      showHealthHistory(animal);
+    }
+  } else {
+    document.getElementById('healthHistory').innerHTML = '';
+  }
+}
+
+function addHealthEntry() {
+  var animalId = document.getElementById('healthAnimalSelect').value;
+  var date = document.getElementById('healthDate').value;
+  var bodyCondition = document.getElementById('bodyCondition').value;
+  var alertness = document.getElementById('alertness').value;
+  var appetite = document.getElementById('appetite').value;
+  var notes = document.getElementById('healthNotes').value.trim();
+  
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  
+  if (!animal) {
+    alert('Please select an animal first.');
+    return;
+  }
+  
+  if (!date) {
+    alert('Please enter a date.');
+    return;
+  }
+  
+  if (!animal.healthEntries) animal.healthEntries = [];
+  
+  animal.healthEntries.push({
+    date: date,
+    bodyCondition: bodyCondition,
+    alertness: alertness,
+    appetite: appetite,
+    notes: notes
+  });
+  
+  saveData();
+  showHealthHistory(animal);
+  
+  // Clear form
+  document.getElementById('healthDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bodyCondition').selectedIndex = 2; // Good
+  document.getElementById('alertness').selectedIndex = 2; // Good
+  document.getElementById('appetite').selectedIndex = 2; // Good
+  document.getElementById('healthNotes').value = '';
+  
+  alert('Health entry added successfully!');
+}
+
+function showHealthHistory(animal) {
+  var history = document.getElementById('healthHistory');
+  history.innerHTML = '<h4>Health History for ' + animal.name + '</h4>';
+  
+  if (!animal.healthEntries || animal.healthEntries.length === 0) {
+    history.innerHTML += '<p style="color: #666; font-style: italic;">No health records yet.</p>';
+    return;
+  }
+  
+  var sorted = animal.healthEntries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  
+  sorted.forEach(function(entry) {
+    var div = document.createElement('div');
+    div.style.cssText = 'padding: 15px; margin: 10px 0; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+    
+    var conditionColor = entry.bodyCondition === 'good' ? '#28a745' : entry.bodyCondition === 'fair' ? '#ffc107' : '#dc3545';
+    var alertnessColor = entry.alertness === 'good' ? '#28a745' : entry.alertness === 'fair' ? '#ffc107' : '#dc3545';
+    var appetiteColor = entry.appetite === 'good' ? '#28a745' : entry.appetite === 'fair' ? '#ffc107' : '#dc3545';
+    
+    div.innerHTML = 
+      '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">' +
+      '<strong>' + formatDate(entry.date) + '</strong>' +
+      '<button class="small danger" onclick="deleteHealthEntry(' + animal.id + ', \'' + entry.date + '\')">🗑️</button>' +
+      '</div>' +
+      '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">' +
+      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
+      '<div style="font-size: 12px; color: #666;">Body Condition</div>' +
+      '<div style="color: ' + conditionColor + '; font-weight: bold; text-transform: capitalize;">' + entry.bodyCondition + '</div>' +
+      '</div>' +
+      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
+      '<div style="font-size: 12px; color: #666;">Alertness</div>' +
+      '<div style="color: ' + alertnessColor + '; font-weight: bold; text-transform: capitalize;">' + entry.alertness + '</div>' +
+      '</div>' +
+      '<div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 5px;">' +
+      '<div style="font-size: 12px; color: #666;">Appetite</div>' +
+      '<div style="color: ' + appetiteColor + '; font-weight: bold; text-transform: capitalize;">' + entry.appetite + '</div>' +
+      '</div>' +
+      '</div>' +
+      (entry.notes ? '<div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px;"><strong>Notes:</strong> ' + entry.notes + '</div>' : '');
+    
+    history.appendChild(div);
+  });
+}
+
+function deleteHealthEntry(animalId, date) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  if (!confirm('Delete health entry from ' + formatDate(date) + '?')) return;
+  
+  animal.healthEntries = animal.healthEntries.filter(function(entry) { 
+    return entry.date !== date; 
+  });
+  
+  saveData();
+  showHealthHistory(animal);
+}
+
+// Export functions
+function exportAnimalData() {
+  var animalId = document.getElementById('exportAnimalSelect').value;
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  
+  if (!animal) {
+    alert('Please select an animal to export.');
+    return;
+  }
+  
+  var exportData = {
+    animal: animal,
+    exportDate: new Date().toISOString(),
+    appVersion: 'BushBuddy v1.0'
+  };
+  
+  var dataStr = JSON.stringify(exportData, null, 2);
+  var dataBlob = new Blob([dataStr], {type: 'application/json'});
+  
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(dataBlob);
+  link.download = animal.name.replace(/[^a-z0-9]/gi, '_') + '_care_data.json';
+  link.click();
+}
+
+function exportAllData() {
+  if (animals.length === 0) {
+    alert('No data to export.');
+    return;
+  }
+  
+  var exportData = {
+    animals: animals,
+    exportDate: new Date().toISOString(),
+    appVersion: 'BushBuddy v1.0'
+  };
+  
+  var dataStr = JSON.stringify(exportData, null, 2);
+  var dataBlob = new Blob([dataStr], {type: 'application/json'});
+  
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(dataBlob);
+  link.download = 'bushbuddy_backup_' + new Date().toISOString().split('T')[0] + '.json';
+  link.click();
+}
+
+function restoreData() {
+  var fileInput = document.getElementById('restoreInput');
+  var file = fileInput.files[0];
+  
+  if (!file) {
+    alert('Please select a backup file to restore.');
+    return;
+  }
+  
+  if (!confirm('Restore data from backup? This will replace all current data.')) {
+    return;
+  }
+  
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var importData = JSON.parse(e.target.result);
+      
+      if (importData.animals) {
+        animals = importData.animals;
+      } else if (importData.animal) {
+        // Single animal import
+        var existingIndex = animals.findIndex(function(a) { return a.id === importData.animal.id; });
+        if (existingIndex >= 0) {
+          animals[existingIndex] = importData.animal;
+        } else {
+          animals.push(importData.animal);
+        }
+      } else {
+        throw new Error('Invalid backup file format');
+      }
+      
+      saveData();
+      renderAnimals();
+      updateSelects();
+      alert('Data restored successfully!');
+      
+    } catch (error) {
+      console.error('Error importing data:', error);
+      alert('Error reading backup file. Please check the file format.');
+    }
+  };
+  
+  reader.readAsText(file);
+  fileInput.value = '';
+}
+</script>
+
+</body>
+</html>
