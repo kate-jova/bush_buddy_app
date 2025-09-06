@@ -168,6 +168,32 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     </div>
   </div>
 
+  <!-- Feeding Schedule Tab -->
+  <div id="scheduleTab" class="tab-content">
+    <div class="card">
+      <h2>Feeding Schedule</h2>
+      <label>Select Animal: <select id="scheduleAnimalSelect" onchange="onScheduleAnimalSelectChange()"></select></label>
+      <div id="scheduleDisplay" style="margin-top: 20px;">
+        <p style="text-align: center; color: #666; font-style: italic;">Select an animal to view feeding schedule</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Gallery Tab -->
+  <div id="galleryTab" class="tab-content">
+    <div class="card">
+      <h2>Photo Gallery</h2>
+      <label>Select Animal: <select id="galleryAnimalSelect" onchange="onGalleryAnimalSelectChange()"></select></label>
+      <div style="margin-top: 20px;">
+        <label>Add Photo: <input type="file" id="photoInput" accept="image/*" multiple></label>
+        <button onclick="addPhotos()">Add Photos</button>
+      </div>
+      <div id="photoGallery" style="margin-top: 20px;">
+        <p style="text-align: center; color: #666; font-style: italic;">Select an animal to view photos</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Export Tab -->
   <div id="exportTab" class="tab-content">
     <div class="card">
