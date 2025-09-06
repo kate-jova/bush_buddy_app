@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="manifest" href="manifest.json">
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BushBuddy</title>
 <style>
@@ -99,7 +98,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 <div class="container">
   <div class="header">
-    <img src="BushBuddy.png" alt="BushBuddy Logo">
+    <img src="BushBuddyLogo.png" alt="BushBuddy Logo">
   </div>
 
   <div class="main-nav">
@@ -795,6 +794,78 @@ function showHealthHistory(animal) {
     
     history.appendChild(div);
   });
+}
+
+function editHealthEntry(animalId, date) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  var entry = animal.healthEntries.find(function(e) { return e.date === date; });
+  if (!entry) return;
+  
+  // Set the animal select
+  document.getElementById('healthAnimalSelect').value = animalId;
+  
+  // Populate form with existing data
+  document.getElementById('healthDate').value = entry.date;
+  document.getElementById('bodyCondition').value = entry.bodyCondition;
+  document.getElementById('alertness').value = entry.alertness;
+  document.getElementById('appetite').value = entry.appetite;
+  document.getElementById('healthNotes').value = entry.notes || '';
+  
+  // Change button to update mode
+  var button = document.querySelector('#healthTab button[onclick="addHealthEntry()"]');
+  button.textContent = 'Update Health Entry';
+  button.onclick = function() { updateHealthEntry(animalId, date); };
+  
+  // Scroll to form
+  document.getElementById('healthTab').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('healthDate').focus();
+}
+
+function updateHealthEntry(animalId, originalDate) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var date = document.getElementById('healthDate').value;
+  var bodyCondition = document.getElementById('bodyCondition').value;
+  var alertness = document.getElementById('alertness').value;
+  var appetite = document.getElementById('appetite').value;
+  var notes = document.getElementById('healthNotes').value.trim();
+  
+  if (!date) {
+    alert('Please enter a date.');
+    return;
+  }
+  
+  // Find and update the health entry
+  var healthEntry = animal.healthEntries.find(function(e) { 
+    return e.date === originalDate; 
+  });
+  
+  if (healthEntry) {
+    healthEntry.date = date;
+    healthEntry.bodyCondition = bodyCondition;
+    healthEntry.alertness = alertness;
+    healthEntry.appetite = appetite;
+    healthEntry.notes = notes;
+  }
+  
+  saveData();
+  
+  // Clear form and reset button
+  document.getElementById('healthDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bodyCondition').selectedIndex = 2;
+  document.getElementById('alertness').selectedIndex = 2;
+  document.getElementById('appetite').selectedIndex = 2;
+  document.getElementById('healthNotes').value = '';
+  
+  var button = document.querySelector('#healthTab button[onclick="updateHealthEntry(\'' + animalId + '\', \'' + originalDate + '\')"]');
+  button.textContent = 'Add Health Entry';
+  button.onclick = addHealthEntry;
+  
+  showHealthHistory(animal);
+  alert('Health entry updated successfully!');
 }
 
 function deleteHealthEntry(animalId, date) {
