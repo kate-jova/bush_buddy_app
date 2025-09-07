@@ -1124,6 +1124,28 @@ function deletePhoto(animalId, photoIndex) {
   showPhotoGallery(animal);
 }
 
+// Create lightbox HTML dynamically if it doesn't exist
+function createLightbox() {
+  var lightboxHTML = 
+    '<div id="lightbox" class="lightbox">' +
+    '<div class="lightbox-content">' +
+    '<span class="lightbox-close" onclick="closeLightbox()">&times;</span>' +
+    '<span class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">&#10094;</span>' +
+    '<img id="lightbox-image" class="lightbox-image" src="" alt="">' +
+    '<span class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">&#10095;</span>' +
+    '<div class="lightbox-info">' +
+    '<div id="lightbox-animal-name" style="font-weight: bold; font-size: 18px; margin-bottom: 5px;"></div>' +
+    '<div id="lightbox-photo-date" style="color: #666; font-size: 14px; margin-bottom: 5px;"></div>' +
+    '<div id="lightbox-photo-name" style="color: #999; font-size: 12px;"></div>' +
+    '<div id="lightbox-counter" style="color: #666; font-size: 14px; margin-top: 10px;"></div>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+  
+  document.body.insertAdjacentHTML('beforeend', lightboxHTML);
+  console.log('Lightbox created dynamically');
+}
+
 // Simple lightbox functions
 function openLightbox(animalId, photoIndex) {
   console.log('openLightbox called with:', animalId, photoIndex);
