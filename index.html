@@ -1127,13 +1127,13 @@ function deletePhoto(animalId, photoIndex) {
 // Create lightbox HTML dynamically if it doesn't exist
 function createLightbox() {
   var lightboxHTML = 
-    '<div id="lightbox" class="lightbox">' +
-    '<div class="lightbox-content">' +
-    '<span class="lightbox-close" onclick="closeLightbox()">&times;</span>' +
-    '<span class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">&#10094;</span>' +
-    '<img id="lightbox-image" class="lightbox-image" src="" alt="">' +
-    '<span class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">&#10095;</span>' +
-    '<div class="lightbox-info">' +
+    '<div id="lightbox" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9);">' +
+    '<div style="position: relative; margin: auto; padding: 20px; width: 90%; height: 90%; display: flex; align-items: center; justify-content: center; flex-direction: column;">' +
+    '<span onclick="closeLightbox()" style="position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 10001;">&times;</span>' +
+    '<span onclick="navigateLightbox(-1)" style="position: absolute; top: 50%; left: 30px; transform: translateY(-50%); color: white; font-size: 30px; font-weight: bold; cursor: pointer; background: rgba(255, 255, 255, 0.2); padding: 15px 20px; border-radius: 50%;">&#10094;</span>' +
+    '<img id="lightbox-image" src="" alt="" style="max-width: 100%; max-height: 80%; object-fit: contain; border-radius: 10px;">' +
+    '<span onclick="navigateLightbox(1)" style="position: absolute; top: 50%; right: 30px; transform: translateY(-50%); color: white; font-size: 30px; font-weight: bold; cursor: pointer; background: rgba(255, 255, 255, 0.2); padding: 15px 20px; border-radius: 50%;">&#10095;</span>' +
+    '<div style="background: rgba(255, 255, 255, 0.95); padding: 15px 20px; border-radius: 10px; margin-top: 20px; text-align: center; color: #333;">' +
     '<div id="lightbox-animal-name" style="font-weight: bold; font-size: 18px; margin-bottom: 5px;"></div>' +
     '<div id="lightbox-photo-date" style="color: #666; font-size: 14px; margin-bottom: 5px;"></div>' +
     '<div id="lightbox-photo-name" style="color: #999; font-size: 12px;"></div>' +
@@ -1143,7 +1143,7 @@ function createLightbox() {
     '</div>';
   
   document.body.insertAdjacentHTML('beforeend', lightboxHTML);
-  console.log('Lightbox created dynamically');
+  console.log('Lightbox created dynamically with inline styles');
 }
 
 // Simple lightbox functions
