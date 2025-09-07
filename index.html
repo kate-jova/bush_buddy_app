@@ -1126,17 +1126,34 @@ function deletePhoto(animalId, photoIndex) {
 
 // Simple lightbox functions
 function openLightbox(animalId, photoIndex) {
+  console.log('openLightbox called with:', animalId, photoIndex);
+  
   var animal = animals.find(function(a) { return a.id == animalId; });
-  if (!animal || !animal.photos || animal.photos.length === 0) return;
+  if (!animal) {
+    console.log('Animal not found:', animalId);
+    return;
+  }
+  
+  if (!animal.photos || animal.photos.length === 0) {
+    console.log('No photos found for animal');
+    return;
+  }
+  
+  console.log('Found animal with', animal.photos.length, 'photos');
   
   currentLightboxAnimal = animal;
   currentPhotoIndex = photoIndex;
   
   var lightbox = document.getElementById('lightbox');
+  console.log('Lightbox element found:', !!lightbox);
+  
   if (lightbox) {
     updateLightboxContent();
     lightbox.style.display = 'block';
     document.body.style.overflow = 'hidden';
+    console.log('Lightbox should now be visible');
+  } else {
+    console.log('Lightbox element not found in DOM');
   }
 }
 
