@@ -57,28 +57,10 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 /* Mobile */
 @media (max-width: 768px) {
   body { padding: 10px; }
-  
-  /* Mobile logo sizing */
-  .header img {
-    max-height: 80px;
-    max-width: 90vw;
-  }
-  
-  .main-nav { 
-    padding: 8px; 
-    overflow-x: auto; 
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-    justify-content: flex-start;
-  }
-  .main-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-  .nav-tab { 
-    padding: 10px 8px; 
-    margin: 0 1px; 
-    min-width: 65px; 
-    flex-shrink: 0;
-  }
+  .header img { max-height: 80px; max-width: 90vw; }
+  .main-nav { padding: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none; justify-content: flex-start; }
+  .main-nav::-webkit-scrollbar { display: none; }
+  .nav-tab { padding: 10px 8px; margin: 0 1px; min-width: 65px; flex-shrink: 0; }
   .nav-tab-icon { font-size: 16px; margin-bottom: 2px; }
   .nav-tab-text { font-size: 9px; line-height: 1.1; }
   .card { padding: 20px; }
@@ -93,6 +75,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
   </div>
 
+  <!-- Navigation -->
   <div class="main-nav">
     <button class="nav-tab active" onclick="showTab('animals')">
       <div class="nav-tab-icon">🐾</div>
@@ -138,19 +121,24 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     </div>
 
     <div class="card">
-  <h2>Your Animals</h2>
-  
-
-  <!-- Counter -->
-  <p id="animalCounter" style="color: #666; font-size: 14px; margin-bottom: 10px;"></p>
-
-  <div id="animalList" class="animal-grid">
-    <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>
-  </div>
-</div>
-
-    <div class="card">
       <h2>Your Animals</h2>
+
+      <!-- Search & Filter Controls -->
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+        <input type="text" id="animalSearch" placeholder="Search by name, species, or notes..."
+               style="flex: 1; min-width: 200px;" oninput="renderAnimals()">
+        <select id="speciesFilter" onchange="renderAnimals()"
+                style="min-width: 200px; padding: 10px; border-radius: 10px; border: 2px solid #e1e8ed;">
+          <option value="">All Species</option>
+          <option value="Common Brushtail Possum">Common Brushtail Possum</option>
+          <option value="Ringtail Possum">Ringtail Possum</option>
+          <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
+        </select>
+      </div>
+
+      <!-- Counter -->
+      <p id="animalCounter" style="color: #666; font-size: 14px; margin-bottom: 10px;"></p>
+
       <div id="animalList" class="animal-grid">
         <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>
       </div>
@@ -514,11 +502,9 @@ function deleteAnimal(id) {
 }
 
 function renderAnimals() {
-  function renderAnimals() {
   var list = document.getElementById('animalList');
   var counter = document.getElementById('animalCounter');
 
-  // Get filter values
   var searchQuery = document.getElementById('animalSearch') ? document.getElementById('animalSearch').value.trim().toLowerCase() : '';
   var speciesFilter = document.getElementById('speciesFilter') ? document.getElementById('speciesFilter').value : '';
 
@@ -530,19 +516,15 @@ function renderAnimals() {
     return;
   }
 
-  // Apply filtering
   var filteredAnimals = animals.filter(function(animal) {
     var matchesSearch = !searchQuery ||
       (animal.name && animal.name.toLowerCase().includes(searchQuery)) ||
       (animal.species && animal.species.toLowerCase().includes(searchQuery)) ||
       (animal.intakeNotes && animal.intakeNotes.toLowerCase().includes(searchQuery));
-    
     var matchesSpecies = !speciesFilter || animal.species === speciesFilter;
-    
     return matchesSearch && matchesSpecies;
   });
 
-  // Counter update
   counter.textContent = 'Showing ' + filteredAnimals.length + ' of ' + animals.length + ' animals';
 
   if (filteredAnimals.length === 0) {
@@ -550,16 +532,13 @@ function renderAnimals() {
     return;
   }
 
-  // Render filtered animals
   filteredAnimals.forEach(function(animal) {
     var div = document.createElement('div');
     div.className = 'animal-item';
-    
-    var daysSinceIntake = animal.intakeDate ? 
-      Math.floor((new Date() - new Date(animal.intakeDate)) / (1000 * 60 * 60 * 24)) : 
-      'Unknown';
-    
-    div.innerHTML = 
+    var daysSinceIntake = animal.intakeDate ?
+      Math.floor((new Date() - new Date(animal.intakeDate)) / (1000 * 60 * 60 * 24)) : 'Unknown';
+
+    div.innerHTML =
       '<div class="animal-actions">' +
       '<button class="small" onclick="editAnimal(' + animal.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; margin-right: 5px;">✏️</button>' +
       '<button class="small" onclick="deleteAnimal(' + animal.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>' +
@@ -569,7 +548,6 @@ function renderAnimals() {
       '<p><strong>Intake:</strong> ' + formatDate(animal.intakeDate) + ' (' + daysSinceIntake + ' days ago)</p>' +
       '<p><strong>Records:</strong> ' + (animal.weights ? animal.weights.length : 0) + ' weights, ' + (animal.healthEntries ? animal.healthEntries.length : 0) + ' health entries</p>' +
       (animal.intakeNotes ? '<p><strong>Notes:</strong> ' + animal.intakeNotes + '</p>' : '');
-    
     list.appendChild(div);
   });
 }
