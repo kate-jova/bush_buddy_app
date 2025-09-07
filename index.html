@@ -90,7 +90,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 <div class="container">
   <div class="header">
-    <img src="BushBuddyLogo.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
+    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
   </div>
 
   <div class="main-nav">
@@ -733,60 +733,6 @@ function showWeightHistory(animal) {
     
     history.appendChild(div);
   });
-}
-
-function renderWeightChart(animalId, chartData) {
-  // Transform data for chart
-  var data = chartData.map(function(w) {
-    return {
-      date: formatDate(w.date),
-      weight: w.weight,
-      fullDate: w.date // Keep original date for sorting
-    };
-  });
-  
-  // Create React component for the chart
-  var WeightChart = function() {
-    return React.createElement('div', { style: { width: '100%', height: '300px' } },
-      React.createElement(Recharts.ResponsiveContainer, { width: '100%', height: '100%' },
-        React.createElement(Recharts.LineChart, { 
-          data: data,
-          margin: { top: 5, right: 30, left: 20, bottom: 5 }
-        }, [
-          React.createElement(Recharts.CartesianGrid, { strokeDasharray: '3 3', key: 'grid' }),
-          React.createElement(Recharts.XAxis, { 
-            dataKey: 'date',
-            key: 'xaxis',
-            angle: -45,
-            textAnchor: 'end',
-            height: 60
-          }),
-          React.createElement(Recharts.YAxis, { 
-            key: 'yaxis',
-            label: { value: 'Weight (g)', angle: -90, position: 'insideLeft' }
-          }),
-          React.createElement(Recharts.Tooltip, { 
-            key: 'tooltip',
-            formatter: function(value) { return [value + 'g', 'Weight']; }
-          }),
-          React.createElement(Recharts.Line, { 
-            type: 'monotone',
-            dataKey: 'weight',
-            stroke: '#698167',
-            strokeWidth: 3,
-            dot: { fill: '#698167', strokeWidth: 2, r: 4 },
-            key: 'line'
-          })
-        ])
-      )
-    );
-  };
-  
-  // Render the chart
-  var container = document.getElementById('chart-container-' + animalId);
-  if (container && window.ReactDOM) {
-    ReactDOM.render(React.createElement(WeightChart), container);
-  }
 }
 
 function deleteWeight(animalId, date, weight) {
