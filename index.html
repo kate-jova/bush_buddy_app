@@ -1260,11 +1260,17 @@ function initApp() {
   }
 }
 
+console.log('About to set up DOM ready detection');
+
 if (document.readyState === 'loading') {
+  console.log('Document still loading, adding event listener');
   document.addEventListener('DOMContentLoaded', initApp);
 } else {
+  console.log('Document already ready, calling initApp immediately');
   initApp();
 }
+
+console.log('Script execution completed');
 </script>
 
 </body>
