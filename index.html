@@ -139,6 +139,24 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
     <div class="card">
       <h2>Your Animals</h2>
+      
+      <!-- Search & Filter Controls -->
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+        <input type="text" id="animalSearch" placeholder="Search by name, species, or notes..." 
+               style="flex: 1; min-width: 200px;">
+        
+        <select id="speciesFilter" 
+                style="min-width: 200px; padding: 10px; border-radius: 10px; border: 2px solid #e1e8ed;">
+          <option value="">All Species</option>
+          <option value="Common Brushtail Possum">Common Brushtail Possum</option>
+          <option value="Ringtail Possum">Ringtail Possum</option>
+          <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
+        </select>
+      </div>
+      
+      <!-- Counter -->
+      <p id="animalCounter" style="color: #666; font-size: 14px; margin-bottom: 10px;"></p>
+
       <div id="animalList" class="animal-grid">
         <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>
       </div>
@@ -277,20 +295,6 @@ var speciesData = {
     { weight: 150, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "6 feeds per day. Milk – 4 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." }
   ]
 };
-
-// Initialize app when DOM is ready
-function initApp() {
-  loadData();
-  setDefaultDates();
-  updateSelects();
-  renderAnimals();
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
 
 // Utility functions
 function formatDate(dateStr) {
@@ -503,14 +507,42 @@ function deleteAnimal(id) {
 
 function renderAnimals() {
   var list = document.getElementById('animalList');
+  var counter = document.getElementById('animalCounter');
+
+  // Get filter values
+  var searchQuery = document.getElementById('animalSearch') ? document.getElementById('animalSearch').value.trim().toLowerCase() : '';
+  var speciesFilter = document.getElementById('speciesFilter') ? document.getElementById('speciesFilter').value : '';
+
   list.innerHTML = '';
-  
+  counter.textContent = '';
+
   if (animals.length === 0) {
     list.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>';
     return;
   }
-  
-  animals.forEach(function(animal) {
+
+  // Apply filtering
+  var filteredAnimals = animals.filter(function(animal) {
+    var matchesSearch = !searchQuery ||
+      (animal.name && animal.name.toLowerCase().includes(searchQuery)) ||
+      (animal.species && animal.species.toLowerCase().includes(searchQuery)) ||
+      (animal.intakeNotes && animal.intakeNotes.toLowerCase().includes(searchQuery));
+    
+    var matchesSpecies = !speciesFilter || animal.species === speciesFilter;
+    
+    return matchesSearch && matchesSpecies;
+  });
+
+  // Counter update
+  counter.textContent = 'Showing ' + filteredAnimals.length + ' of ' + animals.length + ' animals';
+
+  if (filteredAnimals.length === 0) {
+    list.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No matches found. Try adjusting your search or filter.</p>';
+    return;
+  }
+
+  // Render filtered animals
+  filteredAnimals.forEach(function(animal) {
     var div = document.createElement('div');
     div.className = 'animal-item';
     
@@ -733,60 +765,6 @@ function showWeightHistory(animal) {
     
     history.appendChild(div);
   });
-}
-
-function renderWeightChart(animalId, chartData) {
-  // Transform data for chart
-  var data = chartData.map(function(w) {
-    return {
-      date: formatDate(w.date),
-      weight: w.weight,
-      fullDate: w.date // Keep original date for sorting
-    };
-  });
-  
-  // Create React component for the chart
-  var WeightChart = function() {
-    return React.createElement('div', { style: { width: '100%', height: '300px' } },
-      React.createElement(Recharts.ResponsiveContainer, { width: '100%', height: '100%' },
-        React.createElement(Recharts.LineChart, { 
-          data: data,
-          margin: { top: 5, right: 30, left: 20, bottom: 5 }
-        }, [
-          React.createElement(Recharts.CartesianGrid, { strokeDasharray: '3 3', key: 'grid' }),
-          React.createElement(Recharts.XAxis, { 
-            dataKey: 'date',
-            key: 'xaxis',
-            angle: -45,
-            textAnchor: 'end',
-            height: 60
-          }),
-          React.createElement(Recharts.YAxis, { 
-            key: 'yaxis',
-            label: { value: 'Weight (g)', angle: -90, position: 'insideLeft' }
-          }),
-          React.createElement(Recharts.Tooltip, { 
-            key: 'tooltip',
-            formatter: function(value) { return [value + 'g', 'Weight']; }
-          }),
-          React.createElement(Recharts.Line, { 
-            type: 'monotone',
-            dataKey: 'weight',
-            stroke: '#698167',
-            strokeWidth: 3,
-            dot: { fill: '#698167', strokeWidth: 2, r: 4 },
-            key: 'line'
-          })
-        ])
-      )
-    );
-  };
-  
-  // Render the chart
-  var container = document.getElementById('chart-container-' + animalId);
-  if (container && window.ReactDOM) {
-    ReactDOM.render(React.createElement(WeightChart), container);
-  }
 }
 
 function deleteWeight(animalId, date, weight) {
@@ -1236,6 +1214,32 @@ function restoreData() {
   
   reader.readAsText(file);
   fileInput.value = '';
+}
+
+// Initialize app when DOM is ready
+function initApp() {
+  loadData();
+  setDefaultDates();
+  updateSelects();
+  renderAnimals();
+  
+  // Add event listeners for search and filter after functions are loaded
+  var searchInput = document.getElementById('animalSearch');
+  var speciesFilter = document.getElementById('speciesFilter');
+  
+  if (searchInput) {
+    searchInput.addEventListener('input', renderAnimals);
+  }
+  
+  if (speciesFilter) {
+    speciesFilter.addEventListener('change', renderAnimals);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
 </script>
 
