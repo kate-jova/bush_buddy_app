@@ -308,11 +308,39 @@ function formatDate(dateStr) {
 
 function saveData() {
   try {
-    localStorage.setItem('bushbuddy_animals', JSON.stringify(animals));
-    console.log('Data saved successfully');
+    var dataStr = JSON.stringify(animals);
+    var dataSize = new Blob([dataStr]).size;
+    
+    console.log('Attempting to save data. Size:', dataSize, 'bytes');
+    console.log('Number of animals:', animals.length);
+    
+    // Check if we're approaching localStorage limits
+    if (dataSize > 5000000) { // 5MB warning
+      console.warn('Data size is large:', dataSize, 'bytes. This may cause storage issues.');
+    }
+    
+    localStorage.setItem('bushbuddy_animals', dataStr);
+    
+    // Verify the save worked
+    var savedData = localStorage.getItem('bushbuddy_animals');
+    if (savedData && savedData === dataStr) {
+      console.log('Data saved and verified successfully');
+    } else {
+      throw new Error('Data verification failed after save');
+    }
+    
   } catch (e) {
     console.error('Error saving data:', e);
-    alert('Error saving data. Please try again.');
+    console.log('Error name:', e.name);
+    console.log('Error message:', e.message);
+    
+    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+      alert('Storage quota exceeded. Your data is too large to save locally. Please export your data as backup and consider removing old photos.');
+    } else if (e.name === 'SecurityError') {
+      alert('Storage blocked by browser security settings. Please check if you\'re in private/incognito mode.');
+    } else {
+      alert('Error saving data: ' + e.message + '. Please try again.');
+    }
   }
 }
 
