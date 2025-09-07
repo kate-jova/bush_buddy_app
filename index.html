@@ -1064,10 +1064,13 @@ function addPhotos() {
     var reader = new FileReader();
     
     reader.onload = function(e) {
+      // Try to extract date from EXIF data
+      var actualDate = getPhotoDate(file) || new Date().toISOString().split('T')[0];
+      
       animal.photos.push({
         data: e.target.result,
         name: file.name,
-        date: new Date().toISOString().split('T')[0]
+        date: actualDate
       });
       
       addedCount++;
@@ -1083,6 +1086,24 @@ function addPhotos() {
   }
 }
 
+// Extract date from photo metadata
+function getPhotoDate(file) {
+  try {
+    // Try to get date from file's lastModified property first
+    if (file.lastModified) {
+      var fileDate = new Date(file.lastModified);
+      return fileDate.toISOString().split('T')[0];
+    }
+    
+    // For more sophisticated EXIF reading, we'd need a library like exif-js
+    // For now, we'll use the file's last modified date as a reasonable approximation
+    return null;
+  } catch (error) {
+    console.log('Could not extract photo date:', error);
+    return null;
+  }
+}
+
 function showPhotoGallery(animal) {
   var gallery = document.getElementById('photoGallery');
   gallery.innerHTML = '<h4>Photos for ' + animal.name + '</h4>';
@@ -1093,7 +1114,7 @@ function showPhotoGallery(animal) {
   }
   
   var gridDiv = document.createElement('div');
-  gridDiv.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;';
+  gridDiv.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 300px)); gap: 15px; margin-top: 15px; justify-content: center;';
   
   animal.photos.forEach(function(photo, index) {
     var photoDiv = document.createElement('div');
