@@ -138,6 +138,31 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     </div>
 
     <div class="card">
+  <h2>Your Animals</h2>
+  
+  <!-- Search & Filter Controls -->
+  <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+    <input type="text" id="animalSearch" placeholder="Search by name, species, or notes..." 
+           style="flex: 1; min-width: 200px;" oninput="renderAnimals()">
+    
+    <select id="speciesFilter" onchange="renderAnimals()" 
+            style="min-width: 200px; padding: 10px; border-radius: 10px; border: 2px solid #e1e8ed;">
+      <option value="">All Species</option>
+      <option value="Common Brushtail Possum">Common Brushtail Possum</option>
+      <option value="Ringtail Possum">Ringtail Possum</option>
+      <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
+    </select>
+  </div>
+  
+  <!-- Counter -->
+  <p id="animalCounter" style="color: #666; font-size: 14px; margin-bottom: 10px;"></p>
+
+  <div id="animalList" class="animal-grid">
+    <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>
+  </div>
+</div>
+
+    <div class="card">
       <h2>Your Animals</h2>
       <div id="animalList" class="animal-grid">
         <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal above!</p>
