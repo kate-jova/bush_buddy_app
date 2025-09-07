@@ -30,9 +30,19 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 
 /* Forms */
 label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
-input, select, textarea { width: 100%; padding: 12px; margin-top: 6px; border-radius: 10px; border: 2px solid #e1e8ed; box-sizing: border-box; font-size: 16px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+input, select, textarea { width: 100%; padding: 12px; margin-top: 6px; border-radius: 10px; border: 2px solid #e1e8ed; box-sizing: border-box; font-size: 16px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-appearance: none; -webkit-border-radius: 10px; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: #698167; box-shadow: 0 0 0 3px rgba(43,122,120,0.1); }
 textarea { resize: vertical; min-height: 80px; }
+
+/* iOS specific fixes */
+input[type="number"] { -webkit-appearance: none; -moz-appearance: textfield; }
+input[type="date"] { -webkit-appearance: none; }
+input[type="file"] { -webkit-appearance: none; }
+
+/* Prevent zoom on input focus for iOS */
+@media screen and (max-width: 768px) {
+  input, select, textarea { font-size: 16px; }
+}
 
 /* Buttons */
 button { margin: 8px 4px; padding: 12px 20px; border: none; border-radius: 10px; background: linear-gradient(135deg, #698167, #a0b2af); color: white; cursor: pointer; font-weight: 600; transition: all 0.3s ease; min-height: 44px; font-size: 14px; }
