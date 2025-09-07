@@ -1100,7 +1100,7 @@ function showPhotoGallery(animal) {
     photoDiv.style.cssText = 'position: relative; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;';
     
     photoDiv.innerHTML = 
-      '<img src="' + photo.data + '" style="width: 100%; height: 200px; object-fit: cover;">' +
+      '<img src="' + photo.data + '" onclick="openLightbox(' + animal.id + ',' + index + ')" style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;" title="Click to enlarge">' +
       '<div style="padding: 10px;">' +
       '<div style="font-size: 12px; color: #666;">' + formatDate(photo.date) + '</div>' +
       '<div style="font-size: 10px; color: #999; margin-top: 5px;">' + photo.name + '</div>' +
@@ -1122,6 +1122,60 @@ function deletePhoto(animalId, photoIndex) {
   animal.photos.splice(photoIndex, 1);
   saveData();
   showPhotoGallery(animal);
+}
+
+// Simple lightbox functions
+function openLightbox(animalId, photoIndex) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.photos || animal.photos.length === 0) return;
+  
+  currentLightboxAnimal = animal;
+  currentPhotoIndex = photoIndex;
+  
+  var lightbox = document.getElementById('lightbox');
+  if (lightbox) {
+    updateLightboxContent();
+    lightbox.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeLightbox() {
+  var lightbox = document.getElementById('lightbox');
+  if (lightbox) {
+    lightbox.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+}
+
+function navigateLightbox(direction) {
+  if (!currentLightboxAnimal || !currentLightboxAnimal.photos) return;
+  
+  currentPhotoIndex += direction;
+  if (currentPhotoIndex >= currentLightboxAnimal.photos.length) {
+    currentPhotoIndex = 0;
+  } else if (currentPhotoIndex < 0) {
+    currentPhotoIndex = currentLightboxAnimal.photos.length - 1;
+  }
+  
+  updateLightboxContent();
+}
+
+function updateLightboxContent() {
+  if (!currentLightboxAnimal || !currentLightboxAnimal.photos) return;
+  
+  var photo = currentLightboxAnimal.photos[currentPhotoIndex];
+  var lightboxImage = document.getElementById('lightbox-image');
+  var animalName = document.getElementById('lightbox-animal-name');
+  var photoDate = document.getElementById('lightbox-photo-date');
+  var photoName = document.getElementById('lightbox-photo-name');
+  var counter = document.getElementById('lightbox-counter');
+  
+  if (lightboxImage) lightboxImage.src = photo.data;
+  if (animalName) animalName.textContent = currentLightboxAnimal.name;
+  if (photoDate) photoDate.textContent = 'Taken: ' + formatDate(photo.date);
+  if (photoName) photoName.textContent = photo.name;
+  if (counter) counter.textContent = 'Photo ' + (currentPhotoIndex + 1) + ' of ' + currentLightboxAnimal.photos.length;
 }
 
 // Export functions
