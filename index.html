@@ -1147,13 +1147,20 @@ function openLightbox(animalId, photoIndex) {
   var lightbox = document.getElementById('lightbox');
   console.log('Lightbox element found:', !!lightbox);
   
+  if (!lightbox) {
+    console.log('Lightbox not found, creating it now');
+    createLightbox();
+    lightbox = document.getElementById('lightbox');
+    console.log('Lightbox created, found now:', !!lightbox);
+  }
+  
   if (lightbox) {
     updateLightboxContent();
     lightbox.style.display = 'block';
     document.body.style.overflow = 'hidden';
     console.log('Lightbox should now be visible');
   } else {
-    console.log('Lightbox element not found in DOM');
+    console.log('Still unable to create lightbox element');
   }
 }
 
