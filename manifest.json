@@ -1,16 +1,26 @@
 {
   "name": "BushBuddy",
   "short_name": "BushBuddy",
-  "description": "Wildlife Care Management",
-  "start_url": "/",
+  "description": "your wildlife care companion",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f7fa",
   "theme_color": "#698167",
+  "orientation": "any",
   "icons": [
     {
-      "src": "BushBuddy.png",
+      "src": "BushBuddy-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "BushBuddy-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
     }
-  ]
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": []
 }
