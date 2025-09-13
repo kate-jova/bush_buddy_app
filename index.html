@@ -70,67 +70,6 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 /* Results */
 .result { margin-top: 15px; padding: 15px; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-left: 4px solid #698167; }
-
-/* Mobile */
-@media (max-width: 768px) {
-  body { padding: 10px; }
-  
-  /* Mobile logo sizing */
-  .header img {
-    max-height: 80px;
-    max-width: 90vw;
-  }
-  
-  .main-nav { 
-    padding: 6px; 
-    overflow-x: auto; 
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-    justify-content: flex-start;
-    display: flex;
-  }
-  .main-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-  .nav-tab { 
-    padding: 12px 8px; 
-    margin: 0 1px; 
-    min-width: 70px; 
-    flex-shrink: 0;
-  }
-  .nav-tab-icon { font-size: 18px; margin-bottom: 3px; }
-  .nav-tab-text { font-size: 9px; line-height: 1.1; }
-  .card { padding: 20px; }
-  .animal-grid { grid-template-columns: 1fr; }
-}
-
-/* Small mobile optimization */
-@media (max-width: 480px) {
-  .main-nav { 
-    padding: 4px;
-  }
-  .nav-tab { 
-    padding: 10px 6px; 
-    margin: 0 1px; 
-    min-width: 65px;
-  }
-  .nav-tab-icon { font-size: 16px; margin-bottom: 2px; }
-  .nav-tab-text { font-size: 8px; line-height: 1; }
-}
-
-/* Tablet styles (iPad) - Override mobile styles for larger screens */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .main-nav {
-    justify-content: center !important;
-    padding: 10px !important;
-  }
-  .nav-tab { 
-    padding: 16px 18px !important; 
-    min-width: 90px !important; 
-    margin: 0 4px !important; 
-  }
-  .nav-tab-icon { font-size: 22px !important; margin-bottom: 5px !important; }
-  .nav-tab-text { font-size: 11px !important; }
-}
 </style>
 </head>
 <body>
