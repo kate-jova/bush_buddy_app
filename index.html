@@ -116,13 +116,24 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
   .nav-tab-icon { font-size: 16px; margin-bottom: 2px; }
   .nav-tab-text { font-size: 8px; line-height: 1; }
 }
+
+/* Tablet styles (iPad) - Must come after mobile to override */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main-nav {
+    justify-content: center;
+    padding: 10px;
+  }
+  .nav-tab { padding: 16px 18px; min-width: 90px; margin: 0 4px; }
+  .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
+  .nav-tab-text { font-size: 11px; }
+}
 </style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-top: 10; margin-bottom: 0;">
+    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
   </div>
 
   <div class="main-nav">
