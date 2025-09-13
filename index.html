@@ -17,8 +17,15 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .nav-tab:hover { background: rgba(43,122,120,0.1); color: #657a6b; }
 .nav-tab.active { background: linear-gradient(135deg, #698167, #a0b2af); color: white; box-shadow: 0 4px 15px rgba(43,122,120,0.3); }
 
+/* Tablet styles (iPad) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .nav-tab { padding: 16px 18px; min-width: 90px; }
+  .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
+  .nav-tab-text { font-size: 11px; }
+}
+
 /* Desktop larger tabs */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .nav-tab { padding: 16px 20px; min-width: 100px; }
   .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
   .nav-tab-text { font-size: 12px; }
@@ -80,17 +87,18 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
-    justify-content: flex-start;
+    justify-content: center;
+    display: flex;
   }
   .main-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
   .nav-tab { 
-    padding: 10px 8px; 
-    margin: 0 1px; 
-    min-width: 65px; 
+    padding: 14px 12px; 
+    margin: 0 2px; 
+    min-width: 80px; 
     flex-shrink: 0;
   }
-  .nav-tab-icon { font-size: 16px; margin-bottom: 2px; }
-  .nav-tab-text { font-size: 9px; line-height: 1.1; }
+  .nav-tab-icon { font-size: 20px; margin-bottom: 4px; }
+  .nav-tab-text { font-size: 10px; line-height: 1.2; }
   .card { padding: 20px; }
   .animal-grid { grid-template-columns: 1fr; }
 }
@@ -277,8 +285,10 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 <script>
 // Global variables
 var animals = [];
+var currentLightboxAnimal = null;
+var currentPhotoIndex = 0;
 
-// Species data with feeding schedules - FIXED: Removed extra bracket
+// Species data with feeding schedules
 var speciesData = {
   "Common Brushtail Possum": [
     { weight: 1100, feeds: 1, predictedAge: "7 months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed. Cease 1 week before release." },
@@ -286,9 +296,9 @@ var speciesData = {
     { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects. 2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXImum of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage." },
     { weight: 400, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on mum's back but more confident climbing on its own.", housing: "28°C – no artificial heat. Large cage (1m x 1m x 1.2m) or small walk-in aviary on sheltered verandah. Cage to include nest box, water dish and good variety of branches and ropes for climbing.", feedingNotes: "Must be eating good variety of native vegetation cut fresh each day. Soft insects such as small grasshoppers, moths. 3 milk feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds." },
     { weight: 250, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch.", housing: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", feedingNotes: "Offer a good variety of native vegetation (at least 5 different species cut fresh each day). Fresh leaf tip. Offer soft insects such as tiny grasshoppers, moths. 4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
-    { weight: 150, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Starting to explore a little outside of mum’s pouch.", housing: "30°C check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Housed indoors. Exploring cage.", feedingNotes: "A small amount and variety of fresh native leaf tip after each feed. 5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
-    { weight: 100, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces.", housing: "Carry cage of basket with secure lid and fine mesh. Provide a couple of pouch ‘caves’. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads. Housed indoors.", feedingNotes: "Start to introduce soft new leaf tip eucalypt, syzygium, melaleuca etc. Offer a variety as some eucalypt species may be toxic. 6 feeds per day. Milk – 4 hourly. May require additional water feeds in between 2 or 3 of the day feeds. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." },
-    { weight: 60, feeds: 8, predictedAge: "3 months", features: "Furless, eyes closed. Custard-like faeces. Permanently in mum’s pouch. Experienced carers only.", housing: "32°C Check for warmth and maintain temperature. Place multiple pouches inside each other to form a cosy ‘cave'. No loose threads. Wrap in the white car polish cloths with lime green edging, then place in pouches. Cover cage. Humidicrib beneficial for success. Watch for dehydration and diarrhoea.", feedingNotes: "6-8 feeds per day depending upon hydration. May require additional water feeds in between 2 or 3 of the day feeds. Syringe with syringe teat until membranes at side of mouth fully open. Will then lap.", milkFormula: "Milk: 15% of body weight divided equally over 6-8 feeds." }
+    { weight: 150, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Starting to explore a little outside of mum's pouch.", housing: "30°C check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Housed indoors. Exploring cage.", feedingNotes: "A small amount and variety of fresh native leaf tip after each feed. 5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
+    { weight: 100, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces.", housing: "Carry cage of basket with secure lid and fine mesh. Provide a couple of pouch 'caves'. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads. Housed indoors.", feedingNotes: "Start to introduce soft new leaf tip eucalypt, syzygium, melaleuca etc. Offer a variety as some eucalypt species may be toxic. 6 feeds per day. Milk – 4 hourly. May require additional water feeds in between 2 or 3 of the day feeds. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." },
+    { weight: 60, feeds: 8, predictedAge: "3 months", features: "Furless, eyes closed. Custard-like faeces. Permanently in mum's pouch. Experienced carers only.", housing: "32°C Check for warmth and maintain temperature. Place multiple pouches inside each other to form a cosy 'cave'. No loose threads. Wrap in the white car polish cloths with lime green edging, then place in pouches. Cover cage. Humidicrib beneficial for success. Watch for dehydration and diarrhoea.", feedingNotes: "6-8 feeds per day depending upon hydration. May require additional water feeds in between 2 or 3 of the day feeds. Syringe with syringe teat until membranes at side of mouth fully open. Will then lap.", milkFormula: "Milk: 15% of body weight divided equally over 6-8 feeds." }
   ],
   "Ringtail Possum": [
     { weight: 500, feeds: 1, predictedAge: "7.5+ months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary (min 3m x 2m x 2m) situated in natural surroundings. Large variety of fresh native vegetation each day placed in water containers for freshness. Possums should not be able to fall in to foliage water containers. Drey and water placed high in aviary.", feedingNotes: "1 milk feed per day at dusk. Cease 1 week before release.", milkFormula: "Maximum 30mL per feed." },
