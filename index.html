@@ -27,7 +27,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .container { max-width: 1200px; margin: 0 auto; }
 .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
 
-/* Navigation - Fixed for mobile */
+/* Navigation - Mobile first approach */
 .main-nav { 
   display: flex; 
   margin-bottom: 30px; 
@@ -37,27 +37,47 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
   overflow-x: auto; 
   overflow-y: hidden;
-  /* Remove justify-content: center for mobile to prevent overflow issues */
   justify-content: flex-start;
-  /* Enable smooth scrolling */
   scroll-behavior: smooth;
-  /* Hide scrollbar on WebKit browsers */
   -webkit-overflow-scrolling: touch;
-  /* Add position relative for scroll indicators */
   position: relative;
 }
 
-/* TEST: Force centering on all screens to debug iPad issue */
-.main-nav {
-  justify-content: center !important;
-  background: red !important;
+/* Tablet and Desktop - Override mobile styles */
+@media only screen and (min-width: 769px) {
+  .main-nav {
+    justify-content: center !important;
+    overflow-x: visible !important;
+  }
 }
 
-/* Mobile override - only left-align on very small screens */
-@media screen and (max-width: 768px) {
-  .main-nav {
-    justify-content: flex-start !important;
-    background: white !important;
+/* Tablet specific styles */
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+  .nav-tab { 
+    padding: 16px 18px; 
+    min-width: 90px; 
+  }
+  .nav-tab-icon { 
+    font-size: 22px; 
+    margin-bottom: 5px; 
+  }
+  .nav-tab-text { 
+    font-size: 11px; 
+  }
+}
+
+/* Desktop specific styles */
+@media only screen and (min-width: 1025px) {
+  .nav-tab { 
+    padding: 16px 20px; 
+    min-width: 100px; 
+  }
+  .nav-tab-icon { 
+    font-size: 24px; 
+    margin-bottom: 6px; 
+  }
+  .nav-tab-text { 
+    font-size: 12px; 
   }
 }
 
@@ -421,7 +441,7 @@ var speciesData = {
   "Common Brushtail Possum": [
     { weight: 1100, feeds: 1, predictedAge: "7 months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed. Cease 1 week before release." },
     { weight: 900, feeds: 1, predictedAge: "7 months", features: "Fully independent from mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects. 1 milk feed per day at dusk. Start weaning off milk – reduce gradually and monitor weight of possum weekly to ensure maintaining weight with reduced milk and increased foliage. If not, wait until weight stable before reducing milk again.", milkFormula: "Maximum 40mL per feed." },
-    { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects. 2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXImum of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage." },
+    { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects. 2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "Maximum of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage." },
     { weight: 400, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on mum's back but more confident climbing on its own.", housing: "28°C – no artificial heat. Large cage (1m x 1m x 1.2m) or small walk-in aviary on sheltered verandah. Cage to include nest box, water dish and good variety of branches and ropes for climbing.", feedingNotes: "Must be eating good variety of native vegetation cut fresh each day. Soft insects such as small grasshoppers, moths. 3 milk feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds." },
     { weight: 250, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch.", housing: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", feedingNotes: "Offer a good variety of native vegetation (at least 5 different species cut fresh each day). Fresh leaf tip. Offer soft insects such as tiny grasshoppers, moths. 4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
     { weight: 150, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Starting to explore a little outside of mum's pouch.", housing: "30°C check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Housed indoors. Exploring cage.", feedingNotes: "A small amount and variety of fresh native leaf tip after each feed. 5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
@@ -431,7 +451,7 @@ var speciesData = {
   "Ringtail Possum": [
     { weight: 500, feeds: 1, predictedAge: "7.5+ months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary (min 3m x 2m x 2m) situated in natural surroundings. Large variety of fresh native vegetation each day placed in water containers for freshness. Possums should not be able to fall in to foliage water containers. Drey and water placed high in aviary.", feedingNotes: "1 milk feed per day at dusk. Cease 1 week before release.", milkFormula: "Maximum 30mL per feed." },
     { weight: 400, feeds: 1, predictedAge: "7 months", features: "Fully independent from mum in the wild. No human interaction.", housing: "Large outdoor release aviary (min 3m x 2m x 2m) situated in natural surroundings. Large variety of fresh native vegetation each day placed in water containers for freshness. Possums should not be able to fall in to foliage water containers. Drey and water placed high in aviary.", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 30mL per feed." },
-    { weight: 300, feeds: 2, predictedAge: "6 months", features: "Fully independent. Very active at night. Should be very confident climbing around enclosure. Reduce human interaction at this point.", housing: "Large outdoor release aviary (min 3m x 2m x 2m) situated in natural surroundings. Large variety of fresh native vegetation each day placed in water containers for freshness. Possums should not be able to fall in to foliage water containers. Drey and water placed high in aviary.", feedingNotes: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day. Increase native food similar to that of the release site (if known). 2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXImum of 25mls in a single feed. 15% of body weight divided equally over 2 feeds." },
+    { weight: 300, feeds: 2, predictedAge: "6 months", features: "Fully independent. Very active at night. Should be very confident climbing around enclosure. Reduce human interaction at this point.", housing: "Large outdoor release aviary (min 3m x 2m x 2m) situated in natural surroundings. Large variety of fresh native vegetation each day placed in water containers for freshness. Possums should not be able to fall in to foliage water containers. Drey and water placed high in aviary.", feedingNotes: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day. Increase native food similar to that of the release site (if known). 2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "Maximum of 25mls in a single feed. 15% of body weight divided equally over 2 feeds." },
     { weight: 175, feeds: 3, predictedAge: "5 months", features: "Thick fur. Dark pellets. Still riding on mum's back but more confident climbing on its own. Very active at night.", housing: "Large inside cage (1m x 1m x 1.2m). Introduce drey to cage and place the pouch inside drey. Provide water dish and good variety of branches and rope for climbing.", feedingNotes: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day. 3 milk feeds per day.  Offer early morning, mid afternoon and late evening. Lapping from shallow jar lid or small bowl. Feed each ringtail out of a separate bowl, not all feeding from one.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
     { weight: 130, feeds: 4, predictedAge: "4.5 months", features: "Fluffy fur. Dark Pellets. More confident outside of mum's pouch.", housing: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", feedingNotes: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day. 4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl. Feed each ringtail out of a separate bowl, not all feeding from one.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
     { weight: 100, feeds: 5, predictedAge: "4 months", features: "Fine, soft, fluffy fur. Teeth. Darker tube-like faeces or pellets. ", housing: "28°C – no artificial heat should be necessary unless animal unwell. Large indoor cage (1m x 1m x 1.2m) with pouch secured up high. Variety of branches and ropes for climbing.", feedingNotes: "Offer a variety of fresh native vegetation daily. 5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl. ", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
@@ -441,7 +461,7 @@ var speciesData = {
   "Short-Eared Brushtail Possum": [
     { weight: 1300, feeds: 1, predictedAge: "8 months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m).", feedingNotes: "1 milk feed per day at dusk. Start weaning off milk – reduce gradually and monitor weight of possum weekly to ensure maintaining weight with reduced milk and increased foliage. If not, wait until weight stable before reducing milk again.", milkFormula: "Maximum 40mL per feed." },
     { weight: 1100, feeds: 1, predictedAge: "7 months", features: "Fully independent from mum in the wild.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m).", feedingNotes: "1 milk feed per day at dusk. Start weaning off milk – reduce gradually and monitor weight of possum weekly to ensure maintaining weight with reduced milk and increased foliage. If not, wait until weight stable before reducing milk again.", milkFormula: "Maximum 40mL per feed." },
-    { weight: 650, feeds: 2, predictedAge: "5.6 - 6 months", features: "Would still cling to mother's back in the wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised. ", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m), in natural surroundings.", feedingNotes: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects. 2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "MAXImum of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage." },
+    { weight: 650, feeds: 2, predictedAge: "5.6 - 6 months", features: "Would still cling to mother's back in the wild. Should be getting very confident climbing around enclosure. Reduce human interaction at this point, or survival in the wild will be compromised. ", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m), in natural surroundings.", feedingNotes: "Increase native food similar to that of the release site (if known). Large variety of fresh native vegetation (at least 6 varieties) each day placed in water containers for freshness. Browse should include branches with bark, leaves, buds, flowers, fruit, nuts, and seeds. ALL NATIVE. Also a variety of grasses, dandelion, fungi, insects. 2 milk feeds per day. Offer early morning and late evening. Late evening feed should be offered well after native diet has been provided.", milkFormula: "Maximum of 40mls in a single feed. 15% of body weight divided equally over 2 feeds. Decrease to 10% of body weight as they enjoy more native foliage." },
     { weight: 500, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on mum's back.", housing: "Large cage (1m x 1m x 1.2m).", feedingNotes: "3 feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
     { weight: 275, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch.", housing: "Carry cage of basket with secure lid and fine mesh.", feedingNotes: "4 feeds per day. Milk – 6 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
     { weight: 200, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Exploring outside of mum's pouch. Introduce other ringtail possum joeys as soon as possible.", housing: "Carry cage of basket with secure lid and fine mesh", feedingNotes: "5 feeds per day. Milk approximately 5 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
@@ -1590,10 +1610,11 @@ function initApp() {
   }
 }
 
-// Navigation scroll indicators - dynamically create on mobile only
+// Navigation scroll indicators - strict mobile only detection
 function initNavScrollIndicators() {
   console.log('Initializing scroll indicators');
   console.log('Window width:', window.innerWidth);
+  console.log('User agent:', navigator.userAgent);
   
   var nav = document.querySelector('.main-nav');
   if (!nav) {
@@ -1601,11 +1622,23 @@ function initNavScrollIndicators() {
     return;
   }
   
-  // Only create indicators on mobile
-  if (window.innerWidth > 768) {
-    console.log('Not mobile, skipping indicators');
+  // More strict mobile detection
+  var isMobile = window.innerWidth <= 768 && window.innerHeight <= 1024;
+  var isTablet = window.innerWidth >= 769 && window.innerWidth <= 1024;
+  
+  console.log('Device detection:', { isMobile: isMobile, isTablet: isTablet });
+  
+  // Only create indicators on actual mobile phones, not tablets
+  if (!isMobile || isTablet) {
+    console.log('Not mobile phone, skipping indicators');
     return;
   }
+  
+  // Remove any existing indicators first
+  var existingLeft = document.getElementById('scrollLeft');
+  var existingRight = document.getElementById('scrollRight');
+  if (existingLeft) existingLeft.remove();
+  if (existingRight) existingRight.remove();
   
   // Create scroll indicators dynamically
   var leftIndicator = document.createElement('button');
@@ -1627,21 +1660,20 @@ function initNavScrollIndicators() {
   console.log('Indicators created and added');
   
   function updateScrollIndicators() {
+    // Double check we're still on mobile
+    if (window.innerWidth > 768) {
+      leftIndicator.remove();
+      rightIndicator.remove();
+      return;
+    }
+    
     var scrollLeft = nav.scrollLeft;
     var scrollWidth = nav.scrollWidth;
     var clientWidth = nav.clientWidth;
     var maxScroll = scrollWidth - clientWidth;
     
-    console.log('Scroll info:', {
-      scrollLeft: scrollLeft,
-      scrollWidth: scrollWidth,
-      clientWidth: clientWidth,
-      maxScroll: maxScroll
-    });
-    
     // Only show indicators if there's actually scrollable content
     if (maxScroll <= 5) {
-      console.log('No scrollable content');
       leftIndicator.classList.remove('visible');
       rightIndicator.classList.remove('visible');
       return;
@@ -1649,19 +1681,15 @@ function initNavScrollIndicators() {
     
     // Show/hide left indicator
     if (scrollLeft > 10) {
-      console.log('Showing left indicator');
       leftIndicator.classList.add('visible');
     } else {
-      console.log('Hiding left indicator');
       leftIndicator.classList.remove('visible');
     }
     
     // Show/hide right indicator
     if (scrollLeft < maxScroll - 10) {
-      console.log('Showing right indicator');
       rightIndicator.classList.add('visible');
     } else {
-      console.log('Hiding right indicator');
       rightIndicator.classList.remove('visible');
     }
   }
@@ -1671,52 +1699,38 @@ function initNavScrollIndicators() {
   
   // Update indicators on window resize
   window.addEventListener('resize', function() {
-    console.log('Window resized to:', window.innerWidth);
     if (window.innerWidth > 768) {
       // Remove indicators if screen gets larger
       if (leftIndicator && leftIndicator.parentNode) {
-        leftIndicator.parentNode.removeChild(leftIndicator);
+        leftIndicator.remove();
       }
       if (rightIndicator && rightIndicator.parentNode) {
-        rightIndicator.parentNode.removeChild(rightIndicator);
+        rightIndicator.remove();
       }
     } else {
       setTimeout(updateScrollIndicators, 100);
     }
   });
   
-  // Initial update with delay
-  setTimeout(function() {
-    console.log('Initial update');
-    updateScrollIndicators();
-  }, 500);
+  // Initial update
+  setTimeout(updateScrollIndicators, 500);
 }
 
-// Scroll navigation function
+// Scroll navigation function - mobile only
 function scrollNavigation(direction) {
-  console.log('Scroll navigation called:', direction);
+  // Only work on mobile phones
+  if (window.innerWidth > 768) return;
   
   var nav = document.querySelector('.main-nav');
-  if (!nav) {
-    console.log('Nav not found');
-    return;
-  }
+  if (!nav) return;
   
   var scrollAmount = 200;
   
   if (direction === 'left') {
-    nav.scrollBy({
-      left: -scrollAmount,
-      behavior: 'smooth'
-    });
+    nav.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
   } else if (direction === 'right') {
-    nav.scrollBy({
-      left: scrollAmount,
-      behavior: 'smooth'
-    });
+    nav.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
-  
-  console.log('Scrolled', direction, 'by', scrollAmount, 'pixels');
 }
 
 console.log('About to set up DOM ready detection');
