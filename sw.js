@@ -1,9 +1,11 @@
 const CACHE_NAME = 'bushbuddy-v1';
 const urlsToCache = [
   './',
+  './index.html',
   './manifest.json',
-  './BushBuddy-192.png',
-  './BushBuddy-512.png'
+  './icon-192.png',
+  './icon-512.png',
+  './BushBuddy.png'
 ];
 
 self.addEventListener('install', function(event) {
