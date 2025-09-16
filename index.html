@@ -283,7 +283,8 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
       <h2>Photo Gallery</h2>
       <label>Select Animal: <select id="galleryAnimalSelect" onchange="onGalleryAnimalSelectChange()"></select></label>
       <div style="margin-top: 20px;">
-        <label>Add Photo: <input type="file" id="photoInput" accept="image/*" multiple></label>
+        <label>Add Photos: <input type="file" id="photoInput" accept="image/*" multiple></label>
+        <label>Photo Description (optional): <textarea id="photoDescription" placeholder="e.g., Injury on left leg, condition improving, feeding behavior, etc." style="min-height: 60px;"></textarea></label>
         <button onclick="addPhotos()">Add Photos</button>
       </div>
       <div id="photoGallery" style="margin-top: 20px;">
@@ -1102,6 +1103,7 @@ function addPhotos() {
   var animalId = document.getElementById('galleryAnimalSelect').value;
   var fileInput = document.getElementById('photoInput');
   var files = fileInput.files;
+  var description = document.getElementById('photoDescription').value.trim();
   
   var animal = animals.find(function(a) { return a.id == animalId; });
   
@@ -1122,19 +1124,20 @@ function addPhotos() {
   
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
-    processAndAddPhoto(file, animal, function() {
+    processAndAddPhoto(file, animal, description, function() {
       addedCount++;
       if (addedCount === totalFiles) {
         saveData();
         showPhotoGallery(animal);
         fileInput.value = '';
+        document.getElementById('photoDescription').value = '';
         alert(addedCount + ' photo(s) added successfully!');
       }
     });
   }
 }
 
-function processAndAddPhoto(file, animal, callback) {
+function processAndAddPhoto(file, animal, description, callback) {
   var actualDate = getPhotoDate(file) || new Date().toISOString().split('T')[0];
   
   var img = new Image();
@@ -1171,7 +1174,8 @@ function processAndAddPhoto(file, animal, callback) {
     animal.photos.push({
       data: compressedData,
       name: file.name,
-      date: actualDate
+      date: actualDate,
+      description: description || ''
     });
     
     callback();
@@ -1214,11 +1218,21 @@ function showPhotoGallery(animal) {
     var photoDiv = document.createElement('div');
     photoDiv.style.cssText = 'position: relative; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;';
     
+    var descriptionHtml = '';
+    if (photo.description) {
+      // Truncate long descriptions for the gallery view
+      var shortDescription = photo.description.length > 50 ? 
+        photo.description.substring(0, 50) + '...' : 
+        photo.description;
+      descriptionHtml = '<div style="font-size: 11px; color: #333; margin-top: 5px; font-style: italic;">' + shortDescription + '</div>';
+    }
+    
     photoDiv.innerHTML = 
       '<img src="' + photo.data + '" onclick="openLightbox(' + animal.id + ',' + index + ')" style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;" title="Click to enlarge">' +
       '<div style="padding: 10px;">' +
       '<div style="font-size: 12px; color: #666;">' + formatDate(photo.date) + '</div>' +
       '<div style="font-size: 10px; color: #999; margin-top: 5px;">' + photo.name + '</div>' +
+      descriptionHtml +
       '</div>' +
       '<button class="small" onclick="deletePhoto(' + animal.id + ', ' + index + ')" style="position: absolute; top: 5px; right: 5px; background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>';
     
@@ -1245,12 +1259,13 @@ function createLightbox() {
     '<div style="position: relative; margin: auto; padding: 20px; width: 90%; height: 90%; display: flex; align-items: center; justify-content: center; flex-direction: column;">' +
     '<span onclick="closeLightbox()" style="position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 10001;">&times;</span>' +
     '<span onclick="navigateLightbox(-1)" style="position: absolute; top: 50%; left: 30px; transform: translateY(-50%); color: white; font-size: 30px; font-weight: bold; cursor: pointer; background: rgba(255, 255, 255, 0.2); padding: 15px 20px; border-radius: 50%;">&#10094;</span>' +
-    '<img id="lightbox-image" src="" alt="" style="max-width: 100%; max-height: 80%; object-fit: contain; border-radius: 10px;">' +
+    '<img id="lightbox-image" src="" alt="" style="max-width: 100%; max-height: 70%; object-fit: contain; border-radius: 10px;">' +
     '<span onclick="navigateLightbox(1)" style="position: absolute; top: 50%; right: 30px; transform: translateY(-50%); color: white; font-size: 30px; font-weight: bold; cursor: pointer; background: rgba(255, 255, 255, 0.2); padding: 15px 20px; border-radius: 50%;">&#10095;</span>' +
-    '<div style="background: rgba(255, 255, 255, 0.95); padding: 15px 20px; border-radius: 10px; margin-top: 20px; text-align: center; color: #333;">' +
+    '<div style="background: rgba(255, 255, 255, 0.95); padding: 15px 20px; border-radius: 10px; margin-top: 20px; text-align: center; color: #333; max-width: 80%;">' +
     '<div id="lightbox-animal-name" style="font-weight: bold; font-size: 18px; margin-bottom: 5px;"></div>' +
     '<div id="lightbox-photo-date" style="color: #666; font-size: 14px; margin-bottom: 5px;"></div>' +
-    '<div id="lightbox-photo-name" style="color: #999; font-size: 12px;"></div>' +
+    '<div id="lightbox-photo-name" style="color: #999; font-size: 12px; margin-bottom: 8px;"></div>' +
+    '<div id="lightbox-photo-description" style="color: #333; font-size: 14px; margin-bottom: 8px; font-style: italic; line-height: 1.4;"></div>' +
     '<div id="lightbox-counter" style="color: #666; font-size: 14px; margin-top: 10px;"></div>' +
     '</div>' +
     '</div>' +
@@ -1328,12 +1343,21 @@ function updateLightboxContent() {
   var animalName = document.getElementById('lightbox-animal-name');
   var photoDate = document.getElementById('lightbox-photo-date');
   var photoName = document.getElementById('lightbox-photo-name');
+  var photoDescription = document.getElementById('lightbox-photo-description');
   var counter = document.getElementById('lightbox-counter');
   
   if (lightboxImage) lightboxImage.src = photo.data;
   if (animalName) animalName.textContent = currentLightboxAnimal.name;
   if (photoDate) photoDate.textContent = 'Taken: ' + formatDate(photo.date);
   if (photoName) photoName.textContent = photo.name;
+  if (photoDescription) {
+    if (photo.description) {
+      photoDescription.textContent = photo.description;
+      photoDescription.style.display = 'block';
+    } else {
+      photoDescription.style.display = 'none';
+    }
+  }
   if (counter) counter.textContent = 'Photo ' + (currentPhotoIndex + 1) + ' of ' + currentLightboxAnimal.photos.length;
 }
 
