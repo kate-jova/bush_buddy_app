@@ -27,7 +27,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .container { max-width: 1200px; margin: 0 auto; }
 .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
 
-/* SIMPLE CLEAN NAVIGATION */
+/* NAVIGATION WITH PROPER SCROLLING */
 .main-nav { 
   display: flex; 
   justify-content: flex-start;
@@ -40,10 +40,28 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   overflow-y: hidden;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #698167 #f1f1f1;
 }
 
-.main-nav::-webkit-scrollbar { display: none; }
-.main-nav { -ms-overflow-style: none; scrollbar-width: none; }
+/* Custom scrollbar for webkit browsers */
+.main-nav::-webkit-scrollbar {
+  height: 6px;
+}
+
+.main-nav::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.main-nav::-webkit-scrollbar-thumb {
+  background: #698167;
+  border-radius: 3px;
+}
+
+.main-nav::-webkit-scrollbar-thumb:hover {
+  background: #5a6e5b;
+}
 
 .nav-tab { 
   display: flex; 
@@ -61,6 +79,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   min-width: 80px; 
   font-size: 12px; 
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .nav-tab-icon { font-size: 20px; margin-bottom: 4px; }
 .nav-tab-text { font-size: 11px; text-align: center; line-height: 1.2; }
@@ -69,7 +88,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 
 /* TABLET - CENTER NAVIGATION */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .main-nav { justify-content: center; }
+  .main-nav { 
+    justify-content: center; 
+    overflow-x: auto;
+  }
   .nav-tab { padding: 16px 18px; min-width: 90px; }
   .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
   .nav-tab-text { font-size: 11px; }
@@ -77,10 +99,37 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 
 /* DESKTOP - CENTER NAVIGATION */
 @media (min-width: 1025px) {
-  .main-nav { justify-content: center; }
+  .main-nav { 
+    justify-content: center; 
+    overflow-x: visible;
+  }
   .nav-tab { padding: 16px 20px; min-width: 100px; }
   .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
   .nav-tab-text { font-size: 12px; }
+  
+  /* Hide scrollbar on desktop if not needed */
+  .main-nav::-webkit-scrollbar { display: none; }
+  .main-nav { scrollbar-width: none; }
+}
+
+/* MOBILE - Show scrollbar clearly */
+@media (max-width: 768px) {
+  .main-nav {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 15px; /* Extra space for scrollbar */
+  }
+  
+  /* Make scrollbar more visible on mobile */
+  .main-nav::-webkit-scrollbar {
+    height: 8px;
+    display: block;
+  }
+  
+  .main-nav::-webkit-scrollbar-thumb {
+    background: #698167;
+    border-radius: 4px;
+  }
 }
 
 /* Cards */
@@ -328,7 +377,7 @@ var speciesData = {
     { weight: 175, feeds: 3, predictedAge: "5 months", features: "Thick fur. Dark pellets. Still riding on mum's back but more confident climbing on its own. Very active at night.", housing: "Large inside cage (1m x 1m x 1.2m). Introduce drey to cage and place the pouch inside drey. Provide water dish and good variety of branches and rope for climbing.", feedingNotes: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day. 3 milk feeds per day.  Offer early morning, mid afternoon and late evening. Lapping from shallow jar lid or small bowl. Feed each ringtail out of a separate bowl, not all feeding from one.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
     { weight: 130, feeds: 4, predictedAge: "4.5 months", features: "Fluffy fur. Dark Pellets. More confident outside of mum's pouch.", housing: "28°C – no artificial heat should be necessary unless animal compromised. Variety of branches and ropes for climbing. Housed indoors. Coop cup with small amount of fresh water.", feedingNotes: "Should be eating a good variety of foliage of native vegetation. Large variety must be picked fresh every day. 4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl. Feed each ringtail out of a separate bowl, not all feeding from one.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
     { weight: 100, feeds: 5, predictedAge: "4 months", features: "Fine, soft, fluffy fur. Teeth. Darker tube-like faeces or pellets. ", housing: "28°C – no artificial heat should be necessary unless animal unwell. Large indoor cage (1m x 1m x 1.2m) with pouch secured up high. Variety of branches and ropes for climbing.", feedingNotes: "Offer a variety of fresh native vegetation daily. 5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl. ", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
-    { weight: 80, feeds: 6, predictedAge: "3.5 months", features: "Short fur, eyes open. Dark tube like faeces or pellets.", housing: "28°C Check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads. Starting to explore cage. Housed indoors.", feedingNotes: "Start to introduce soft new leaf tip eucalypt, syzygium, melaleuca etc. after every feed. Offer a variety as some eucalypt species may be toxic. 6 feeds per day. Milk – 4 hourly. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." },
+            { weight: 80, feeds: 6, predictedAge: "3.5 months", features: "Short fur, eyes open. Dark tube like faeces or pellets.", housing: "28°C Check warmth. Carry cage or basket with secure lid and fine mesh. Hang pouch inside with a couple of sturdy branches. Plenty of polar fleece/ flannelette cloths on base of cage to allow hiding for security. No threads. Starting to explore cage. Housed indoors.", feedingNotes: "Start to introduce soft new leaf tip eucalypt, syzygium, melaleuca etc. after every feed. Offer a variety as some eucalypt species may be toxic. 6 feeds per day. Milk – 4 hourly. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." },
     { weight: 45, feeds: 6, predictedAge: "3 months", features: "Furless, eyes open. Must have eyes open to be viable. Custard-like faeces. Permanently in mum's pouch. Experienced carers only – difficult to save. Introduce other ringtails of same size as soon as possible.", housing: "32°C Check for warmth and maintain at that temperature. Place multiple pouches inside each other to form a cosy 'cave.' No loose threads. Wrap in the white car polish cloths with lime green edging, then place in pouches. Cover cage. Humidicrib beneficial for success. Watch for dehydration and diarrhoea.", feedingNotes: "6-8 feeds per day depending upon hydration. May require additional water feeds in between 2 or 3 of the day feeds. Syringe with syringe teat until membranes at side of mouth fully open. Will then lap. Small amount of Oxbow Critical Care added to the warm milk in jar lid at each feed. Oxbow is added until possum reaches 400g. Fresh leaf tip should be put in with possum after each feed from 60g.", milkFormula: "Milk: 15% -20% of body weight divided equally over 6 feeds." }
   ],
   "Short-Eared Brushtail Possum": [
@@ -1457,9 +1506,6 @@ function initApp() {
     speciesFilter.addEventListener('change', renderAnimals);
   }
   
-  // Initialize navigation scroll indicators
-  initNavScrollIndicators();
-  
   document.addEventListener('keydown', function(e) {
     var lightbox = document.getElementById('lightbox');
     if (lightbox && lightbox.style.display === 'block') {
@@ -1480,129 +1526,6 @@ function initApp() {
         closeLightbox();
       }
     });
-  }
-}
-
-// Navigation scroll indicators - strict mobile only detection
-function initNavScrollIndicators() {
-  console.log('Initializing scroll indicators');
-  console.log('Window width:', window.innerWidth);
-  console.log('User agent:', navigator.userAgent);
-  
-  var nav = document.querySelector('.main-nav');
-  if (!nav) {
-    console.log('Nav not found');
-    return;
-  }
-  
-  // More strict mobile detection
-  var isMobile = window.innerWidth <= 768 && window.innerHeight <= 1024;
-  var isTablet = window.innerWidth >= 769 && window.innerWidth <= 1024;
-  
-  console.log('Device detection:', { isMobile: isMobile, isTablet: isTablet });
-  
-  // Only create indicators on actual mobile phones, not tablets
-  if (!isMobile || isTablet) {
-    console.log('Not mobile phone, skipping indicators');
-    return;
-  }
-  
-  // Remove any existing indicators first
-  var existingLeft = document.getElementById('scrollLeft');
-  var existingRight = document.getElementById('scrollRight');
-  if (existingLeft) existingLeft.remove();
-  if (existingRight) existingRight.remove();
-  
-  // Create scroll indicators dynamically
-  var leftIndicator = document.createElement('button');
-  leftIndicator.id = 'scrollLeft';
-  leftIndicator.className = 'scroll-indicator scroll-indicator-left';
-  leftIndicator.innerHTML = '‹';
-  leftIndicator.onclick = function() { scrollNavigation('left'); };
-  
-  var rightIndicator = document.createElement('button');
-  rightIndicator.id = 'scrollRight';
-  rightIndicator.className = 'scroll-indicator scroll-indicator-right';
-  rightIndicator.innerHTML = '›';
-  rightIndicator.onclick = function() { scrollNavigation('right'); };
-  
-  // Append to nav
-  nav.appendChild(leftIndicator);
-  nav.appendChild(rightIndicator);
-  
-  console.log('Indicators created and added');
-  
-  function updateScrollIndicators() {
-    // Double check we're still on mobile
-    if (window.innerWidth > 768) {
-      leftIndicator.remove();
-      rightIndicator.remove();
-      return;
-    }
-    
-    var scrollLeft = nav.scrollLeft;
-    var scrollWidth = nav.scrollWidth;
-    var clientWidth = nav.clientWidth;
-    var maxScroll = scrollWidth - clientWidth;
-    
-    // Only show indicators if there's actually scrollable content
-    if (maxScroll <= 5) {
-      leftIndicator.classList.remove('visible');
-      rightIndicator.classList.remove('visible');
-      return;
-    }
-    
-    // Show/hide left indicator
-    if (scrollLeft > 10) {
-      leftIndicator.classList.add('visible');
-    } else {
-      leftIndicator.classList.remove('visible');
-    }
-    
-    // Show/hide right indicator
-    if (scrollLeft < maxScroll - 10) {
-      rightIndicator.classList.add('visible');
-    } else {
-      rightIndicator.classList.remove('visible');
-    }
-  }
-  
-  // Update indicators on scroll
-  nav.addEventListener('scroll', updateScrollIndicators);
-  
-  // Update indicators on window resize
-  window.addEventListener('resize', function() {
-    if (window.innerWidth > 768) {
-      // Remove indicators if screen gets larger
-      if (leftIndicator && leftIndicator.parentNode) {
-        leftIndicator.remove();
-      }
-      if (rightIndicator && rightIndicator.parentNode) {
-        rightIndicator.remove();
-      }
-    } else {
-      setTimeout(updateScrollIndicators, 100);
-    }
-  });
-  
-  // Initial update
-  setTimeout(updateScrollIndicators, 500);
-}
-
-// Scroll navigation function - mobile only
-function scrollNavigation(direction) {
-  // Only work on mobile phones
-  if (window.innerWidth > 768) return;
-  
-  var nav = document.querySelector('.main-nav');
-  if (!nav) return;
-  
-  var scrollAmount = 200;
-  
-  if (direction === 'left') {
-    nav.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-  } else if (direction === 'right') {
-    nav.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
 }
 
