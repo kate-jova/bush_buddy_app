@@ -27,9 +27,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .container { max-width: 1200px; margin: 0 auto; }
 .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
 
-/* Navigation - Mobile first approach */
+/* Navigation - Back to basics */
 .main-nav { 
   display: flex; 
+  justify-content: flex-start;
   margin-bottom: 30px; 
   background: white; 
   border-radius: 15px; 
@@ -37,48 +38,37 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
   overflow-x: auto; 
   overflow-y: hidden;
-  justify-content: flex-start;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  position: relative;
 }
 
-/* Tablet and Desktop - Override mobile styles */
-@media only screen and (min-width: 769px) {
+/* Hide scrollbar but keep functionality */
+.main-nav::-webkit-scrollbar {
+  display: none;
+}
+.main-nav {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Tablet styles (iPad) - Center navigation */
+@media (min-width: 769px) and (max-width: 1024px) {
   .main-nav {
-    justify-content: center !important;
-    overflow-x: visible !important;
+    justify-content: center;
   }
+  .nav-tab { padding: 16px 18px; min-width: 90px; }
+  .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
+  .nav-tab-text { font-size: 11px; }
 }
 
-/* Tablet specific styles */
-@media only screen and (min-width: 769px) and (max-width: 1024px) {
-  .nav-tab { 
-    padding: 16px 18px; 
-    min-width: 90px; 
+/* Desktop - Center navigation */
+@media (min-width: 1025px) {
+  .main-nav {
+    justify-content: center;
   }
-  .nav-tab-icon { 
-    font-size: 22px; 
-    margin-bottom: 5px; 
-  }
-  .nav-tab-text { 
-    font-size: 11px; 
-  }
-}
-
-/* Desktop specific styles */
-@media only screen and (min-width: 1025px) {
-  .nav-tab { 
-    padding: 16px 20px; 
-    min-width: 100px; 
-  }
-  .nav-tab-icon { 
-    font-size: 24px; 
-    margin-bottom: 6px; 
-  }
-  .nav-tab-text { 
-    font-size: 12px; 
-  }
+  .nav-tab { padding: 16px 20px; min-width: 100px; }
+  .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
+  .nav-tab-text { font-size: 12px; }
 }
 
 /* Navigation container to hold indicators */
