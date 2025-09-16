@@ -224,36 +224,31 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
   </div>
 
-  <div class="nav-container">
-    <button class="scroll-indicator scroll-indicator-left" id="scrollLeft" onclick="scrollNavigation('left')">‹</button>
-    <button class="scroll-indicator scroll-indicator-right" id="scrollRight" onclick="scrollNavigation('right')">›</button>
-    
-    <div class="main-nav">
-      <button class="nav-tab active" onclick="showTab('animals')">
-        <div class="nav-tab-icon">🐾</div>
-        <div class="nav-tab-text">Animal<br>Management</div>
-      </button>
-      <button class="nav-tab" onclick="showTab('weight')">
-        <div class="nav-tab-icon">⚖️</div>
-        <div class="nav-tab-text">Weight &<br>Feed</div>
-      </button>
-      <button class="nav-tab" onclick="showTab('health')">
-        <div class="nav-tab-icon">🏥</div>
-        <div class="nav-tab-text">Health<br>Tracking</div>
-      </button>
-      <button class="nav-tab" onclick="showTab('schedule')">
-        <div class="nav-tab-icon">📅</div>
-        <div class="nav-tab-text">Feeding<br>Schedule</div>
-      </button>
-      <button class="nav-tab" onclick="showTab('gallery')">
-        <div class="nav-tab-icon">📸</div>
-        <div class="nav-tab-text">Photo<br>Gallery</div>
-      </button>
-      <button class="nav-tab" onclick="showTab('export')">
-        <div class="nav-tab-icon">📋</div>
-        <div class="nav-tab-text">Care<br>Handover</div>
-      </button>
-    </div>
+  <div class="main-nav" id="mainNav">
+    <button class="nav-tab active" onclick="showTab('animals')">
+      <div class="nav-tab-icon">🐾</div>
+      <div class="nav-tab-text">Animal<br>Management</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('weight')">
+      <div class="nav-tab-icon">⚖️</div>
+      <div class="nav-tab-text">Weight &<br>Feed</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('health')">
+      <div class="nav-tab-icon">🏥</div>
+      <div class="nav-tab-text">Health<br>Tracking</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('schedule')">
+      <div class="nav-tab-icon">📅</div>
+      <div class="nav-tab-text">Feeding<br>Schedule</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('gallery')">
+      <div class="nav-tab-icon">📸</div>
+      <div class="nav-tab-text">Photo<br>Gallery</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('export')">
+      <div class="nav-tab-icon">📋</div>
+      <div class="nav-tab-text">Care<br>Handover</div>
+    </button>
   </div>
 
   <!-- Animals Tab -->
@@ -1581,42 +1576,43 @@ function initApp() {
   }
 }
 
-// Navigation scroll indicators - more aggressive mobile detection
+// Navigation scroll indicators - dynamically create on mobile only
 function initNavScrollIndicators() {
   console.log('Initializing scroll indicators');
   console.log('Window width:', window.innerWidth);
   
   var nav = document.querySelector('.main-nav');
-  var leftIndicator = document.getElementById('scrollLeft');
-  var rightIndicator = document.getElementById('scrollRight');
-  
-  console.log('Elements found:', {
-    nav: !!nav,
-    leftIndicator: !!leftIndicator,
-    rightIndicator: !!rightIndicator
-  });
-  
-  if (!nav || !leftIndicator || !rightIndicator) {
-    console.log('Missing elements, aborting');
+  if (!nav) {
+    console.log('Nav not found');
     return;
   }
   
+  // Only create indicators on mobile
+  if (window.innerWidth > 768) {
+    console.log('Not mobile, skipping indicators');
+    return;
+  }
+  
+  // Create scroll indicators dynamically
+  var leftIndicator = document.createElement('button');
+  leftIndicator.id = 'scrollLeft';
+  leftIndicator.className = 'scroll-indicator scroll-indicator-left';
+  leftIndicator.innerHTML = '‹';
+  leftIndicator.onclick = function() { scrollNavigation('left'); };
+  
+  var rightIndicator = document.createElement('button');
+  rightIndicator.id = 'scrollRight';
+  rightIndicator.className = 'scroll-indicator scroll-indicator-right';
+  rightIndicator.innerHTML = '›';
+  rightIndicator.onclick = function() { scrollNavigation('right'); };
+  
+  // Append to nav
+  nav.appendChild(leftIndicator);
+  nav.appendChild(rightIndicator);
+  
+  console.log('Indicators created and added');
+  
   function updateScrollIndicators() {
-    var isMobile = window.innerWidth <= 768;
-    console.log('Update called, isMobile:', isMobile);
-    
-    if (!isMobile) {
-      leftIndicator.classList.remove('visible');
-      rightIndicator.classList.remove('visible');
-      leftIndicator.style.display = 'none';
-      rightIndicator.style.display = 'none';
-      return;
-    }
-    
-    // Force show on mobile
-    leftIndicator.style.display = 'flex';
-    rightIndicator.style.display = 'flex';
-    
     var scrollLeft = nav.scrollLeft;
     var scrollWidth = nav.scrollWidth;
     var clientWidth = nav.clientWidth;
@@ -1662,7 +1658,17 @@ function initNavScrollIndicators() {
   // Update indicators on window resize
   window.addEventListener('resize', function() {
     console.log('Window resized to:', window.innerWidth);
-    setTimeout(updateScrollIndicators, 100);
+    if (window.innerWidth > 768) {
+      // Remove indicators if screen gets larger
+      if (leftIndicator && leftIndicator.parentNode) {
+        leftIndicator.parentNode.removeChild(leftIndicator);
+      }
+      if (rightIndicator && rightIndicator.parentNode) {
+        rightIndicator.parentNode.removeChild(rightIndicator);
+      }
+    } else {
+      setTimeout(updateScrollIndicators, 100);
+    }
   });
   
   // Initial update with delay
