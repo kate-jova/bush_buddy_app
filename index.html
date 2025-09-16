@@ -43,42 +43,56 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   scroll-behavior: smooth;
   /* Hide scrollbar on WebKit browsers */
   -webkit-overflow-scrolling: touch;
-  /* Add gradient fade indicators */
+  /* Add position relative for scroll indicators */
   position: relative;
 }
 
-/* Fade gradient indicators for mobile scrolling */
-.main-nav::before,
-.main-nav::after {
-  content: '';
+/* Navigation container to hold indicators */
+.nav-container {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+/* Scroll indicators */
+.scroll-indicator {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 20px;
-  pointer-events: none;
-  z-index: 2;
-  transition: opacity 0.3s ease;
-}
-
-.main-nav::before {
-  left: 0;
-  background: linear-gradient(to right, rgba(255,255,255,0.9), transparent);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(105, 129, 103, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 10;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
   opacity: 0;
+  visibility: hidden;
 }
 
-.main-nav::after {
-  right: 0;
-  background: linear-gradient(to left, rgba(255,255,255,0.9), transparent);
+.scroll-indicator.visible {
   opacity: 1;
+  visibility: visible;
 }
 
-/* Show/hide fade indicators based on scroll position */
-.main-nav.scrolled-left::before {
-  opacity: 1;
+.scroll-indicator:hover {
+  background: rgba(105, 129, 103, 1);
+  transform: translateY(-50%) scale(1.1);
 }
 
-.main-nav.scrolled-right::after {
-  opacity: 0;
+.scroll-indicator-left {
+  left: -15px;
+}
+
+.scroll-indicator-right {
+  right: -15px;
 }
 
 /* Hide scrollbar but keep functionality */
@@ -181,31 +195,36 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
     <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
   </div>
 
-  <div class="main-nav">
-    <button class="nav-tab active" onclick="showTab('animals')">
-      <div class="nav-tab-icon">🐾</div>
-      <div class="nav-tab-text">Animal<br>Management</div>
-    </button>
-    <button class="nav-tab" onclick="showTab('weight')">
-      <div class="nav-tab-icon">⚖️</div>
-      <div class="nav-tab-text">Weight &<br>Feed</div>
-    </button>
-    <button class="nav-tab" onclick="showTab('health')">
-      <div class="nav-tab-icon">🏥</div>
-      <div class="nav-tab-text">Health<br>Tracking</div>
-    </button>
-    <button class="nav-tab" onclick="showTab('schedule')">
-      <div class="nav-tab-icon">📅</div>
-      <div class="nav-tab-text">Feeding<br>Schedule</div>
-    </button>
-    <button class="nav-tab" onclick="showTab('gallery')">
-      <div class="nav-tab-icon">📸</div>
-      <div class="nav-tab-text">Photo<br>Gallery</div>
-    </button>
-    <button class="nav-tab" onclick="showTab('export')">
-      <div class="nav-tab-icon">📋</div>
-      <div class="nav-tab-text">Care<br>Handover</div>
-    </button>
+  <div class="nav-container">
+    <button class="scroll-indicator scroll-indicator-left" id="scrollLeft" onclick="scrollNavigation('left')">‹</button>
+    <button class="scroll-indicator scroll-indicator-right" id="scrollRight" onclick="scrollNavigation('right')">›</button>
+    
+    <div class="main-nav">
+      <button class="nav-tab active" onclick="showTab('animals')">
+        <div class="nav-tab-icon">🐾</div>
+        <div class="nav-tab-text">Animal<br>Management</div>
+      </button>
+      <button class="nav-tab" onclick="showTab('weight')">
+        <div class="nav-tab-icon">⚖️</div>
+        <div class="nav-tab-text">Weight &<br>Feed</div>
+      </button>
+      <button class="nav-tab" onclick="showTab('health')">
+        <div class="nav-tab-icon">🏥</div>
+        <div class="nav-tab-text">Health<br>Tracking</div>
+      </button>
+      <button class="nav-tab" onclick="showTab('schedule')">
+        <div class="nav-tab-icon">📅</div>
+        <div class="nav-tab-text">Feeding<br>Schedule</div>
+      </button>
+      <button class="nav-tab" onclick="showTab('gallery')">
+        <div class="nav-tab-icon">📸</div>
+        <div class="nav-tab-text">Photo<br>Gallery</div>
+      </button>
+      <button class="nav-tab" onclick="showTab('export')">
+        <div class="nav-tab-icon">📋</div>
+        <div class="nav-tab-text">Care<br>Handover</div>
+      </button>
+    </div>
   </div>
 
   <!-- Animals Tab -->
@@ -1536,7 +1555,10 @@ function initApp() {
 // Navigation scroll indicators
 function initNavScrollIndicators() {
   var nav = document.querySelector('.main-nav');
-  if (!nav) return;
+  var leftIndicator = document.getElementById('scrollLeft');
+  var rightIndicator = document.getElementById('scrollRight');
+  
+  if (!nav || !leftIndicator || !rightIndicator) return;
   
   function updateScrollIndicators() {
     var scrollLeft = nav.scrollLeft;
@@ -1544,16 +1566,18 @@ function initNavScrollIndicators() {
     var clientWidth = nav.clientWidth;
     var maxScroll = scrollWidth - clientWidth;
     
-    // Remove existing classes
-    nav.classList.remove('scrolled-left', 'scrolled-right');
-    
-    // Add classes based on scroll position
-    if (scrollLeft > 5) {
-      nav.classList.add('scrolled-left');
+    // Show/hide left indicator
+    if (scrollLeft > 10) {
+      leftIndicator.classList.add('visible');
+    } else {
+      leftIndicator.classList.remove('visible');
     }
     
-    if (scrollLeft < maxScroll - 5) {
-      nav.classList.add('scrolled-right');
+    // Show/hide right indicator
+    if (scrollLeft < maxScroll - 10) {
+      rightIndicator.classList.add('visible');
+    } else {
+      rightIndicator.classList.remove('visible');
     }
   }
   
@@ -1567,6 +1591,26 @@ function initNavScrollIndicators() {
   
   // Initial update
   setTimeout(updateScrollIndicators, 100);
+}
+
+// Scroll navigation function
+function scrollNavigation(direction) {
+  var nav = document.querySelector('.main-nav');
+  if (!nav) return;
+  
+  var scrollAmount = 200; // pixels to scroll
+  
+  if (direction === 'left') {
+    nav.scrollBy({
+      left: -scrollAmount,
+      behavior: 'smooth'
+    });
+  } else if (direction === 'right') {
+    nav.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+  }
 }
 
 console.log('About to set up DOM ready detection');
