@@ -27,7 +27,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .container { max-width: 1200px; margin: 0 auto; }
 .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
 
-/* Navigation - Back to basics */
+/* SIMPLE CLEAN NAVIGATION */
 .main-nav { 
   display: flex; 
   justify-content: flex-start;
@@ -42,102 +42,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   -webkit-overflow-scrolling: touch;
 }
 
-/* Hide scrollbar but keep functionality */
-.main-nav::-webkit-scrollbar {
-  display: none;
-}
-.main-nav {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Tablet styles (iPad) - Center navigation */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .main-nav {
-    justify-content: center;
-  }
-  .nav-tab { padding: 16px 18px; min-width: 90px; }
-  .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
-  .nav-tab-text { font-size: 11px; }
-}
-
-/* Desktop - Center navigation */
-@media (min-width: 1025px) {
-  .main-nav {
-    justify-content: center;
-  }
-  .nav-tab { padding: 16px 20px; min-width: 100px; }
-  .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
-  .nav-tab-text { font-size: 12px; }
-}
-
-/* Navigation container to hold indicators */
-.nav-container {
-  position: relative;
-  margin-bottom: 30px;
-}
-
-/* Mobile-only scroll indicators with higher specificity */
-@media screen and (max-width: 768px) {
-  .nav-container .scroll-indicator {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(105, 129, 103, 0.9);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: bold;
-    z-index: 10;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .nav-container .scroll-indicator.visible {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-
-  .nav-container .scroll-indicator:hover {
-    background: rgba(105, 129, 103, 1);
-    transform: translateY(-50%) scale(1.1);
-  }
-
-  .nav-container .scroll-indicator-left {
-    left: -15px;
-  }
-
-  .nav-container .scroll-indicator-right {
-    right: -15px;
-  }
-}
-
-/* Hide scroll indicators completely on tablet and larger */
-@media screen and (min-width: 769px) {
-  .scroll-indicator {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-  }
-}
-
-/* Hide scrollbar but keep functionality */
-.main-nav::-webkit-scrollbar {
-  display: none;
-}
-.main-nav {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.main-nav::-webkit-scrollbar { display: none; }
+.main-nav { -ms-overflow-style: none; scrollbar-width: none; }
 
 .nav-tab { 
   display: flex; 
@@ -154,7 +60,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   font-weight: 600; 
   min-width: 80px; 
   font-size: 12px; 
-  /* Prevent flex shrinking */
   flex-shrink: 0;
 }
 .nav-tab-icon { font-size: 20px; margin-bottom: 4px; }
@@ -162,39 +67,17 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 .nav-tab:hover { background: rgba(43,122,120,0.1); color: #657a6b; }
 .nav-tab.active { background: linear-gradient(135deg, #698167, #a0b2af); color: white; box-shadow: 0 4px 15px rgba(43,122,120,0.3); }
 
-/* Tablet styles (iPad) - Center navigation on larger screens */
+/* TABLET - CENTER NAVIGATION */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .nav-container {
-    display: block;
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .main-nav {
-    display: inline-flex !important;
-    justify-content: center !important;
-    margin-bottom: 0 !important;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  .main-nav { justify-content: center; }
   .nav-tab { padding: 16px 18px; min-width: 90px; }
   .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
   .nav-tab-text { font-size: 11px; }
 }
 
-/* Desktop larger tabs - Center navigation */
+/* DESKTOP - CENTER NAVIGATION */
 @media (min-width: 1025px) {
-  .nav-container {
-    display: block;
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .main-nav {
-    display: inline-flex !important;
-    justify-content: center !important;
-    margin-bottom: 0 !important;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  .main-nav { justify-content: center; }
   .nav-tab { padding: 16px 20px; min-width: 100px; }
   .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
   .nav-tab-text { font-size: 12px; }
