@@ -43,6 +43,42 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
   scroll-behavior: smooth;
   /* Hide scrollbar on WebKit browsers */
   -webkit-overflow-scrolling: touch;
+  /* Add gradient fade indicators */
+  position: relative;
+}
+
+/* Fade gradient indicators for mobile scrolling */
+.main-nav::before,
+.main-nav::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.3s ease;
+}
+
+.main-nav::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(255,255,255,0.9), transparent);
+  opacity: 0;
+}
+
+.main-nav::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(255,255,255,0.9), transparent);
+  opacity: 1;
+}
+
+/* Show/hide fade indicators based on scroll position */
+.main-nav.scrolled-left::before {
+  opacity: 1;
+}
+
+.main-nav.scrolled-right::after {
+  opacity: 0;
 }
 
 /* Hide scrollbar but keep functionality */
@@ -1471,6 +1507,9 @@ function initApp() {
     speciesFilter.addEventListener('change', renderAnimals);
   }
   
+  // Initialize navigation scroll indicators
+  initNavScrollIndicators();
+  
   document.addEventListener('keydown', function(e) {
     var lightbox = document.getElementById('lightbox');
     if (lightbox && lightbox.style.display === 'block') {
@@ -1492,6 +1531,42 @@ function initApp() {
       }
     });
   }
+}
+
+// Navigation scroll indicators
+function initNavScrollIndicators() {
+  var nav = document.querySelector('.main-nav');
+  if (!nav) return;
+  
+  function updateScrollIndicators() {
+    var scrollLeft = nav.scrollLeft;
+    var scrollWidth = nav.scrollWidth;
+    var clientWidth = nav.clientWidth;
+    var maxScroll = scrollWidth - clientWidth;
+    
+    // Remove existing classes
+    nav.classList.remove('scrolled-left', 'scrolled-right');
+    
+    // Add classes based on scroll position
+    if (scrollLeft > 5) {
+      nav.classList.add('scrolled-left');
+    }
+    
+    if (scrollLeft < maxScroll - 5) {
+      nav.classList.add('scrolled-right');
+    }
+  }
+  
+  // Update indicators on scroll
+  nav.addEventListener('scroll', updateScrollIndicators);
+  
+  // Update indicators on window resize
+  window.addEventListener('resize', function() {
+    setTimeout(updateScrollIndicators, 100);
+  });
+  
+  // Initial update
+  setTimeout(updateScrollIndicators, 100);
 }
 
 console.log('About to set up DOM ready detection');
