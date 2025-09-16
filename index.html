@@ -141,12 +141,16 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 /* Tablet styles (iPad) - Center navigation on larger screens */
 @media (min-width: 769px) and (max-width: 1024px) {
   .nav-container {
+    display: block;
     text-align: center;
+    margin-bottom: 30px;
   }
   .main-nav {
-    justify-content: center !important;
     display: inline-flex !important;
-    margin-bottom: 0;
+    justify-content: center !important;
+    margin-bottom: 0 !important;
+    margin-left: auto;
+    margin-right: auto;
   }
   .nav-tab { padding: 16px 18px; min-width: 90px; }
   .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
@@ -156,12 +160,16 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; 
 /* Desktop larger tabs - Center navigation */
 @media (min-width: 1025px) {
   .nav-container {
+    display: block;
     text-align: center;
+    margin-bottom: 30px;
   }
   .main-nav {
-    justify-content: center !important;
     display: inline-flex !important;
-    margin-bottom: 0;
+    justify-content: center !important;
+    margin-bottom: 0 !important;
+    margin-left: auto;
+    margin-right: auto;
   }
   .nav-tab { padding: 16px 20px; min-width: 100px; }
   .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
