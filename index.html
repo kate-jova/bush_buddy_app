@@ -347,7 +347,7 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 
 <footer style="margin-top: 50px; padding: 30px 20px; background: rgba(255,255,255,0.9); border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #666;">
   <div style="max-width: 1200px; margin: 0 auto;">
-    <p><strong>Disclaimer:</strong> BushBuddy is a record-keeping tool designed to assist qualified wildlife carers operating under an approved permit. This application does not provide veterinary or professional wildlife care advice. Always consult with licensed wildlife veterinarians and follow established wildlife care protocols.</p>
+    <p><strong>Disclaimer:</strong> BushBuddy is a record-keeping tool designed to assist qualified wildlife carers. This application does not provide veterinary or professional wildlife care advice. Always consult with licensed wildlife veterinarians and follow established wildlife care protocols.</p>
     <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">© 2025 BushBuddy. All rights reserved.</p>
   </div>
 </footer>
@@ -1095,30 +1095,131 @@ function showFeedingSchedule(animal) {
   var dailyMilk = mostRecent.weight * 0.15;
   var perFeed = dailyMilk / feeds;
   
+  // Check if animal has custom feeding times
+  if (!animal.feedingTimes) {
+    animal.feedingTimes = [];
+  }
+  
   display.innerHTML = '<h4>Daily Feeding Schedule for ' + animal.name + '</h4>';
   display.innerHTML += '<p><strong>Based on current weight:</strong> ' + mostRecent.weight + 'g (' + formatDate(mostRecent.date) + ')</p>';
   display.innerHTML += '<p><strong>Total feeds per day:</strong> ' + feeds + '</p>';
-  display.innerHTML += '<p><strong>Milk per feed:</strong> ' + perFeed.toFixed(1) + 'g</p><br>';
+  display.innerHTML += '<p><strong>Milk per feed:</strong> ' + perFeed.toFixed(1) + 'g</p>';
   
-  var scheduleDiv = document.createElement('div');
-  scheduleDiv.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;';
+  // Custom schedule setup
+  var setupDiv = document.createElement('div');
+  setupDiv.style.cssText = 'margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;';
   
-  for (var i = 0; i < feeds; i++) {
-    var hour = Math.floor((24 / feeds) * i);
-    var minute = Math.floor(((24 / feeds) * i - hour) * 60);
-    var timeStr = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+  if (animal.feedingTimes.length !== feeds) {
+    setupDiv.innerHTML = 
+      '<h5>Customize Feeding Times</h5>' +
+      '<p>Set your preferred feeding times for ' + feeds + ' daily feeds:</p>' +
+      '<div id="timeInputs-' + animal.id + '" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0;"></div>' +
+      '<button onclick="saveFeedingTimes(' + animal.id + ', ' + feeds + ')" style="margin-right: 10px;">Save Custom Times</button>' +
+      '<button onclick="useDefaultTimes(' + animal.id + ', ' + feeds + ')" style="background: #6c757d;">Use Even Spacing</button>';
     
+    display.appendChild(setupDiv);
+    
+    // Create time inputs
+    var timeInputsDiv = document.getElementById('timeInputs-' + animal.id);
+    for (var i = 0; i < feeds; i++) {
+      var inputDiv = document.createElement('div');
+      inputDiv.style.cssText = 'text-align: center;';
+      var defaultTime = getDefaultTime(i, feeds);
+      inputDiv.innerHTML = 
+        '<label style="font-size: 12px; display: block; margin-bottom: 5px;">Feed ' + (i + 1) + ':</label>' +
+        '<input type="time" id="feedTime-' + animal.id + '-' + i + '" value="' + defaultTime + '" style="width: 100%; padding: 8px; margin: 0;">';
+      timeInputsDiv.appendChild(inputDiv);
+    }
+  } else {
+    setupDiv.innerHTML = 
+      '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+      '<h5 style="margin: 0;">Custom Feeding Schedule Set</h5>' +
+      '<button onclick="editFeedingTimes(' + animal.id + ', ' + feeds + ')" style="background: #6c757d; font-size: 12px; padding: 6px 12px;">Edit Times</button>' +
+      '</div>';
+    display.appendChild(setupDiv);
+  }
+  
+  // Display current schedule
+  var scheduleDiv = document.createElement('div');
+  scheduleDiv.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;';
+  
+  var feedTimes = animal.feedingTimes.length === feeds ? animal.feedingTimes : getDefaultTimes(feeds);
+  
+  feedTimes.forEach(function(time, i) {
     var feedDiv = document.createElement('div');
     feedDiv.style.cssText = 'padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;';
     feedDiv.innerHTML = 
       '<div style="font-size: 18px; font-weight: bold; color: #698167;">Feed ' + (i + 1) + '</div>' +
-      '<div style="font-size: 16px; margin: 8px 0;">' + timeStr + '</div>' +
+      '<div style="font-size: 16px; margin: 8px 0;">' + time + '</div>' +
       '<div style="font-size: 14px; color: #666;">' + perFeed.toFixed(1) + 'g milk</div>';
     
     scheduleDiv.appendChild(feedDiv);
-  }
+  });
   
   display.appendChild(scheduleDiv);
+}
+
+function getDefaultTime(index, totalFeeds) {
+  var hour = Math.floor((24 / totalFeeds) * index);
+  var minute = Math.floor(((24 / totalFeeds) * index - hour) * 60);
+  return String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+}
+
+function getDefaultTimes(totalFeeds) {
+  var times = [];
+  for (var i = 0; i < totalFeeds; i++) {
+    times.push(getDefaultTime(i, totalFeeds));
+  }
+  return times;
+}
+
+function saveFeedingTimes(animalId, totalFeeds) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var times = [];
+  var valid = true;
+  
+  for (var i = 0; i < totalFeeds; i++) {
+    var timeInput = document.getElementById('feedTime-' + animalId + '-' + i);
+    if (timeInput && timeInput.value) {
+      times.push(timeInput.value);
+    } else {
+      valid = false;
+      break;
+    }
+  }
+  
+  if (!valid) {
+    alert('Please set all feeding times.');
+    return;
+  }
+  
+  // Sort times chronologically
+  times.sort();
+  
+  animal.feedingTimes = times;
+  saveData();
+  showFeedingSchedule(animal);
+  alert('Custom feeding times saved successfully!');
+}
+
+function useDefaultTimes(animalId, totalFeeds) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  animal.feedingTimes = getDefaultTimes(totalFeeds);
+  saveData();
+  showFeedingSchedule(animal);
+}
+
+function editFeedingTimes(animalId, totalFeeds) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  animal.feedingTimes = [];
+  saveData();
+  showFeedingSchedule(animal);
 }
 
 // Photo Gallery functions
