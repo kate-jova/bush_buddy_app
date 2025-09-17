@@ -1110,40 +1110,25 @@ function showFeedingSchedule(animal) {
   setupDiv.style.cssText = 'margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;';
   
   if (animal.feedingTimes.length !== feeds) {
-    setupDiv.innerHTML = 
-      '<h5>Customize Feeding Times</h5>' +
+    var setupHTML = '<h5>Customize Feeding Times</h5>' +
       '<p>Set your preferred feeding times for ' + feeds + ' daily feeds:</p>' +
-      '<div id="timeInputs-' + animal.id + '" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0;"></div>' +
+      '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0;">';
+    
+    // Generate time inputs directly in HTML
+    for (var i = 0; i < feeds; i++) {
+      var defaultTime = getDefaultTime(i, feeds);
+      setupHTML += 
+        '<div style="text-align: center; padding: 10px; background: white; border-radius: 8px; border: 1px solid #e1e8ed;">' +
+        '<label style="font-size: 12px; display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Feed ' + (i + 1) + ':</label>' +
+        '<input type="time" id="feedTime-' + animal.id + '-' + i + '" value="' + defaultTime + '" style="width: 100%; padding: 8px; margin: 0; border-radius: 6px; border: 1px solid #ddd; font-size: 14px;">' +
+        '</div>';
+    }
+    
+    setupHTML += '</div>' +
       '<button onclick="saveFeedingTimes(' + animal.id + ', ' + feeds + ')" style="margin-right: 10px;">Save Custom Times</button>' +
       '<button onclick="useDefaultTimes(' + animal.id + ', ' + feeds + ')" style="background: #6c757d;">Use Even Spacing</button>';
     
-    display.appendChild(setupDiv);
-    
-    // Create time inputs after the div is in the DOM
-    setTimeout(function() {
-      var timeInputsDiv = document.getElementById('timeInputs-' + animal.id);
-      if (timeInputsDiv) {
-        for (var i = 0; i < feeds; i++) {
-          var inputDiv = document.createElement('div');
-          inputDiv.style.cssText = 'text-align: center; padding: 10px; background: white; border-radius: 8px; border: 1px solid #e1e8ed;';
-          var defaultTime = getDefaultTime(i, feeds);
-          
-          var labelEl = document.createElement('label');
-          labelEl.style.cssText = 'font-size: 12px; display: block; margin-bottom: 5px; font-weight: 600; color: #555;';
-          labelEl.textContent = 'Feed ' + (i + 1) + ':';
-          
-          var inputEl = document.createElement('input');
-          inputEl.type = 'time';
-          inputEl.id = 'feedTime-' + animal.id + '-' + i;
-          inputEl.value = defaultTime;
-          inputEl.style.cssText = 'width: 100%; padding: 8px; margin: 0; border-radius: 6px; border: 1px solid #ddd; font-size: 14px;';
-          
-          inputDiv.appendChild(labelEl);
-          inputDiv.appendChild(inputEl);
-          timeInputsDiv.appendChild(inputDiv);
-        }
-      }
-    }, 50);
+    setupDiv.innerHTML = setupHTML;
   } else {
     setupDiv.innerHTML = 
       '<div style="display: flex; justify-content: space-between; align-items: center;">' +
