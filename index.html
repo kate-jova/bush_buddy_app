@@ -2,194 +2,173 @@
 <html lang="en">
 <head>
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#698167">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="BushBuddy">
-<link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#698167">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BushBuddy">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BushBuddy</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      margin: 0; 
+      padding: 20px; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #e7f5e4 100%); 
+      min-height: 100vh; 
+    }
+    
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
 
-<script>
-// PWA Installation handling
-let deferredPrompt;
-let installButton;
+    .main-nav { 
+      display: flex; 
+      justify-content: flex-start;
+      margin-bottom: 30px; 
+      background: white; 
+      border-radius: 15px; 
+      padding: 10px; 
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
+      overflow-x: auto; 
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #698167 #f1f1f1;
+    }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  showInstallButton();
-});
+    .main-nav::-webkit-scrollbar { height: 6px; }
+    .main-nav::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    .main-nav::-webkit-scrollbar-thumb { background: #698167; border-radius: 3px; }
 
-function showInstallButton() {
-  if (!installButton) {
-    installButton = document.createElement('button');
-    installButton.textContent = 'Install App';
-    installButton.style.cssText = `
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-      background: linear-gradient(135deg, #698167, #a0b2af);
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    `;
-    installButton.onclick = installApp;
-    document.body.appendChild(installButton);
-  }
-}
+    .nav-tab { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      padding: 12px 16px; 
+      margin: 0 4px; 
+      border: none; 
+      background: transparent; 
+      color: #666; 
+      cursor: pointer; 
+      border-radius: 10px; 
+      transition: all 0.3s ease; 
+      font-weight: 600; 
+      min-width: 80px; 
+      font-size: 12px; 
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    
+    .nav-tab-icon { font-size: 20px; margin-bottom: 4px; }
+    .nav-tab-text { font-size: 11px; text-align: center; line-height: 1.2; }
+    .nav-tab:hover { background: rgba(43,122,120,0.1); color: #657a6b; }
+    .nav-tab.active { background: linear-gradient(135deg, #698167, #a0b2af); color: white; box-shadow: 0 4px 15px rgba(43,122,120,0.3); }
 
-function installApp() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      deferredPrompt = null;
-      hideInstallButton();
-    });
-  }
-}
+    .card { 
+      background: white; 
+      padding: 25px; 
+      border-radius: 20px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
+      margin-bottom: 25px; 
+    }
+    
+    .card h2 { margin-top: 0; color: #698167; font-size: 1.8em; }
+    .card h3 { color: #698167; font-size: 1.4em; }
 
-function hideInstallButton() {
-  if (installButton) {
-    installButton.remove();
-    installButton = null;
-  }
-}
+    label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
+    input, select, textarea { 
+      width: 100%; 
+      padding: 12px; 
+      margin-top: 6px; 
+      border-radius: 10px; 
+      border: 2px solid #e1e8ed; 
+      box-sizing: border-box; 
+      font-size: 16px; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    }
+    
+    input:focus, select:focus, textarea:focus { 
+      outline: none; 
+      border-color: #698167; 
+      box-shadow: 0 0 0 3px rgba(43,122,120,0.1); 
+    }
+    
+    textarea { resize: vertical; min-height: 80px; }
 
-window.addEventListener('appinstalled', (evt) => {
-  hideInstallButton();
-});
+    button { 
+      margin: 8px 4px; 
+      padding: 12px 20px; 
+      border: none; 
+      border-radius: 10px; 
+      background: linear-gradient(135deg, #698167, #a0b2af); 
+      color: white; 
+      cursor: pointer; 
+      font-weight: 600; 
+      transition: all 0.3s ease; 
+      min-height: 44px; 
+      font-size: 14px; 
+    }
+    
+    button:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 20px rgba(43,122,120,0.3); 
+    }
+    
+    button.small { 
+      padding: 8px 12px; 
+      font-size: 12px; 
+      margin: 2px; 
+      min-height: 36px; 
+    }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js').then(function(registration) {
-      console.log('ServiceWorker registration successful');
-    }).catch(function(err) {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
-</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BushBuddy</title>
-<style>
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #e7f5e4 100%); min-height: 100vh; }
-.container { max-width: 1200px; margin: 0 auto; }
-.header { text-align: center; margin-bottom: 30px; color: #657a6b; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.main-nav { 
-  display: flex; 
-  justify-content: flex-start;
-  margin-bottom: 30px; 
-  background: white; 
-  border-radius: 15px; 
-  padding: 10px; 
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
-  overflow-x: auto; 
-  overflow-y: hidden;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: #698167 #f1f1f1;
-}
+    .animal-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      gap: 20px; 
+      margin-top: 20px; 
+    }
+    
+    .animal-item { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 15px; 
+      box-shadow: 0 6px 25px rgba(0,0,0,0.1); 
+      position: relative; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+    }
+    
+    .animal-item:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15); 
+    }
+    
+    .animal-item h4 { margin-top: 0; color: #698167; }
+    .animal-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
 
-.main-nav::-webkit-scrollbar { height: 6px; }
-.main-nav::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
-.main-nav::-webkit-scrollbar-thumb { background: #698167; border-radius: 3px; }
-.main-nav::-webkit-scrollbar-thumb:hover { background: #5a6e5b; }
-
-.nav-tab { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  padding: 12px 16px; 
-  margin: 0 4px; 
-  border: none; 
-  background: transparent; 
-  color: #666; 
-  cursor: pointer; 
-  border-radius: 10px; 
-  transition: all 0.3s ease; 
-  font-weight: 600; 
-  min-width: 80px; 
-  font-size: 12px; 
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-.nav-tab-icon { font-size: 20px; margin-bottom: 4px; }
-.nav-tab-text { font-size: 11px; text-align: center; line-height: 1.2; }
-.nav-tab:hover { background: rgba(43,122,120,0.1); color: #657a6b; }
-.nav-tab.active { background: linear-gradient(135deg, #698167, #a0b2af); color: white; box-shadow: 0 4px 15px rgba(43,122,120,0.3); }
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .main-nav { justify-content: center; overflow-x: auto; }
-  .nav-tab { padding: 16px 18px; min-width: 90px; }
-  .nav-tab-icon { font-size: 22px; margin-bottom: 5px; }
-  .nav-tab-text { font-size: 11px; }
-}
-
-@media (min-width: 1025px) {
-  .main-nav { justify-content: center; overflow-x: visible; }
-  .nav-tab { padding: 16px 20px; min-width: 100px; }
-  .nav-tab-icon { font-size: 24px; margin-bottom: 6px; }
-  .nav-tab-text { font-size: 12px; }
-  .main-nav::-webkit-scrollbar { display: none; }
-  .main-nav { scrollbar-width: none; }
-}
-
-@media (max-width: 768px) {
-  .main-nav { justify-content: flex-start; overflow-x: auto; padding-bottom: 15px; }
-  .main-nav::-webkit-scrollbar { height: 8px; display: block; }
-  .main-nav::-webkit-scrollbar-thumb { background: #698167; border-radius: 4px; }
-}
-
-.card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 25px; }
-.card h2 { margin-top: 0; color: #698167; font-size: 1.8em; }
-
-label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
-input, select, textarea { width: 100%; padding: 12px; margin-top: 6px; border-radius: 10px; border: 2px solid #e1e8ed; box-sizing: border-box; font-size: 16px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-appearance: none; -webkit-border-radius: 10px; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: #698167; box-shadow: 0 0 0 3px rgba(43,122,120,0.1); }
-textarea { resize: vertical; min-height: 80px; }
-
-input[type="number"] { -webkit-appearance: none; -moz-appearance: textfield; }
-input[type="date"] { -webkit-appearance: none; }
-input[type="file"] { -webkit-appearance: none; }
-
-@media screen and (max-width: 768px) {
-  input, select, textarea { font-size: 16px; }
-}
-
-button { margin: 8px 4px; padding: 12px 20px; border: none; border-radius: 10px; background: linear-gradient(135deg, #698167, #a0b2af); color: white; cursor: pointer; font-weight: 600; transition: all 0.3s ease; min-height: 44px; font-size: 14px; }
-button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(43,122,120,0.3); }
-button.small { padding: 8px 12px; font-size: 12px; margin: 2px; min-height: 36px; }
-button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
-
-.tab-content { display: none; }
-.tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-.animal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-.animal-item { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 6px 25px rgba(0,0,0,0.1); position: relative; cursor: pointer; transition: all 0.3s ease; }
-.animal-item:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
-.animal-item h4 { margin-top: 0; color: #698167; }
-.animal-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
-
-.result { margin-top: 15px; padding: 15px; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-left: 4px solid #698167; }
-</style>
+    .result { 
+      margin-top: 15px; 
+      padding: 15px; 
+      border-radius: 12px; 
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
+      border-left: 4px solid #698167; 
+    }
+  </style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto; margin-bottom: 0;">
+    <img src="BushBuddy.png" alt="BushBuddy Logo" style="max-height: 120px; max-width: 100%; height: auto;">
   </div>
 
-  <div class="main-nav" id="mainNav">
+  <div class="main-nav">
     <button class="nav-tab active" onclick="showTab('home')">
       <div class="nav-tab-icon">🏠</div>
       <div class="nav-tab-text">Home</div>
@@ -210,11 +189,8 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
       <h2>Your Animals</h2>
       
       <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-        <input type="text" id="animalSearch" placeholder="Search by name, species, or notes..." 
-               style="flex: 1; min-width: 200px;">
-        
-        <select id="speciesFilter" 
-                style="min-width: 200px; padding: 10px; border-radius: 10px; border: 2px solid #e1e8ed;">
+        <input type="text" id="animalSearch" placeholder="Search by name, species, or notes..." style="flex: 1; min-width: 200px;">
+        <select id="speciesFilter" style="min-width: 200px;">
           <option value="">All Species</option>
           <option value="Common Brushtail Possum">Common Brushtail Possum</option>
           <option value="Ringtail Possum">Ringtail Possum</option>
@@ -223,7 +199,6 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
       </div>
       
       <p id="animalCounter" style="color: #666; font-size: 14px; margin-bottom: 10px;"></p>
-
       <div id="animalList" class="animal-grid">
         <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal using the "Add New Animal" tab!</p>
       </div>
@@ -251,18 +226,20 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
   <!-- Animal Detail View -->
   <div id="animalDetailTab" class="tab-content">
     <div style="margin-bottom: 20px;">
-      <button onclick="showTab('home')" style="background: #6c757d; padding: 8px 16px;">← Back to Animals</button>
+      <button onclick="showTab('home')" style="background: #6c757d;">← Back to Animals</button>
     </div>
-    
-    <div id="animalDetailContent">
-    </div>
+    <div id="animalDetailContent"></div>
   </div>
 
   <!-- Export Tab -->
   <div id="exportTab" class="tab-content">
     <div class="card">
       <h2>Backup & Export</h2>
-      <label>Select Animal for Export: <select id="exportAnimalSelect"><option value="">Select an animal...</option></select></label>
+      <label>Select Animal for Export: 
+        <select id="exportAnimalSelect">
+          <option value="">Select an animal...</option>
+        </select>
+      </label>
       <button onclick="exportAnimalData()">Export Care Data</button>
       
       <div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 15px;">
@@ -285,23 +262,49 @@ button.danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
 <script>
 var animals = [];
 
-// Initialize app
-function initApp() {
-  loadData();
-  setDefaultDates();
-  updateSelects();
-  renderAnimals();
-  
-  var searchInput = document.getElementById('animalSearch');
-  var speciesFilter = document.getElementById('speciesFilter');
-  
-  if (searchInput) {
-    searchInput.addEventListener('input', renderAnimals);
+// Species feeding data
+var speciesData = {
+  "Common Brushtail Possum": [
+    { weight: 1100, feeds: 1, predictedAge: "7 months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "1 milk feed per day at dusk.", milkFormula: "Maximum 40mL per feed. Cease 1 week before release." },
+    { weight: 500, feeds: 2, predictedAge: "5.5 - 6 months", features: "Would still cling to mother's back in wild. Should be getting very confident climbing around enclosure.", housing: "Large outdoor release aviary (min 3m x 2m x 2m). Nest box, food/ water high in aviary.", feedingNotes: "2 milk feeds per day. Offer early morning and late evening.", milkFormula: "Maximum of 40mls in a single feed. 15% of body weight divided equally over 2 feeds." },
+    { weight: 400, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on mum's back but more confident climbing.", housing: "Large cage (1m x 1m x 1.2m) or small walk-in aviary. Include nest box, water dish and branches for climbing.", feedingNotes: "3 milk feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds." },
+    { weight: 250, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch.", housing: "Variety of branches and ropes for climbing. Housed indoors. Small amount of fresh water.", feedingNotes: "4 feeds per day. Milk – 6 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
+    { weight: 150, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Starting to explore outside of mum's pouch.", housing: "Carry cage with secure lid and fine mesh. Hang pouch inside with branches. Housed indoors.", feedingNotes: "5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
+    { weight: 100, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces.", housing: "Multiple pouches to form a cosy 'cave'. Plenty of fleece cloths. Housed indoors.", feedingNotes: "6 feeds per day. Milk – 4 hourly. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." },
+    { weight: 60, feeds: 8, predictedAge: "3 months", features: "Furless, eyes closed. Custard-like faeces. Permanently in mum's pouch. Experienced carers only.", housing: "32°C. Multiple pouches forming cosy 'cave'. Watch for dehydration and diarrhoea.", feedingNotes: "6-8 feeds per day depending upon hydration. Syringe with teat until mouth membranes open.", milkFormula: "Milk: 15% of body weight divided equally over 6-8 feeds." }
+  ],
+  "Ringtail Possum": [
+    { weight: 500, feeds: 1, predictedAge: "7.5+ months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary (min 3m x 2m x 2m) in natural surroundings. Drey and water placed high.", feedingNotes: "1 milk feed per day at dusk. Cease 1 week before release.", milkFormula: "Maximum 30mL per feed." },
+    { weight: 300, feeds: 2, predictedAge: "6 months", features: "Fully independent. Very active at night. Should be very confident climbing.", housing: "Large outdoor release aviary (min 3m x 2m x 2m) in natural surroundings. Drey and water placed high.", feedingNotes: "2 milk feeds per day. Offer early morning and late evening.", milkFormula: "Maximum of 25mls in a single feed. 15% of body weight divided equally over 2 feeds." },
+    { weight: 175, feeds: 3, predictedAge: "5 months", features: "Thick fur. Dark pellets. Still riding on mum's back but more confident climbing.", housing: "Large inside cage (1m x 1m x 1.2m). Introduce drey to cage. Good variety of branches and rope.", feedingNotes: "3 milk feeds per day. Early morning, mid afternoon and late evening. Feed each ringtail separately.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
+    { weight: 130, feeds: 4, predictedAge: "4.5 months", features: "Fluffy fur. Dark Pellets. More confident outside of mum's pouch.", housing: "Variety of branches and ropes for climbing. Housed indoors. Small amount of fresh water.", feedingNotes: "4 feeds per day. Milk – 6 hourly. Lapping from shallow bowl. Feed each ringtail separately.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
+    { weight: 100, feeds: 5, predictedAge: "4 months", features: "Fine, soft, fluffy fur. Teeth. Darker tube-like faeces or pellets.", housing: "Large indoor cage (1m x 1m x 1.2m) with pouch secured up high. Variety of branches and ropes.", feedingNotes: "5 feeds per day. Milk approximately 5 hourly. Lapping from shallow jar lid or small bowl.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
+    { weight: 80, feeds: 6, predictedAge: "3.5 months", features: "Short fur, eyes open. Dark tube like faeces or pellets.", housing: "Carry cage with secure lid and fine mesh. Hang pouch with branches. Housed indoors.", feedingNotes: "6 feeds per day. Milk – 4 hourly. Will usually be lapping by this stage.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." }
+  ],
+  "Short-Eared Brushtail Possum": [
+    { weight: 1300, feeds: 1, predictedAge: "8 months", features: "Prepare to release. Must be assessed for suitability against the release criteria.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m).", feedingNotes: "1 milk feed per day at dusk. Start weaning off milk gradually.", milkFormula: "Maximum 40mL per feed." },
+    { weight: 650, feeds: 2, predictedAge: "5.6 - 6 months", features: "Would still cling to mother's back in the wild. Should be getting very confident climbing.", housing: "Large outdoor release aviary, (minimum 3m x 2m x 2m), in natural surroundings.", feedingNotes: "2 milk feeds per day. Offer early morning and late evening.", milkFormula: "Maximum of 40mls in a single feed. 15% of body weight divided equally over 2 feeds." },
+    { weight: 500, feeds: 3, predictedAge: "5 months", features: "Dense fur. Dark pellets. Still riding on mum's back.", housing: "Large cage (1m x 1m x 1.2m).", feedingNotes: "3 feeds per day. Offer early morning, mid afternoon and late evening.", milkFormula: "Milk: 15% of body weight divided equally over 3 feeds" },
+    { weight: 275, feeds: 4, predictedAge: "4.5 months", features: "Short dense fur. Soft pellets. More confident out of mum's pouch.", housing: "Carry cage with secure lid and fine mesh.", feedingNotes: "4 feeds per day. Milk – 6 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 4 feeds." },
+    { weight: 200, feeds: 5, predictedAge: "4 months", features: "Fine soft fur, teeth. Darker tube-like faeces. Exploring outside of mum's pouch.", housing: "Carry cage with secure lid and fine mesh", feedingNotes: "5 feeds per day. Milk approximately 5 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 5 feeds." },
+    { weight: 150, feeds: 6, predictedAge: "3.5 months", features: "Cutting fur, eyes open. Thick, custard-like faeces.", housing: "Carry cage with secure lid and fine mesh.", feedingNotes: "6 feeds per day. Milk – 4 hourly.", milkFormula: "Milk: 15% of body weight divided equally over 6 feeds." }
+  ]
+};
+
+function getFeedsPerDay(weight, species) {
+  var schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  for (var i = 0; i < schedule.length; i++) {
+    if (weight >= schedule[i].weight) return schedule[i].feeds;
   }
-  
-  if (speciesFilter) {
-    speciesFilter.addEventListener('change', renderAnimals);
+  return schedule[schedule.length - 1].feeds;
+}
+
+function getAnimalInfo(weight, species) {
+  var schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  for (var i = 0; i < schedule.length; i++) {
+    if (weight >= schedule[i].weight) return schedule[i];
   }
+  return schedule[schedule.length - 1];
 }
 
 function formatDate(dateStr) {
@@ -498,136 +501,4 @@ function deleteAnimal(id) {
 }
 
 function showAnimalDetail(animalId) {
-  var animal = animals.find(function(a) { return a.id == animalId; });
-  if (!animal) return;
-  
-  document.querySelectorAll('.nav-tab').forEach(function(tab) { 
-    tab.classList.remove('active'); 
-  });
-  document.querySelectorAll('.tab-content').forEach(function(content) { 
-    content.classList.remove('active'); 
-  });
-  document.getElementById('animalDetailTab').classList.add('active');
-  
-  var content = document.getElementById('animalDetailContent');
-  content.innerHTML = 
-    '<div class="card">' +
-    '<h2>' + animal.name + '</h2>' +
-    '<p><strong>Species:</strong> ' + animal.species + '</p>' +
-    '<p><strong>Intake:</strong> ' + formatDate(animal.intakeDate) + ' (' + Math.floor((new Date() - new Date(animal.intakeDate)) / (1000 * 60 * 60 * 24)) + ' days ago)</p>' +
-    (animal.intakeNotes ? '<p><strong>Intake Notes:</strong> ' + animal.intakeNotes + '</p>' : '') +
-    '</div>' +
-    '<div class="card">' +
-    '<h3>Care Management</h3>' +
-    '<p>Full care management features will be available in the next update. This includes:</p>' +
-    '<ul>' +
-    '<li>Weight tracking and feed calculations</li>' +
-    '<li>Health condition monitoring</li>' +
-    '<li>Treatment and medication logging</li>' +
-    '<li>Daily feeding checklists</li>' +
-    '<li>Custom feeding schedules</li>' +
-    '<li>Photo gallery</li>' +
-    '</ul>' +
-    '</div>';
-}
-
-function exportAnimalData() {
-  var animalId = document.getElementById('exportAnimalSelect').value;
-  var animal = animals.find(function(a) { return a.id == animalId; });
-  
-  if (!animal) {
-    alert('Please select an animal to export.');
-    return;
-  }
-  
-  var exportData = {
-    animal: animal,
-    exportDate: new Date().toISOString(),
-    appVersion: 'BushBuddy v2.0'
-  };
-  
-  var dataStr = JSON.stringify(exportData, null, 2);
-  var dataBlob = new Blob([dataStr], {type: 'application/json'});
-  
-  var link = document.createElement('a');
-  link.href = URL.createObjectURL(dataBlob);
-  link.download = animal.name.replace(/[^a-z0-9]/gi, '_') + '_care_data.json';
-  link.click();
-}
-
-function exportAllData() {
-  if (animals.length === 0) {
-    alert('No data to export.');
-    return;
-  }
-  
-  var exportData = {
-    animals: animals,
-    exportDate: new Date().toISOString(),
-    appVersion: 'BushBuddy v2.0'
-  };
-  
-  var dataStr = JSON.stringify(exportData, null, 2);
-  var dataBlob = new Blob([dataStr], {type: 'application/json'});
-  
-  var link = document.createElement('a');
-  link.href = URL.createObjectURL(dataBlob);
-  link.download = 'bushbuddy_backup_' + new Date().toISOString().split('T')[0] + '.json';
-  link.click();
-}
-
-function restoreData() {
-  var fileInput = document.getElementById('restoreInput');
-  var file = fileInput.files[0];
-  
-  if (!file) {
-    alert('Please select a backup file to restore.');
-    return;
-  }
-  
-  if (!confirm('Restore data from backup? This will replace all current data.')) {
-    return;
-  }
-  
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var importData = JSON.parse(e.target.result);
-      
-      if (importData.animals) {
-        animals = importData.animals;
-      } else if (importData.animal) {
-        var existingIndex = animals.findIndex(function(a) { return a.id === importData.animal.id; });
-        if (existingIndex >= 0) {
-          animals[existingIndex] = importData.animal;
-        } else {
-          animals.push(importData.animal);
-        }
-      } else {
-        throw new Error('Invalid backup file format');
-      }
-      
-      saveData();
-      renderAnimals();
-      updateSelects();
-      alert('Data restored successfully!');
-      
-    } catch (error) {
-      console.error('Error importing data:', error);
-      alert('Error reading backup file. Please check the file format.');
-    }
-  };
-  
-  reader.readAsText(file);
-  fileInput.value = '';
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
-</script>
-
-</body>
-</html>
+  var animal = animals.
