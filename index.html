@@ -1124,8 +1124,8 @@ function showFeedingSchedule(animal) {
       displayHTML += 
         '<div style="text-align: center; padding: 10px; background: white; border-radius: 8px; border: 1px solid #e1e8ed;">' +
         '<label style="font-size: 12px; display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Feed ' + (i + 1) + ':</label>' +
-        '<select id="feedTime-' + animal.id + '-' + i + '" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 14px; text-align: center; background: white;">' +
-        generateTimeOptions().replace('value="' + defaultTime + '"', 'value="' + defaultTime + '" selected') +
+        '<select id="feedTime-' + animal.id + '-' + i + '" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 14px; background: white;">' +
+        generateTimeOptions(defaultTime) +
         '</select>' +
         '</div>';
     }
@@ -1183,12 +1183,13 @@ function getDefaultTime(index, totalFeeds) {
   return String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
 }
 
-function generateTimeOptions() {
+function generateTimeOptions(selectedTime) {
   var options = '';
   for (var hour = 0; hour < 24; hour++) {
     for (var minute = 0; minute < 60; minute += 15) {
       var timeStr = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
-      options += '<option value="' + timeStr + '">' + timeStr + '</option>';
+      var selected = timeStr === selectedTime ? ' selected' : '';
+      options += '<option value="' + timeStr + '"' + selected + '>' + timeStr + '</option>';
     }
   }
   return options;
