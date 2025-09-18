@@ -159,6 +159,94 @@
       background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
       border-left: 4px solid #698167; 
     }
+
+    .feeding-schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .feeding-time-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 12px;
+      border: 2px solid #e9ecef;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .feeding-time-card:hover {
+      border-color: #698167;
+      transform: translateY(-2px);
+    }
+
+    .feeding-time-card.completed {
+      background: #d4edda;
+      border-color: #c3e6cb;
+    }
+
+    .feeding-time-card.overdue {
+      background: #f8d7da;
+      border-color: #f5c6cb;
+    }
+
+    .feeding-time-card.upcoming {
+      background: #fff3cd;
+      border-color: #ffeaa7;
+    }
+
+    .feeding-time-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .feeding-time-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-completed { background: #28a745; color: white; }
+    .status-overdue { background: #dc3545; color: white; }
+    .status-upcoming { background: #ffc107; color: #212529; }
+    .status-pending { background: #6c757d; color: white; }
+
+    .schedule-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      border: 2px solid #e9ecef;
+    }
+
+    .summary-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #698167;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -323,9 +411,20 @@ function formatDate(dateStr) {
   return day + '-' + month + '-' + year;
 }
 
+function formatTime(timeStr) {
+  if (!timeStr) return '';
+  var time = new Date('1970-01-01T' + timeStr + ':00');
+  return time.toLocaleTimeString('en-AU', { 
+    hour: 'numeric', 
+    minute: '2-digit', 
+    hour12: true 
+  });
+}
+
 function saveData() {
   try {
-    localStorage.setItem('bushbuddy_animals', JSON.stringify(animals));
+    var dataStr = JSON.stringify(animals);
+    localStorage.setItem('bushbuddy_animals', dataStr);
     console.log('Data saved successfully');
   } catch (e) {
     console.error('Error saving data:', e);
@@ -584,7 +683,7 @@ function showAnimalSection(animalId, section) {
       content.innerHTML = '<div class="card"><h3>Daily Feeding</h3><p>Daily feeding checklist features coming soon...</p></div>';
       break;
     case 'schedule':
-      content.innerHTML = '<div class="card"><h3>Feeding Schedule</h3><p>Custom feeding schedule features coming soon...</p></div>';
+      showScheduleSection(animal, content);
       break;
     case 'photos':
       content.innerHTML = '<div class="card"><h3>Photo Gallery</h3><p>Photo gallery features coming soon...</p></div>';
@@ -622,6 +721,333 @@ function showWeightSection(animal, container) {
   document.getElementById('animalWeight-' + animal.id).oninput = function() {
     showFeedCalcForAnimal(animal);
   };
+}
+
+function showScheduleSection(animal, container) {
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<h3>Feeding Schedule for ' + animal.name + '</h3>';
+  
+  // Get current feeding requirements
+  var currentWeight = getCurrentWeight(animal);
+  var feedsPerDay = currentWeight ? getFeedsPerDay(currentWeight, animal.species) : 0;
+  
+  // Initialize feeding times if they don't exist
+  if (!animal.feedingTimes) {
+    animal.feedingTimes = [];
+  }
+  
+  // Generate default schedule if empty and we have weight data
+  if (animal.feedingTimes.length === 0 && feedsPerDay > 0) {
+    generateDefaultSchedule(animal, feedsPerDay);
+  }
+  
+  // Schedule management section
+  var scheduleControls = document.createElement('div');
+  scheduleControls.innerHTML = 
+    '<div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">' +
+    '<h4>Schedule Management</h4>' +
+    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
+    '<div><label>Current Weight (g): <input type="number" id="scheduleWeight-' + animal.id + '" value="' + (currentWeight || '') + '" placeholder="Enter current weight"></label></div>' +
+    '<div style="display: flex; align-items: end; gap: 10px;">' +
+    '<button onclick="updateScheduleForWeight(' + animal.id + ')">Update Schedule</button>' +
+    '<button onclick="addCustomFeedingTime(' + animal.id + ')" style="background: #28a745;">Add Custom Time</button>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+  card.appendChild(scheduleControls);
+  
+  // Summary cards
+  var summaryDiv = document.createElement('div');
+  summaryDiv.className = 'schedule-summary';
+  summaryDiv.id = 'scheduleSummary-' + animal.id;
+  card.appendChild(summaryDiv);
+  
+  // Feeding times grid
+  var scheduleDiv = document.createElement('div');
+  scheduleDiv.className = 'feeding-schedule-grid';
+  scheduleDiv.id = 'feedingSchedule-' + animal.id;
+  card.appendChild(scheduleDiv);
+  
+  container.appendChild(card);
+  
+  updateScheduleDisplay(animal);
+}
+
+function getCurrentWeight(animal) {
+  if (!animal.weights || animal.weights.length === 0) return null;
+  var sorted = animal.weights.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  return sorted[0].weight;
+}
+
+function generateDefaultSchedule(animal, feedsPerDay) {
+  animal.feedingTimes = [];
+  
+  // Default feeding times based on number of feeds
+  var defaultTimes = {
+    1: ['19:00'],
+    2: ['07:00', '19:00'],
+    3: ['07:00', '15:00', '22:00'],
+    4: ['06:00', '12:00', '18:00', '00:00'],
+    5: ['06:00', '11:00', '16:00', '21:00', '02:00'],
+    6: ['06:00', '10:00', '14:00', '18:00', '22:00', '02:00'],
+    8: ['06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '00:00', '03:00']
+  };
+  
+  var times = defaultTimes[feedsPerDay] || defaultTimes[6];
+  
+  times.forEach(function(time, index) {
+    animal.feedingTimes.push({
+      id: Date.now() + index,
+      time: time,
+      description: 'Feed ' + (index + 1),
+      enabled: true
+    });
+  });
+  
+  saveData();
+}
+
+function updateScheduleForWeight(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var weightInput = document.getElementById('scheduleWeight-' + animalId);
+  var weight = parseFloat(weightInput.value);
+  
+  if (!weight || weight <= 0) {
+    alert('Please enter a valid weight.');
+    return;
+  }
+  
+  var feedsPerDay = getFeedsPerDay(weight, animal.species);
+  
+  if (confirm('This will update the feeding schedule to ' + feedsPerDay + ' feeds per day based on ' + weight + 'g weight. Continue?')) {
+    generateDefaultSchedule(animal, feedsPerDay);
+    updateScheduleDisplay(animal);
+  }
+}
+
+function addCustomFeedingTime(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var time = prompt('Enter feeding time (24-hour format, e.g., 14:30):');
+  if (!time) return;
+  
+  // Validate time format
+  if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+    alert('Please enter time in valid format (HH:MM)');
+    return;
+  }
+  
+  var description = prompt('Enter description (optional):', 'Custom feed');
+  
+  if (!animal.feedingTimes) animal.feedingTimes = [];
+  
+  animal.feedingTimes.push({
+    id: Date.now(),
+    time: time,
+    description: description || 'Custom feed',
+    enabled: true
+  });
+  
+  // Sort by time
+  animal.feedingTimes.sort(function(a, b) {
+    return a.time.localeCompare(b.time);
+  });
+  
+  saveData();
+  updateScheduleDisplay(animal);
+}
+
+function updateScheduleDisplay(animal) {
+  var summaryDiv = document.getElementById('scheduleSummary-' + animal.id);
+  var scheduleDiv = document.getElementById('feedingSchedule-' + animal.id);
+  
+  if (!summaryDiv || !scheduleDiv) return;
+  
+  // Calculate summary stats
+  var totalFeeds = animal.feedingTimes ? animal.feedingTimes.filter(function(ft) { return ft.enabled; }).length : 0;
+  var todayFeeds = getTodayFeedingLogs(animal).length;
+  var completedFeeds = getTodayCompletedFeeds(animal);
+  var overdueFeeds = getTodayOverdueFeeds(animal);
+  
+  // Update summary
+  summaryDiv.innerHTML = 
+    '<div class="summary-card">' +
+    '<div class="summary-number">' + totalFeeds + '</div>' +
+    '<div class="summary-label">Daily Feeds</div>' +
+    '</div>' +
+    '<div class="summary-card">' +
+    '<div class="summary-number">' + completedFeeds + '</div>' +
+    '<div class="summary-label">Completed Today</div>' +
+    '</div>' +
+    '<div class="summary-card">' +
+    '<div class="summary-number">' + overdueFeeds + '</div>' +
+    '<div class="summary-label">Overdue</div>' +
+    '</div>' +
+    '<div class="summary-card">' +
+    '<div class="summary-number">' + (totalFeeds - completedFeeds) + '</div>' +
+    '<div class="summary-label">Remaining</div>' +
+    '</div>';
+  
+  // Update schedule
+  scheduleDiv.innerHTML = '';
+  
+  if (!animal.feedingTimes || animal.feedingTimes.length === 0) {
+    scheduleDiv.innerHTML = '<p style="text-align: center; color: #666; font-style: italic; grid-column: 1/-1;">No feeding schedule set. Enter a current weight to generate a schedule.</p>';
+    return;
+  }
+  
+  animal.feedingTimes.forEach(function(feedTime) {
+    if (!feedTime.enabled) return;
+    
+    var status = getFeedingStatus(animal, feedTime);
+    var card = document.createElement('div');
+    card.className = 'feeding-time-card ' + status.class;
+    
+    card.innerHTML = 
+      '<div class="feeding-time-header">' +
+      '<div>' +
+      '<strong>' + formatTime(feedTime.time) + '</strong><br>' +
+      '<small>' + feedTime.description + '</small>' +
+      '</div>' +
+      '<div class="feeding-time-actions">' +
+      '<span class="status-badge status-' + status.class + '">' + status.text + '</span>' +
+      '</div>' +
+      '</div>' +
+      '<div style="margin-top: 10px;">' +
+      (status.class === 'completed' ? 
+        '<button class="small" onclick="unmarkFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')" style="background: #6c757d;">Undo</button>' :
+        '<button class="small" onclick="markFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')">Mark Complete</button>'
+      ) +
+      '<button class="small" onclick="deleteFeedingTime(' + animal.id + ', ' + feedTime.id + ')" style="background: #dc3545; margin-left: 5px;">Delete</button>' +
+      '</div>';
+    
+    scheduleDiv.appendChild(card);
+  });
+}
+
+function getFeedingStatus(animal, feedTime) {
+  var today = new Date().toISOString().split('T')[0];
+  var now = new Date();
+  var feedDateTime = new Date(today + 'T' + feedTime.time + ':00');
+  
+  // Check if already completed today
+  var todayLogs = getTodayFeedingLogs(animal);
+  var isCompleted = todayLogs.some(function(log) {
+    return log.scheduledTime === feedTime.time;
+  });
+  
+  if (isCompleted) {
+    return { class: 'completed', text: 'Done' };
+  }
+  
+  // Check if overdue (more than 30 minutes past scheduled time)
+  var overdueTime = new Date(feedDateTime.getTime() + 30 * 60 * 1000);
+  if (now > overdueTime) {
+    return { class: 'overdue', text: 'Overdue' };
+  }
+  
+  // Check if upcoming (within 1 hour of scheduled time)
+  var upcomingTime = new Date(feedDateTime.getTime() - 60 * 60 * 1000);
+  if (now >= upcomingTime && now <= feedDateTime) {
+    return { class: 'upcoming', text: 'Soon' };
+  }
+  
+  return { class: 'pending', text: 'Pending' };
+}
+
+function getTodayFeedingLogs(animal) {
+  if (!animal.feedingLogs) return [];
+  var today = new Date().toISOString().split('T')[0];
+  return animal.feedingLogs.filter(function(log) {
+    return log.date === today;
+  });
+}
+
+function getTodayCompletedFeeds(animal) {
+  return getTodayFeedingLogs(animal).length;
+}
+
+function getTodayOverdueFeeds(animal) {
+  if (!animal.feedingTimes) return 0;
+  var now = new Date();
+  var today = new Date().toISOString().split('T')[0];
+  var todayLogs = getTodayFeedingLogs(animal);
+  
+  return animal.feedingTimes.filter(function(feedTime) {
+    if (!feedTime.enabled) return false;
+    
+    var feedDateTime = new Date(today + 'T' + feedTime.time + ':00');
+    var overdueTime = new Date(feedDateTime.getTime() + 30 * 60 * 1000);
+    
+    var isCompleted = todayLogs.some(function(log) {
+      return log.scheduledTime === feedTime.time;
+    });
+    
+    return !isCompleted && now > overdueTime;
+  }).length;
+}
+
+function markFeedingComplete(animalId, scheduledTime) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  if (!animal.feedingLogs) animal.feedingLogs = [];
+  
+  var today = new Date().toISOString().split('T')[0];
+  var now = new Date();
+  
+  // Check if already completed
+  var existingLog = animal.feedingLogs.find(function(log) {
+    return log.date === today && log.scheduledTime === scheduledTime;
+  });
+  
+  if (existingLog) {
+    alert('This feeding has already been marked as complete.');
+    return;
+  }
+  
+  animal.feedingLogs.push({
+    id: Date.now(),
+    date: today,
+    actualTime: now.toTimeString().substr(0, 5),
+    scheduledTime: scheduledTime,
+    completedAt: now.toISOString()
+  });
+  
+  saveData();
+  updateScheduleDisplay(animal);
+}
+
+function unmarkFeedingComplete(animalId, scheduledTime) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.feedingLogs) return;
+  
+  var today = new Date().toISOString().split('T')[0];
+  
+  animal.feedingLogs = animal.feedingLogs.filter(function(log) {
+    return !(log.date === today && log.scheduledTime === scheduledTime);
+  });
+  
+  saveData();
+  updateScheduleDisplay(animal);
+}
+
+function deleteFeedingTime(animalId, feedingTimeId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.feedingTimes) return;
+  
+  if (!confirm('Delete this feeding time?')) return;
+  
+  animal.feedingTimes = animal.feedingTimes.filter(function(ft) {
+    return ft.id !== feedingTimeId;
+  });
+  
+  saveData();
+  updateScheduleDisplay(animal);
 }
 
 function addWeightForAnimal(animalId) {
