@@ -828,27 +828,58 @@ function updateScheduleForWeight(animalId) {
   }
 }
 
+function generateTimeOptions() {
+  var options = '';
+  for (var hour = 0; hour < 24; hour++) {
+    for (var minute = 0; minute < 60; minute += 15) {
+      var timeStr = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+      var displayTime = formatTime(timeStr);
+      options += '<option value="' + timeStr + '">' + displayTime + '</option>';
+    }
+  }
+  return options;
+}
+
 function addCustomFeedingTime(animalId) {
   var animal = animals.find(function(a) { return a.id == animalId; });
   if (!animal) return;
   
-  var time = prompt('Enter feeding time (24-hour format, e.g., 14:30):');
-  if (!time) return;
+  var modalHtml = 
+    '<div id="feedingTimeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
+    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; width: 90%;">' +
+    '<h3 style="margin-top: 0;">Add Feeding Time</h3>' +
+    '<label>Time: <select id="newFeedingTime" style="margin-top: 10px;">' + generateTimeOptions() + '</select></label>' +
+    '<label>Description: <input type="text" id="newFeedingDescription" value="Custom feed" style="margin-top: 15px;"></label>' +
+    '<div style="margin-top: 20px; text-align: right;">' +
+    '<button onclick="closeFeedingTimeModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="saveFeedingTime(' + animalId + ')">Add Time</button>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
   
-  // Validate time format
-  if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
-    alert('Please enter time in valid format (HH:MM)');
-    return;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeFeedingTimeModal() {
+  var modal = document.getElementById('feedingTimeModal');
+  if (modal) {
+    modal.remove();
   }
+}
+
+function saveFeedingTime(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
   
-  var description = prompt('Enter description (optional):', 'Custom feed');
+  var time = document.getElementById('newFeedingTime').value;
+  var description = document.getElementById('newFeedingDescription').value.trim() || 'Custom feed';
   
   if (!animal.feedingTimes) animal.feedingTimes = [];
   
   animal.feedingTimes.push({
     id: Date.now(),
     time: time,
-    description: description || 'Custom feed',
+    description: description,
     enabled: true
   });
   
@@ -859,6 +890,7 @@ function addCustomFeedingTime(animalId) {
   
   saveData();
   updateScheduleDisplay(animal);
+  closeFeedingTimeModal();
 }
 
 function updateScheduleDisplay(animal) {
@@ -910,11 +942,15 @@ function updateScheduleDisplay(animal) {
     card.innerHTML = 
       '<div class="feeding-time-header">' +
       '<div>' +
-      '<strong>' + formatTime(feedTime.time) + '</strong><br>' +
-      '<small>' + feedTime.description + '</small>' +
+      '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
+      '<select id="feedingTimeSelect-' + feedTime.id + '" onchange="updateFeedingTime(' + animal.id + ', ' + feedTime.id + ', this.value)" style="padding: 4px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; font-weight: bold; background: white;">' +
+      generateTimeOptionsWithSelected(feedTime.time) +
+      '</select>' +
+      '<span class="status-badge status-' + status.class + '">' + status.text + '</span>' +
+      '</div>' +
+      '<input type="text" id="feedingDesc-' + feedTime.id + '" value="' + feedTime.description + '" onchange="updateFeedingDescription(' + animal.id + ', ' + feedTime.id + ', this.value)" style="border: none; background: transparent; font-size: 12px; color: #666; padding: 2px; width: 100%;" placeholder="Enter description">' +
       '</div>' +
       '<div class="feeding-time-actions">' +
-      '<span class="status-badge status-' + status.class + '">' + status.text + '</span>' +
       '</div>' +
       '</div>' +
       '<div style="margin-top: 10px;">' +
@@ -927,6 +963,48 @@ function updateScheduleDisplay(animal) {
     
     scheduleDiv.appendChild(card);
   });
+}
+
+function generateTimeOptionsWithSelected(selectedTime) {
+  var options = '';
+  for (var hour = 0; hour < 24; hour++) {
+    for (var minute = 0; minute < 60; minute += 15) {
+      var timeStr = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+      var displayTime = formatTime(timeStr);
+      var selected = timeStr === selectedTime ? ' selected' : '';
+      options += '<option value="' + timeStr + '"' + selected + '>' + displayTime + '</option>';
+    }
+  }
+  return options;
+}
+
+function updateFeedingTime(animalId, feedingTimeId, newTime) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.feedingTimes) return;
+  
+  var feedingTime = animal.feedingTimes.find(function(ft) { return ft.id === feedingTimeId; });
+  if (!feedingTime) return;
+  
+  feedingTime.time = newTime;
+  
+  // Sort by time after update
+  animal.feedingTimes.sort(function(a, b) {
+    return a.time.localeCompare(b.time);
+  });
+  
+  saveData();
+  updateScheduleDisplay(animal);
+}
+
+function updateFeedingDescription(animalId, feedingTimeId, newDescription) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.feedingTimes) return;
+  
+  var feedingTime = animal.feedingTimes.find(function(ft) { return ft.id === feedingTimeId; });
+  if (!feedingTime) return;
+  
+  feedingTime.description = newDescription.trim() || 'Feed';
+  saveData();
 }
 
 function getFeedingStatus(animal, feedTime) {
