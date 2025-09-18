@@ -451,7 +451,10 @@ function showHealthSection(animal, container) {
   
   container.appendChild(card);
   
-  updateHealthDisplay(animal);
+  // Call updateHealthDisplay after a small delay to ensure DOM is ready
+  setTimeout(function() {
+    updateHealthDisplay(animal);
+  }, 10);
 }
 
 function updateHealthDisplay(animal) {
@@ -2232,6 +2235,125 @@ function markFeedingComplete(animalId, scheduledTime) {
   
   saveData();
   updateScheduleDisplay(animal);
+}
+
+function getTodayFeedingLogs(animal) {
+  if (!animal.feedingLogs) return [];
+  var today = new Date().toISOString().split('T')[0];
+  return animal.feedingLogs.filter(function(log) {
+    return log.date === today;
+  });
+}function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var date = document.getElementById('healthEntryDate').value;
+  var time = document.getElementById('healthEntryTime').value;
+  var type = document.getElementById('healthEntryType').value;
+  var notes = document.getElementById('healthEntryNotes').value.trim();
+  
+  if (!date || !type) {
+    alert('Please fill in date and type.');
+    return;
+  }
+  
+  if (!notes) {
+    alert('Please enter some notes for this health entry.');
+    return;
+  }
+  
+  var healthEntry = {
+    id: Date.now(),
+    date: date,
+    time: time,
+    type: type,
+    notes: notes
+  };
+  
+  if (!animal.healthEntries) animal.healthEntries = [];
+  animal.healthEntries.push(healthEntry);
+  
+  saveData();
+  updateHealthDisplay(animal);
+  closeHealthEntryModal();
+}
+
+function editHealthEntry(animalId, entryId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  var entry = animal.healthEntries.find(function(e) { return e.id === entryId; });
+  if (!entry) return;
+  
+  var modalHtml = 
+    '<div id="healthEntryModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
+    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+    '<h3 style="margin-top: 0;">Edit Health Entry</h3>' +
+    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">' +
+    '<div><label>Date: <input type="date" id="healthEntryDate" value="' + entry.date + '"></label></div>' +
+    '<div><label>Time: <select id="healthEntryTime">' + generateTimeOptionsWithSelected(entry.time || '12:00') + '</select></label></div>' +
+    '</div>' +
+    '<label>Type: <select id="healthEntryType" style="margin-top: 10px;">' +
+    '<option value="observation"' + (entry.type === 'observation' ? ' selected' : '') + '>Daily Observation</option>' +
+    '<option value="concern"' + (entry.type === 'concern' ? ' selected' : '') + '>Health Concern</option>' +
+    '<option value="improvement"' + (entry.type === 'improvement' ? ' selected' : '') + '>Improvement</option>' +
+    '<option value="medication"' + (entry.type === 'medication' ? ' selected' : '') + '>Medication Given</option>' +
+    '<option value="vet-visit"' + (entry.type === 'vet-visit' ? ' selected' : '') + '>Vet Visit</option>' +
+    '</select></label>' +
+    '<label>Notes: <textarea id="healthEntryNotes" placeholder="Enter detailed health notes..." style="margin-top: 15px; height: 120px;">' + (entry.notes || '') + '</textarea></label>' +
+    '<div style="margin-top: 20px; text-align: right;">' +
+    '<button onclick="closeHealthEntryModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="updateHealthEntry(' + animalId + ', ' + entryId + ')">Update Entry</button>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function updateHealthEntry(animalId, entryId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  var entry = animal.healthEntries.find(function(e) { return e.id === entryId; });
+  if (!entry) return;
+  
+  var date = document.getElementById('healthEntryDate').value;
+  var time = document.getElementById('healthEntryTime').value;
+  var type = document.getElementById('healthEntryType').value;
+  var notes = document.getElementById('healthEntryNotes').value.trim();
+  
+  if (!date || !type) {
+    alert('Please fill in date and type.');
+    return;
+  }
+  
+  if (!notes) {
+    alert('Please enter some notes for this health entry.');
+    return;
+  }
+  
+  entry.date = date;
+  entry.time = time;
+  entry.type = type;
+  entry.notes = notes;
+  
+  saveData();
+  updateHealthDisplay(animal);
+  closeHealthEntryModal();
+}
+
+function deleteHealthEntry(animalId, entryId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  if (!confirm('Delete this health entry? This cannot be undone.')) return;
+  
+  animal.healthEntries = animal.healthEntries.filter(function(e) {
+    return e.id !== entryId;
+  });
+  
+  saveData();
+  updateHealthDisplay(animal);
 }
 
 function generateTimeOptionsWithSelected(selectedTime) {
