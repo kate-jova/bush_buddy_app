@@ -1680,6 +1680,52 @@ function addAnimal() {
   showTab('home');
 }
 
+function addAnimal() {
+  console.log('addAnimal function called');
+  
+  var name = document.getElementById('animalName').value.trim();
+  var species = document.getElementById('animalSpecies').value;
+  var intakeDate = document.getElementById('intakeDate').value;
+  var intakeNotes = document.getElementById('intakeNotes').value.trim();
+  
+  console.log('Form values:', {name: name, species: species, intakeDate: intakeDate});
+  
+  if (!name || !species) {
+    alert('Please enter animal name and species.');
+    return;
+  }
+  
+  var newAnimal = {
+    id: Date.now(),
+    name: name,
+    species: species,
+    intakeDate: intakeDate || new Date().toISOString().split('T')[0],
+    intakeNotes: intakeNotes,
+    weights: [],
+    healthEntries: [],
+    photos: [],
+    treatments: [],
+    feedingLogs: [],
+    feedingTimes: []
+  };
+  
+  animals.push(newAnimal);
+  console.log('Animal added:', newAnimal);
+  
+  saveData();
+  
+  // Clear form
+  document.getElementById('animalName').value = '';
+  document.getElementById('intakeDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('intakeNotes').value = '';
+  
+  renderAnimals();
+  updateSelects();
+  alert(name + ' has been added successfully!');
+  
+  showTab('home');
+}
+
 function renderAnimals() {
   var list = document.getElementById('animalList');
   var counter = document.getElementById('animalCounter');
