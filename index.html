@@ -939,9 +939,15 @@ function updateScheduleDisplay(animal) {
     var card = document.createElement('div');
     card.className = 'feeding-time-card ' + status.class;
     
+    // Get today's feeding log for this time to show notes
+    var todayLog = getTodayFeedingLogForTime(animal, feedTime.time);
+    var hasNotes = todayLog && todayLog.notes && todayLog.notes.trim();
+    var notesIcon = hasNotes ? '📝' : '📝';
+    var notesColor = hasNotes ? '#28a745' : '#6c757d';
+    
     card.innerHTML = 
       '<div class="feeding-time-header">' +
-      '<div>' +
+      '<div style="flex: 1;">' +
       '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
       '<select id="feedingTimeSelect-' + feedTime.id + '" onchange="updateFeedingTime(' + animal.id + ', ' + feedTime.id + ', this.value)" style="padding: 4px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; font-weight: bold; background: white;">' +
       generateTimeOptionsWithSelected(feedTime.time) +
@@ -951,8 +957,10 @@ function updateScheduleDisplay(animal) {
       '<input type="text" id="feedingDesc-' + feedTime.id + '" value="' + feedTime.description + '" onchange="updateFeedingDescription(' + animal.id + ', ' + feedTime.id + ', this.value)" style="border: none; background: transparent; font-size: 12px; color: #666; padding: 2px; width: 100%;" placeholder="Enter description">' +
       '</div>' +
       '<div class="feeding-time-actions">' +
+      '<button class="small" onclick="showFeedingNotes(' + animal.id + ', \'' + feedTime.time + '\')" style="background: transparent; color: ' + notesColor + '; border: 1px solid ' + notesColor + '; padding: 6px 8px; font-size: 14px;" title="' + (hasNotes ? 'View/Edit Notes' : 'Add Notes') + '">' + notesIcon + '</button>' +
       '</div>' +
       '</div>' +
+      (hasNotes ? '<div style="margin: 10px 0; padding: 8px; background: rgba(40, 167, 69, 0.1); border-left: 3px solid #28a745; border-radius: 3px; font-size: 12px;"><strong>Notes:</strong> ' + (todayLog.notes.length > 50 ? todayLog.notes.substring(0, 50) + '...' : todayLog.notes) + '</div>' : '') +
       '<div style="margin-top: 10px;">' +
       (status.class === 'completed' ? 
         '<button class="small" onclick="unmarkFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')" style="background: #6c757d;">Undo</button>' :
@@ -963,6 +971,136 @@ function updateScheduleDisplay(animal) {
     
     scheduleDiv.appendChild(card);
   });
+}
+
+function getTodayFeedingLogForTime(animal, scheduledTime) {
+  if (!animal.feedingLogs) return null;
+  var today = new Date().toISOString().split('T')[0];
+  return animal.feedingLogs.find(function(log) {
+    return log.date === today && log.scheduledTime === scheduledTime;
+  });
+}
+
+function showFeedingNotes(animalId, scheduledTime) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var today = new Date().toISOString().split('T')[0];
+  var todayLog = getTodayFeedingLogForTime(animal, scheduledTime);
+  var currentNotes = todayLog ? (todayLog.notes || '') : '';
+  var isCompleted = todayLog ? true : false;
+  
+  var modalHtml = 
+    '<div id="feedingNotesModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
+    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+    '<h3 style="margin-top: 0;">Feeding Notes - ' + formatTime(scheduledTime) + '</h3>' +
+    '<p style="color: #666; margin-bottom: 20px;">Date: ' + formatDate(today) + '</p>' +
+    (isCompleted ? 
+      '<div style="margin-bottom: 15px; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;"><strong>✓ Feeding completed</strong> at ' + (todayLog.actualTime ? formatTime(todayLog.actualTime) : 'unknown time') + '</div>' :
+      '<div style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;"><strong>⏳ Feeding not completed yet</strong></div>'
+    ) +
+    '<label style="display: block; margin-bottom: 10px; font-weight: 600;">Notes:</label>' +
+    '<textarea id="feedingNotesText" placeholder="Record any feeding observations, issues, amounts consumed, behavior, etc..." style="width: 100%; height: 120px; padding: 12px; border: 2px solid #e1e8ed; border-radius: 8px; font-family: inherit; resize: vertical;">' + currentNotes + '</textarea>' +
+    '<div style="margin-top: 20px; text-align: right;">' +
+    '<button onclick="closeFeedingNotesModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="saveFeedingNotes(' + animalId + ', \'' + scheduledTime + '\')">Save Notes</button>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  
+  // Focus on the textarea
+  setTimeout(function() {
+    var textarea = document.getElementById('feedingNotesText');
+    if (textarea) {
+      textarea.focus();
+    }
+  }, 100);
+}
+
+function closeFeedingNotesModal() {
+  var modal = document.getElementById('feedingNotesModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function saveFeedingNotes(animalId, scheduledTime) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var notes = document.getElementById('feedingNotesText').value.trim();
+  var today = new Date().toISOString().split('T')[0];
+  
+  if (!animal.feedingLogs) animal.feedingLogs = [];
+  
+  // Find existing log for today and this time
+  var existingLog = animal.feedingLogs.find(function(log) {
+    return log.date === today && log.scheduledTime === scheduledTime;
+  });
+  
+  if (existingLog) {
+    // Update existing log with notes
+    existingLog.notes = notes;
+  } else {
+    // Create new log entry just for notes (not marked as completed)
+    animal.feedingLogs.push({
+      id: Date.now(),
+      date: today,
+      scheduledTime: scheduledTime,
+      notes: notes,
+      notesOnly: true // Flag to indicate this is just notes, not a completed feeding
+    });
+  }
+  
+  saveData();
+  updateScheduleDisplay(animal);
+  closeFeedingNotesModal();
+}
+
+function markFeedingComplete(animalId, scheduledTime) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  if (!animal.feedingLogs) animal.feedingLogs = [];
+  
+  var today = new Date().toISOString().split('T')[0];
+  var now = new Date();
+  
+  // Check if already completed
+  var existingLog = animal.feedingLogs.find(function(log) {
+    return log.date === today && log.scheduledTime === scheduledTime && !log.notesOnly;
+  });
+  
+  if (existingLog) {
+    alert('This feeding has already been marked as complete.');
+    return;
+  }
+  
+  // Check if there's a notes-only entry
+  var notesOnlyLog = animal.feedingLogs.find(function(log) {
+    return log.date === today && log.scheduledTime === scheduledTime && log.notesOnly;
+  });
+  
+  if (notesOnlyLog) {
+    // Convert notes-only entry to completed feeding
+    notesOnlyLog.actualTime = now.toTimeString().substr(0, 5);
+    notesOnlyLog.completedAt = now.toISOString();
+    delete notesOnlyLog.notesOnly;
+  } else {
+    // Create new completed feeding log
+    animal.feedingLogs.push({
+      id: Date.now(),
+      date: today,
+      actualTime: now.toTimeString().substr(0, 5),
+      scheduledTime: scheduledTime,
+      completedAt: now.toISOString()
+    });
+  }
+  
+  saveData();
+  updateScheduleDisplay(animal);
 }
 
 function generateTimeOptionsWithSelected(selectedTime) {
@@ -1046,7 +1184,40 @@ function getTodayFeedingLogs(animal) {
 }
 
 function getTodayCompletedFeeds(animal) {
-  return getTodayFeedingLogs(animal).length;
+  if (!animal.feedingLogs) return 0;
+  var today = new Date().toISOString().split('T')[0];
+  return animal.feedingLogs.filter(function(log) {
+    return log.date === today && !log.notesOnly;
+  }).length;
+}
+
+function unmarkFeedingComplete(animalId, scheduledTime) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.feedingLogs) return;
+  
+  var today = new Date().toISOString().split('T')[0];
+  
+  // Find the completed feeding log
+  var completedLog = animal.feedingLogs.find(function(log) {
+    return log.date === today && log.scheduledTime === scheduledTime && !log.notesOnly;
+  });
+  
+  if (completedLog) {
+    if (completedLog.notes && completedLog.notes.trim()) {
+      // If there are notes, convert back to notes-only entry
+      completedLog.notesOnly = true;
+      delete completedLog.actualTime;
+      delete completedLog.completedAt;
+    } else {
+      // If no notes, remove the log entirely
+      animal.feedingLogs = animal.feedingLogs.filter(function(log) {
+        return log !== completedLog;
+      });
+    }
+  }
+  
+  saveData();
+  updateScheduleDisplay(animal);
 }
 
 function getTodayOverdueFeeds(animal) {
