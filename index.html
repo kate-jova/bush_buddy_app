@@ -162,7 +162,7 @@
 
     .feeding-schedule-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 15px;
       margin-top: 20px;
     }
@@ -197,23 +197,168 @@
     }
 
     .feeding-time-header {
+      margin-bottom: 15px;
+    }
+
+    .feeding-time-main {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 12px;
       margin-bottom: 10px;
     }
 
-    .feeding-time-actions {
+    .feeding-time-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .feeding-time-controls {
       display: flex;
+      flex-direction: column;
       gap: 5px;
+      align-items: flex-end;
+    }
+
+    .feeding-time-select {
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      background: white;
+      min-width: 100px;
+    }
+
+    .feeding-description {
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: #666;
+      padding: 2px 0;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .feeding-description:focus {
+      outline: none;
+      background: rgba(255,255,255,0.8);
+      border-radius: 3px;
+      padding: 4px;
+    }
+
+    .feeding-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .feeding-actions button {
+      flex: 1;
+      min-width: 80px;
+      padding: 8px 12px;
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .notes-preview {
+      margin: 8px 0;
+      padding: 8px 10px;
+      background: rgba(40, 167, 69, 0.1);
+      border-left: 3px solid #28a745;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.3;
     }
 
     .status-badge {
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .notes-button {
+      background: transparent !important;
+      border: 1px solid;
+      padding: 6px 8px !important;
+      font-size: 16px !important;
+      min-width: auto !important;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 !important;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .feeding-schedule-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .feeding-time-card {
+        padding: 12px;
+      }
+      
+      .feeding-time-main {
+        gap: 10px;
+      }
+      
+      .feeding-time-controls {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .feeding-time-select {
+        font-size: 14px;
+        min-width: 90px;
+      }
+      
+      .feeding-actions {
+        gap: 6px;
+      }
+      
+      .feeding-actions button {
+        font-size: 12px;
+        padding: 8px 10px;
+        min-width: 70px;
+      }
+      
+      .schedule-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      
+      .summary-card {
+        padding: 12px;
+      }
+      
+      .summary-number {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .feeding-time-main {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .feeding-time-controls {
+        flex-direction: row;
+        align-self: stretch;
+        justify-content: space-between;
+      }
+      
+      .feeding-time-select {
+        min-width: 120px;
+      }
     }
 
     .status-completed { background: #28a745; color: white; }
@@ -947,26 +1092,26 @@ function updateScheduleDisplay(animal) {
     
     card.innerHTML = 
       '<div class="feeding-time-header">' +
-      '<div style="flex: 1;">' +
-      '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
-      '<select id="feedingTimeSelect-' + feedTime.id + '" onchange="updateFeedingTime(' + animal.id + ', ' + feedTime.id + ', this.value)" style="padding: 4px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; font-weight: bold; background: white;">' +
+      '<div class="feeding-time-main">' +
+      '<div class="feeding-time-info">' +
+      '<select class="feeding-time-select" id="feedingTimeSelect-' + feedTime.id + '" onchange="updateFeedingTime(' + animal.id + ', ' + feedTime.id + ', this.value)">' +
       generateTimeOptionsWithSelected(feedTime.time) +
       '</select>' +
+      '<input type="text" class="feeding-description" id="feedingDesc-' + feedTime.id + '" value="' + feedTime.description + '" onchange="updateFeedingDescription(' + animal.id + ', ' + feedTime.id + ', this.value)" placeholder="Enter description">' +
+      '</div>' +
+      '<div class="feeding-time-controls">' +
       '<span class="status-badge status-' + status.class + '">' + status.text + '</span>' +
-      '</div>' +
-      '<input type="text" id="feedingDesc-' + feedTime.id + '" value="' + feedTime.description + '" onchange="updateFeedingDescription(' + animal.id + ', ' + feedTime.id + ', this.value)" style="border: none; background: transparent; font-size: 12px; color: #666; padding: 2px; width: 100%;" placeholder="Enter description">' +
-      '</div>' +
-      '<div class="feeding-time-actions">' +
-      '<button class="small" onclick="showFeedingNotes(' + animal.id + ', \'' + feedTime.time + '\')" style="background: transparent; color: ' + notesColor + '; border: 1px solid ' + notesColor + '; padding: 6px 8px; font-size: 14px;" title="' + (hasNotes ? 'View/Edit Notes' : 'Add Notes') + '">' + notesIcon + '</button>' +
+      '<button class="notes-button" onclick="showFeedingNotes(' + animal.id + ', \'' + feedTime.time + '\')" style="color: ' + notesColor + '; border-color: ' + notesColor + ';" title="' + (hasNotes ? 'View/Edit Notes' : 'Add Notes') + '">' + notesIcon + '</button>' +
       '</div>' +
       '</div>' +
-      (hasNotes ? '<div style="margin: 10px 0; padding: 8px; background: rgba(40, 167, 69, 0.1); border-left: 3px solid #28a745; border-radius: 3px; font-size: 12px;"><strong>Notes:</strong> ' + (todayLog.notes.length > 50 ? todayLog.notes.substring(0, 50) + '...' : todayLog.notes) + '</div>' : '') +
-      '<div style="margin-top: 10px;">' +
+      '</div>' +
+      (hasNotes ? '<div class="notes-preview"><strong>Notes:</strong> ' + (todayLog.notes.length > 60 ? todayLog.notes.substring(0, 60) + '...' : todayLog.notes) + '</div>' : '') +
+      '<div class="feeding-actions">' +
       (status.class === 'completed' ? 
-        '<button class="small" onclick="unmarkFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')" style="background: #6c757d;">Undo</button>' :
-        '<button class="small" onclick="markFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')">Mark Complete</button>'
+        '<button onclick="unmarkFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')" style="background: #6c757d;">Undo</button>' :
+        '<button onclick="markFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')">Complete</button>'
       ) +
-      '<button class="small" onclick="deleteFeedingTime(' + animal.id + ', ' + feedTime.id + ')" style="background: #dc3545; margin-left: 5px;">Delete</button>' +
+      '<button onclick="deleteFeedingTime(' + animal.id + ', ' + feedTime.id + ')" style="background: #dc3545;">Delete</button>' +
       '</div>';
     
     scheduleDiv.appendChild(card);
