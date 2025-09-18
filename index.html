@@ -744,6 +744,298 @@ function deleteHealthEntry(animalId, entryId) {
   saveData();
   updateHealthDisplay(animal);
 }
+}
+
+function updateHealthDisplay(animal) {
+  var summaryDiv = document.getElementById('healthSummary-' + animal.id);
+  var entriesDiv = document.getElementById('healthEntries-' + animal.id);
+  
+  if (!summaryDiv || !entriesDiv) return;
+  
+  // Calculate summary stats
+  var totalEntries = animal.healthEntries ? animal.healthEntries.length : 0;
+  var recentEntries = getRecentHealthEntries(animal, 7).length;
+  var concerns = animal.healthEntries ? animal.healthEntries.filter(function(entry) { 
+    return entry.type === 'concern' && isRecentEntry(entry.date, 7); 
+  }).length : 0;
+  var lastEntry = totalEntries > 0 ? calculateDaysSince(animal.healthEntries[0].date) : 'Never';
+  
+  // Update summary
+  summaryDiv.innerHTML = 
+    '<div class="health-summary-card">' +
+    '<div class="health-summary-number">' + totalEntries + '</div>' +
+    '<div class="health-summary-label">Total Entries</div>' +
+    '</div>' +
+    '<div class="health-summary-card">' +
+    '<div class="health-summary-number">' + recentEntries + '</div>' +
+    '<div class="health-summary-label">This Week</div>' +
+    '</div>' +
+    '<div class="health-summary-card">' +
+    '<div class="health-summary-number">' + concerns + '</div>' +
+    '<div class="health-summary-label">Active Concerns</div>' +
+    '</div>' +
+    '<div class="health-summary-card">' +
+    '<div class="health-summary-number">' + (typeof lastEntry === 'number' ? lastEntry + 'd' : lastEntry) + '</div>' +
+    '<div class="health-summary-label">Last Entry</div>' +
+    '</div>';
+  
+  // Update entries list
+  entriesDiv.innerHTML = '<h4 style="margin: 20px 0 15px 0; color: #698167;">Health History</h4>';
+  
+  if (!animal.healthEntries || animal.healthEntries.length === 0) {
+    entriesDiv.innerHTML += '<p style="text-align: center; color: #666; font-style: italic; margin: 30px 0;">No health entries yet. Use the buttons above to start tracking health observations.</p>';
+    return;
+  }
+  
+  // Sort entries by date (newest first)
+  var sortedEntries = animal.healthEntries.slice().sort(function(a, b) {
+    return new Date(b.date + 'T' + (b.time || '00:00')) - new Date(a.date + 'T' + (a.time || '00:00'));
+  });
+  
+  sortedEntries.forEach(function(entry) {
+    var entryDiv = document.createElement('div');
+    entryDiv.className = 'health-entry-card';
+    
+    var daysSince = calculateDaysSince(entry.date);
+    var timeDisplay = entry.time ? formatTime(entry.time) : '';
+    
+    entryDiv.innerHTML = 
+      '<div class="health-entry-header">' +
+      '<div>' +
+      '<div class="health-entry-date">' + formatDate(entry.date) + 
+      (timeDisplay ? ' at ' + timeDisplay : '') + '</div>' +
+      '<div class="health-entry-time">' + daysSince + ' days ago</div>' +
+      '</div>' +
+      '<div class="health-entry-type health-type-' + entry.type + '">' + 
+      getHealthTypeLabel(entry.type) + '</div>' +
+      '</div>' +
+      '<div class="health-entry-content">' + 
+      (entry.notes || 'No notes recorded') + '</div>' +
+      '<div class="health-entry-actions">' +
+      '<button class="small" onclick="editHealthEntry(' + animal.id + ', ' + entry.id + ')" style="background: #6c757d;">Edit</button>' +
+      '<button class="small" onclick="deleteHealthEntry(' + animal.id + ', ' + entry.id + ')" style="background: #dc3545;">Delete</button>' +
+      '</div>';
+    
+    entriesDiv.appendChild(entryDiv);
+  });
+}
+
+function getRecentHealthEntries(animal, days) {
+  if (!animal.healthEntries) return [];
+  var cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+  
+  return animal.healthEntries.filter(function(entry) {
+    return new Date(entry.date) >= cutoffDate;
+  });
+}
+
+function isRecentEntry(dateStr, days) {
+  var cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+  return new Date(dateStr) >= cutoffDate;
+}
+
+function calculateDaysSince(dateStr) {
+  var entryDate = new Date(dateStr);
+  var today = new Date();
+  var diffTime = today - entryDate;
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function getHealthTypeLabel(type) {
+  var labels = {
+    'observation': 'Observation',
+    'concern': 'Concern',
+    'improvement': 'Improvement',
+    'medication': 'Medication',
+    'vet-visit': 'Vet Visit'
+  };
+  return labels[type] || 'Other';
+}
+
+function addQuickHealthEntry(animalId, type) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var prompts = {
+    'observation': 'Record daily observation (behavior, appetite, activity level, etc.):',
+    'concern': 'Describe the health concern or symptom observed:',
+    'improvement': 'Describe the improvement or positive change:',
+    'medication': 'Record medication given (name, dose, time):',
+    'vet-visit': 'Record vet visit details (reason, findings, recommendations):'
+  };
+  
+  var notes = prompt(prompts[type] || 'Enter health notes:');
+  if (!notes || !notes.trim()) return;
+  
+  var now = new Date();
+  var healthEntry = {
+    id: Date.now(),
+    date: now.toISOString().split('T')[0],
+    time: now.toTimeString().substr(0, 5),
+    type: type,
+    notes: notes.trim()
+  };
+  
+  if (!animal.healthEntries) animal.healthEntries = [];
+  animal.healthEntries.push(healthEntry);
+  
+  saveData();
+  updateHealthDisplay(animal);
+}
+
+function showAddHealthEntryModal(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var now = new Date();
+  var modalHtml = 
+    '<div id="healthEntryModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
+    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+    '<h3 style="margin-top: 0;">Add Health Entry</h3>' +
+    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">' +
+    '<div><label>Date: <input type="date" id="healthEntryDate" value="' + now.toISOString().split('T')[0] + '"></label></div>' +
+    '<div><label>Time: <select id="healthEntryTime">' + generateTimeOptionsWithSelected(now.toTimeString().substr(0, 5)) + '</select></label></div>' +
+    '</div>' +
+    '<label>Type: <select id="healthEntryType" style="margin-top: 10px;">' +
+    '<option value="observation">Daily Observation</option>' +
+    '<option value="concern">Health Concern</option>' +
+    '<option value="improvement">Improvement</option>' +
+    '<option value="medication">Medication Given</option>' +
+    '<option value="vet-visit">Vet Visit</option>' +
+    '</select></label>' +
+    '<label>Notes: <textarea id="healthEntryNotes" placeholder="Enter detailed health notes..." style="margin-top: 15px; height: 120px;"></textarea></label>' +
+    '<div style="margin-top: 20px; text-align: right;">' +
+    '<button onclick="closeHealthEntryModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="saveHealthEntry(' + animalId + ')">Save Entry</button>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeHealthEntryModal() {
+  var modal = document.getElementById('healthEntryModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function saveHealthEntry(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var date = document.getElementById('healthEntryDate').value;
+  var time = document.getElementById('healthEntryTime').value;
+  var type = document.getElementById('healthEntryType').value;
+  var notes = document.getElementById('healthEntryNotes').value.trim();
+  
+  if (!date || !type) {
+    alert('Please fill in date and type.');
+    return;
+  }
+  
+  if (!notes) {
+    alert('Please enter some notes for this health entry.');
+    return;
+  }
+  
+  var healthEntry = {
+    id: Date.now(),
+    date: date,
+    time: time,
+    type: type,
+    notes: notes
+  };
+  
+  if (!animal.healthEntries) animal.healthEntries = [];
+  animal.healthEntries.push(healthEntry);
+  
+  saveData();
+  updateHealthDisplay(animal);
+  closeHealthEntryModal();
+}
+
+function editHealthEntry(animalId, entryId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  var entry = animal.healthEntries.find(function(e) { return e.id === entryId; });
+  if (!entry) return;
+  
+  var modalHtml = 
+    '<div id="healthEntryModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
+    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+    '<h3 style="margin-top: 0;">Edit Health Entry</h3>' +
+    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">' +
+    '<div><label>Date: <input type="date" id="healthEntryDate" value="' + entry.date + '"></label></div>' +
+    '<div><label>Time: <select id="healthEntryTime">' + generateTimeOptionsWithSelected(entry.time || '12:00') + '</select></label></div>' +
+    '</div>' +
+    '<label>Type: <select id="healthEntryType" style="margin-top: 10px;">' +
+    '<option value="observation"' + (entry.type === 'observation' ? ' selected' : '') + '>Daily Observation</option>' +
+    '<option value="concern"' + (entry.type === 'concern' ? ' selected' : '') + '>Health Concern</option>' +
+    '<option value="improvement"' + (entry.type === 'improvement' ? ' selected' : '') + '>Improvement</option>' +
+    '<option value="medication"' + (entry.type === 'medication' ? ' selected' : '') + '>Medication Given</option>' +
+    '<option value="vet-visit"' + (entry.type === 'vet-visit' ? ' selected' : '') + '>Vet Visit</option>' +
+    '</select></label>' +
+    '<label>Notes: <textarea id="healthEntryNotes" placeholder="Enter detailed health notes..." style="margin-top: 15px; height: 120px;">' + (entry.notes || '') + '</textarea></label>' +
+    '<div style="margin-top: 20px; text-align: right;">' +
+    '<button onclick="closeHealthEntryModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="updateHealthEntry(' + animalId + ', ' + entryId + ')">Update Entry</button>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function updateHealthEntry(animalId, entryId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  var entry = animal.healthEntries.find(function(e) { return e.id === entryId; });
+  if (!entry) return;
+  
+  var date = document.getElementById('healthEntryDate').value;
+  var time = document.getElementById('healthEntryTime').value;
+  var type = document.getElementById('healthEntryType').value;
+  var notes = document.getElementById('healthEntryNotes').value.trim();
+  
+  if (!date || !type) {
+    alert('Please fill in date and type.');
+    return;
+  }
+  
+  if (!notes) {
+    alert('Please enter some notes for this health entry.');
+    return;
+  }
+  
+  entry.date = date;
+  entry.time = time;
+  entry.type = type;
+  entry.notes = notes;
+  
+  saveData();
+  updateHealthDisplay(animal);
+  closeHealthEntryModal();
+}
+
+function deleteHealthEntry(animalId, entryId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.healthEntries) return;
+  
+  if (!confirm('Delete this health entry? This cannot be undone.')) return;
+  
+  animal.healthEntries = animal.healthEntries.filter(function(e) {
+    return e.id !== entryId;
+  });
+  
+  saveData();
+  updateHealthDisplay(animal);
+}
 
 /* Mobile optimizations */
     @media (max-width: 768px) {
@@ -1764,6 +2056,62 @@ function updateFeedingDescription(animalId, feedingTimeId, newDescription) {
   
   feedingTime.description = newDescription.trim() || 'Feed';
   saveData();
+}
+
+function showHealthSection(animal, container) {
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<h3>Health Tracking for ' + animal.name + '</h3>';
+  
+  // Initialize health entries if they don't exist
+  if (!animal.healthEntries) {
+    animal.healthEntries = [];
+  }
+  
+  // Health summary
+  var summaryDiv = document.createElement('div');
+  summaryDiv.className = 'health-summary-grid';
+  summaryDiv.id = 'healthSummary-' + animal.id;
+  card.appendChild(summaryDiv);
+  
+  // Quick action buttons
+  var quickActionsDiv = document.createElement('div');
+  quickActionsDiv.className = 'health-quick-actions';
+  quickActionsDiv.innerHTML = 
+    '<button class="quick-action-btn" onclick="addQuickHealthEntry(' + animal.id + ', \'observation\')">' +
+    '<div style="font-size: 16px; margin-bottom: 4px;">👁️</div>' +
+    'Daily Observation' +
+    '</button>' +
+    '<button class="quick-action-btn" onclick="addQuickHealthEntry(' + animal.id + ', \'concern\')">' +
+    '<div style="font-size: 16px; margin-bottom: 4px;">⚠️</div>' +
+    'Health Concern' +
+    '</button>' +
+    '<button class="quick-action-btn" onclick="addQuickHealthEntry(' + animal.id + ', \'improvement\')">' +
+    '<div style="font-size: 16px; margin-bottom: 4px;">✅</div>' +
+    'Improvement' +
+    '</button>' +
+    '<button class="quick-action-btn" onclick="addQuickHealthEntry(' + animal.id + ', \'medication\')">' +
+    '<div style="font-size: 16px; margin-bottom: 4px;">💊</div>' +
+    'Medication Given' +
+    '</button>' +
+    '<button class="quick-action-btn" onclick="addQuickHealthEntry(' + animal.id + ', \'vet-visit\')">' +
+    '<div style="font-size: 16px; margin-bottom: 4px;">🏥</div>' +
+    'Vet Visit' +
+    '</button>' +
+    '<button class="quick-action-btn" onclick="showAddHealthEntryModal(' + animal.id + ')">' +
+    '<div style="font-size: 16px; margin-bottom: 4px;">➕</div>' +
+    'Custom Entry' +
+    '</button>';
+  card.appendChild(quickActionsDiv);
+  
+  // Health entries list
+  var entriesDiv = document.createElement('div');
+  entriesDiv.id = 'healthEntries-' + animal.id;
+  card.appendChild(entriesDiv);
+  
+  container.appendChild(card);
+  
+  updateHealthDisplay(animal);
 }
 
 function getFeedingStatus(animal, feedTime) {
