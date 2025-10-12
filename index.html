@@ -25,7 +25,7 @@
 
     .main-nav { 
       display: flex; 
-      justify-content: flex-start;
+      justify-content: center;
       margin-bottom: 30px; 
       background: white; 
       border-radius: 15px; 
@@ -520,8 +520,8 @@
 
   <div class="main-nav">
     <button class="nav-tab active" onclick="showTab('home')">
-      <div class="nav-tab-icon">🏠</div>
-      <div class="nav-tab-text">Home</div>
+      <div class="nav-tab-icon">🐾</div>
+      <div class="nav-tab-text">Your<br>Animals</div>
     </button>
     <button class="nav-tab" onclick="showTab('add')">
       <div class="nav-tab-icon">➕</div>
@@ -914,7 +914,6 @@ function showAnimalDetail(animalId) {
     '<button onclick="showAnimalSection(' + animal.id + ', \'weight\')" style="text-align: left; padding: 15px;">⚖️ Weight & Feeding</button>' +
     '<button onclick="showAnimalSection(' + animal.id + ', \'health\')" style="text-align: left; padding: 15px;">🏥 Health Tracking</button>' +
     '<button onclick="showAnimalSection(' + animal.id + ', \'treatments\')" style="text-align: left; padding: 15px;">💊 Treatments</button>' +
-    '<button onclick="showAnimalSection(' + animal.id + ', \'feeding\')" style="text-align: left; padding: 15px;">📅 Daily Feeding</button>' +
     '<button onclick="showAnimalSection(' + animal.id + ', \'schedule\')" style="text-align: left; padding: 15px;">⏰ Feeding Schedule</button>' +
     '<button onclick="showAnimalSection(' + animal.id + ', \'photos\')" style="text-align: left; padding: 15px;">📸 Photo Gallery</button>' +
     '</div>' +
