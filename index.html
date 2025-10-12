@@ -823,7 +823,7 @@ function showAnimalSection(animalId, section) {
       showHealthSection(animal, content);
       break;
     case 'treatments':
-      content.innerHTML = '<div class="card"><h3>Treatments</h3><p>Treatment logging features coming soon...</p></div>';
+      showTreatmentsSection(animal, content);
       break;
     case 'feeding':
       content.innerHTML = '<div class="card"><h3>Daily Feeding</h3><p>Daily feeding checklist features coming soon...</p></div>';
@@ -911,7 +911,213 @@ function showHealthSection(animal, container) {
   
   updateHealthDisplay(animal);
 }
+function showTreatmentsSection(animal, container) {
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<h3>Treatment Tracking for ' + animal.name + '</h3>';
+  
+  var form = document.createElement('div');
+  form.style.cssText = 'margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px;';
+  form.innerHTML = 
+    '<h4 style="margin-top: 0; color: #698167;">Record Treatment</h4>' +
+    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
+    '<div><label>Date: <input type="date" id="treatmentDate-' + animal.id + '" value="' + new Date().toISOString().split('T')[0] + '"></label></div>' +
+    '<div><label>Time: <input type="time" id="treatmentTime-' + animal.id + '" value="' + new Date().toTimeString().substr(0, 5) + '"></label></div>' +
+    '<div><label>Type: <select id="treatmentType-' + animal.id + '">' +
+    '<option value="Medication">Medication</option>' +
+    '<option value="Wound Care">Wound Care</option>' +
+    '<option value="Parasite Treatment">Parasite Treatment</option>' +
+    '<option value="Vitamin Supplement">Vitamin Supplement</option>' +
+    '<option value="Antibiotic">Antibiotic</option>' +
+    '<option value="Pain Relief">Pain Relief</option>' +
+    '<option value="Fluid Therapy">Fluid Therapy</option>' +
+    '<option value="Other">Other</option>' +
+    '</select></label></div>' +
+    '</div>' +
+    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">' +
+    '<div><label>Treatment Name: <input type="text" id="treatmentName-' + animal.id + '" placeholder="e.g., Baytril, Metacam"></label></div>' +
+    '<div><label>Dosage: <input type="text" id="treatmentDosage-' + animal.id + '" placeholder="e.g., 0.5ml, 10mg"></label></div>' +
+    '<div><label>Route: <select id="treatmentRoute-' + animal.id + '">' +
+    '<option value="Oral">Oral</option>' +
+    '<option value="Topical">Topical</option>' +
+    '<option value="Injectable">Injectable</option>' +
+    '<option value="Other">Other</option>' +
+    '</select></label></div>' +
+    '</div>' +
+    '<label style="margin-top: 15px;">Notes: <textarea id="treatmentNotes-' + animal.id + '" placeholder="Additional details about administration, animal response, etc..." style="min-height: 80px;"></textarea></label>' +
+    '<div style="margin-top: 15px;">' +
+    '<label style="display: inline-block; margin-right: 20px;"><input type="checkbox" id="treatmentOngoing-' + animal.id + '"> Ongoing treatment (requires repeat doses)</label>' +
+    '</div>' +
+    '<button onclick="addTreatment(' + animal.id + ')" style="margin-top: 15px;">Add Treatment Record</button>';
+  card.appendChild(form);
+  
+  var summaryDiv = document.createElement('div');
+  summaryDiv.className = 'schedule-summary';
+  summaryDiv.style.marginBottom = '20px';
+  card.appendChild(summaryDiv);
+  
+  var historyDiv = document.createElement('div');
+  historyDiv.id = 'treatmentHistory-' + animal.id;
+  card.appendChild(historyDiv);
+  
+  container.appendChild(card);
+  
+  updateTreatmentDisplay(animal);
+}
 
+function addTreatment(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  
+  var date = document.getElementById('treatmentDate-' + animalId).value;
+  var time = document.getElementById('treatmentTime-' + animalId).value;
+  var type = document.getElementById('treatmentType-' + animalId).value;
+  var name = document.getElementById('treatmentName-' + animalId).value.trim();
+  var dosage = document.getElementById('treatmentDosage-' + animalId).value.trim();
+  var route = document.getElementById('treatmentRoute-' + animalId).value;
+  var notes = document.getElementById('treatmentNotes-' + animalId).value.trim();
+  var ongoing = document.getElementById('treatmentOngoing-' + animalId).checked;
+  
+  if (!date || !name) {
+    alert('Please enter a date and treatment name.');
+    return;
+  }
+  
+  if (!animal.treatments) animal.treatments = [];
+  
+  animal.treatments.push({
+    id: Date.now(),
+    date: date,
+    time: time,
+    type: type,
+    name: name,
+    dosage: dosage,
+    route: route,
+    notes: notes,
+    ongoing: ongoing,
+    createdAt: new Date().toISOString()
+  });
+  
+  saveData();
+  
+  document.getElementById('treatmentDate-' + animalId).value = new Date().toISOString().split('T')[0];
+  document.getElementById('treatmentTime-' + animalId).value = new Date().toTimeString().substr(0, 5);
+  document.getElementById('treatmentType-' + animalId).value = 'Medication';
+  document.getElementById('treatmentName-' + animalId).value = '';
+  document.getElementById('treatmentDosage-' + animalId).value = '';
+  document.getElementById('treatmentRoute-' + animalId).value = 'Oral';
+  document.getElementById('treatmentNotes-' + animalId).value = '';
+  document.getElementById('treatmentOngoing-' + animalId).checked = false;
+  
+  updateTreatmentDisplay(animal);
+  alert('Treatment record added successfully!');
+}
+
+function updateTreatmentDisplay(animal) {
+  var historyDiv = document.getElementById('treatmentHistory-' + animal.id);
+  if (!historyDiv) return;
+  
+  historyDiv.innerHTML = '<h4 style="color: #698167;">Treatment History</h4>';
+  
+  if (!animal.treatments || animal.treatments.length === 0) {
+    historyDiv.innerHTML += '<p style="color: #666; font-style: italic;">No treatment records yet.</p>';
+    return;
+  }
+  
+  var totalTreatments = animal.treatments.length;
+  var ongoingTreatments = animal.treatments.filter(function(t) { return t.ongoing; }).length;
+  var recentTreatments = animal.treatments.filter(function(t) {
+    var treatmentDate = new Date(t.date);
+    var weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return treatmentDate >= weekAgo;
+  }).length;
+  
+  var uniqueMedications = {};
+  animal.treatments.forEach(function(t) {
+    uniqueMedications[t.name] = true;
+  });
+  var medicationCount = Object.keys(uniqueMedications).length;
+  
+  var summaryDiv = historyDiv.previousElementSibling;
+  if (summaryDiv && summaryDiv.className === 'schedule-summary') {
+    summaryDiv.innerHTML = 
+      '<div class="summary-card">' +
+      '<div class="summary-number">' + totalTreatments + '</div>' +
+      '<div class="summary-label">Total Records</div>' +
+      '</div>' +
+      '<div class="summary-card">' +
+      '<div class="summary-number">' + recentTreatments + '</div>' +
+      '<div class="summary-label">Past 7 Days</div>' +
+      '</div>' +
+      '<div class="summary-card">' +
+      '<div class="summary-number">' + medicationCount + '</div>' +
+      '<div class="summary-label">Different Meds</div>' +
+      '</div>' +
+      '<div class="summary-card" style="' + (ongoingTreatments > 0 ? 'border-color: #ffc107;' : '') + '">' +
+      '<div class="summary-number" style="' + (ongoingTreatments > 0 ? 'color: #ffc107;' : '') + '">' + ongoingTreatments + '</div>' +
+      '<div class="summary-label">Ongoing</div>' +
+      '</div>';
+  }
+  
+  var sorted = animal.treatments.slice().sort(function(a, b) {
+    var dateA = new Date(a.date + 'T' + (a.time || '00:00'));
+    var dateB = new Date(b.date + 'T' + (b.time || '00:00'));
+    return dateB - dateA;
+  });
+  
+  sorted.forEach(function(treatment) {
+    var div = document.createElement('div');
+    div.style.cssText = 'padding: 15px; margin: 10px 0; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); ' + 
+      (treatment.ongoing ? 'border-left: 4px solid #ffc107;' : 'border-left: 4px solid #698167;');
+    
+    var typeColor = {
+      'Medication': '#007bff',
+      'Wound Care': '#dc3545',
+      'Parasite Treatment': '#28a745',
+      'Vitamin Supplement': '#17a2b8',
+      'Antibiotic': '#6f42c1',
+      'Pain Relief': '#fd7e14',
+      'Fluid Therapy': '#20c997',
+      'Other': '#6c757d'
+    };
+    
+    var color = typeColor[treatment.type] || '#698167';
+    
+    div.innerHTML = 
+      '<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">' +
+      '<div>' +
+      '<strong style="font-size: 18px;">' + treatment.name + '</strong>' +
+      (treatment.dosage ? ' <span style="color: #666;">(' + treatment.dosage + ')</span>' : '') +
+      '<br>' +
+      '<strong style="font-size: 14px;">' + formatDate(treatment.date) + '</strong>' +
+      (treatment.time ? ' <span style="color: #666;">at ' + formatTime(treatment.time) + '</span>' : '') +
+      '<br>' +
+      '<span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: ' + color + '; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + treatment.type.toUpperCase() + '</span>' +
+      ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #e9ecef; color: #495057; border-radius: 12px; font-size: 11px; font-weight: 600;">' + treatment.route.toUpperCase() + '</span>' +
+      (treatment.ongoing ? ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #ffc107; color: #212529; border-radius: 12px; font-size: 11px; font-weight: 600;">🔄 ONGOING</span>' : '') +
+      '</div>' +
+      '<button class="small" onclick="deleteTreatment(' + animal.id + ', ' + treatment.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>' +
+      '</div>' +
+      (treatment.notes ? '<div style="margin-top: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; line-height: 1.6;">' + treatment.notes + '</div>' : '');
+    
+    historyDiv.appendChild(div);
+  });
+}
+
+function deleteTreatment(animalId, treatmentId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.treatments) return;
+  
+  if (!confirm('Delete this treatment record?')) return;
+  
+  animal.treatments = animal.treatments.filter(function(t) {
+    return t.id !== treatmentId;
+  });
+  
+  saveData();
+  updateTreatmentDisplay(animal);
+}
 function addHealthEntry(animalId) {
   var animal = animals.find(function(a) { return a.id == animalId; });
   if (!animal) return;
