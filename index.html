@@ -509,6 +509,136 @@
         height: 150px;
       }
     }
+    .timeline-container {
+      margin-top: 20px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline-item:before {
+      content: '';
+      position: absolute;
+      left: 9px;
+      top: 30px;
+      bottom: -20px;
+      width: 2px;
+      background: #e9ecef;
+    }
+
+    .timeline-item:last-child:before {
+      display: none;
+    }
+
+    .timeline-time {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 10px;
+    }
+
+    .timeline-time.completed {
+      background: #28a745;
+      color: white;
+    }
+
+    .timeline-time.pending {
+      background: #6c757d;
+      color: white;
+    }
+
+    .timeline-time.overdue {
+      background: #dc3545;
+      color: white;
+    }
+
+    .timeline-time.upcoming {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .timeline-content {
+      flex: 1;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .timeline-animal {
+      font-size: 18px;
+      font-weight: bold;
+      color: #698167;
+    }
+
+    .timeline-type {
+      font-size: 14px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .timeline-details {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .no-schedule {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+      font-style: italic;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 8px 16px;
+      border: 2px solid #e9ecef;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .filter-tab:hover {
+      border-color: #698167;
+    }
+
+    .filter-tab.active {
+      background: #698167;
+      color: white;
+      border-color: #698167;
+    }
   </style>
 </head>
 <body>
@@ -522,6 +652,10 @@
     <button class="nav-tab active" onclick="showTab('home')">
       <div class="nav-tab-icon">🐾</div>
       <div class="nav-tab-text">Your<br>Animals</div>
+    </button>
+    <button class="nav-tab" onclick="showTab('daily')">
+      <div class="nav-tab-icon">📅</div>
+      <div class="nav-tab-text">Today's<br>Schedule</div>
     </button>
     <button class="nav-tab" onclick="showTab('add')">
       <div class="nav-tab-icon">➕</div>
@@ -570,6 +704,14 @@
       <label>Intake Date: <input type="date" id="intakeDate"></label>
       <label>Intake Notes: <textarea id="intakeNotes" placeholder="Circumstances of rescue, initial condition, etc."></textarea></label>
       <button onclick="addAnimal()">Add Animal</button>
+    </div>
+  </div>
+
+  <!-- Today's Schedule Tab -->
+  <div id="dailyTab" class="tab-content">
+    <div class="card">
+      <h2>Today's Schedule - <span id="todayDate"></span></h2>
+      <div id="dailyScheduleContent"></div>
     </div>
   </div>
 
@@ -737,6 +879,11 @@ function showTab(tabName) {
   var targetTab = document.getElementById(tabName + 'Tab');
   if (targetTab) {
     targetTab.classList.add('active');
+  }
+  
+  // Load daily schedule when daily tab is shown
+  if (tabName === 'daily') {
+    showDailySchedule();
   }
   
   updateSelects();
@@ -2417,7 +2564,182 @@ function restoreData() {
   reader.readAsText(file);
   fileInput.value = '';
 }
+function showDailySchedule() {
+  var today = new Date();
+  var dateStr = today.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('todayDate').textContent = dateStr;
+  
+  var content = document.getElementById('dailyScheduleContent');
+  
+  // Collect all scheduled items for today
+  var scheduleItems = [];
+  
+  animals.forEach(function(animal) {
+    // Add feeding times
+    if (animal.feedingTimes && animal.feedingTimes.length > 0) {
+      animal.feedingTimes.forEach(function(feedTime) {
+        if (feedTime.enabled) {
+          var status = getFeedingStatus(animal, feedTime);
+          var todayLog = getTodayFeedingLogForTime(animal, feedTime.time);
+          
+          scheduleItems.push({
+            time: feedTime.time,
+            type: 'feeding',
+            animal: animal,
+            status: status,
+            description: feedTime.description,
+            log: todayLog,
+            feedTime: feedTime
+          });
+        }
+      });
+    }
+    
+    // Add ongoing treatments for today
+    if (animal.treatments && animal.treatments.length > 0) {
+      var todayStr = today.toISOString().split('T')[0];
+      animal.treatments.forEach(function(treatment) {
+        if (treatment.ongoing) {
+          // Show ongoing treatments at their original time or at 9am if no time specified
+          var treatmentTime = treatment.time || '09:00';
+          scheduleItems.push({
+            time: treatmentTime,
+            type: 'treatment',
+            animal: animal,
+            status: { class: 'pending', text: 'Pending' },
+            description: treatment.name,
+            treatment: treatment
+          });
+        }
+      });
+    }
+  });
+  
+  // Sort by time
+  scheduleItems.sort(function(a, b) {
+    return a.time.localeCompare(b.time);
+  });
+  
+  if (scheduleItems.length === 0) {
+    content.innerHTML = '<div class="no-schedule">No scheduled feeds or treatments for today. Add animals and set up their feeding schedules to see them here!</div>';
+    return;
+  }
+  
+  // Create filter tabs
+  var filterHtml = 
+    '<div class="filter-tabs">' +
+    '<button class="filter-tab active" onclick="filterDailySchedule(\'all\')">All (' + scheduleItems.length + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'feeding\')">Feeding (' + scheduleItems.filter(function(i) { return i.type === 'feeding'; }).length + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'treatment\')">Treatments (' + scheduleItems.filter(function(i) { return i.type === 'treatment'; }).length + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'pending\')">Pending (' + scheduleItems.filter(function(i) { return i.status.class === 'pending' || i.status.class === 'upcoming' || i.status.class === 'overdue'; }).length + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'completed\')">Completed (' + scheduleItems.filter(function(i) { return i.status.class === 'completed'; }).length + ')</button>' +
+    '</div>';
+  
+  // Create timeline
+  var timelineHtml = '<div class="timeline-container" id="timelineContainer">';
+  
+  scheduleItems.forEach(function(item) {
+    var statusIcon = '';
+    if (item.status.class === 'completed') statusIcon = '✓';
+    else if (item.status.class === 'overdue') statusIcon = '!';
+    else if (item.status.class === 'upcoming') statusIcon = '⋯';
+    else statusIcon = '○';
+    
+    timelineHtml += 
+      '<div class="timeline-item" data-type="' + item.type + '" data-status="' + item.status.class + '">' +
+      '<div class="timeline-time ' + item.status.class + '">' + statusIcon + '</div>' +
+      '<div class="timeline-content">' +
+      '<div class="timeline-header">' +
+      '<div>' +
+      '<div class="timeline-animal">' + item.animal.name + '</div>' +
+      '<div class="timeline-type">' + 
+      (item.type === 'feeding' ? '🍼 Feeding' : '💊 Treatment') + 
+      ' • ' + formatTime(item.time) + 
+      '</div>' +
+      '</div>' +
+      '<span class="status-badge status-' + item.status.class + '">' + item.status.text + '</span>' +
+      '</div>';
+    
+    if (item.type === 'feeding') {
+      var hasNotes = item.log && item.log.notes && item.log.notes.trim();
+      timelineHtml += 
+        '<div class="timeline-details">' +
+        '<strong>' + item.description + '</strong><br>';
+      
+      if (hasNotes) {
+        timelineHtml += 'Notes: ' + item.log.notes + '<br>';
+      }
+      
+      timelineHtml += 
+        '</div>' +
+        '<div style="margin-top: 10px; display: flex; gap: 8px;">';
+      
+      if (item.status.class === 'completed') {
+        timelineHtml += 
+          '<button class="small" onclick="unmarkFeedingComplete(' + item.animal.id + ', \'' + item.feedTime.time + '\'); showDailySchedule();" style="background: #6c757d; color: white;">Undo</button>';
+      } else {
+        timelineHtml += 
+          '<button class="small" onclick="markFeedingComplete(' + item.animal.id + ', \'' + item.feedTime.time + '\'); showDailySchedule();" style="background: #28a745; color: white;">Mark Complete</button>';
+      }
+      
+      timelineHtml += 
+        '<button class="small" onclick="showFeedingNotes(' + item.animal.id + ', \'' + item.feedTime.time + '\')" style="background: #17a2b8; color: white;">Add Notes</button>' +
+        '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'schedule\');" style="background: #698167; color: white;">View Animal</button>' +
+        '</div>';
+    } else {
+      timelineHtml += 
+        '<div class="timeline-details">' +
+        '<strong>' + item.treatment.type + '</strong><br>' +
+        'Dosage: ' + (item.treatment.dosage || 'Not specified') + '<br>' +
+        'Route: ' + item.treatment.route + '<br>';
+      
+      if (item.treatment.notes) {
+        timelineHtml += 'Notes: ' + item.treatment.notes + '<br>';
+      }
+      
+      timelineHtml += 
+        '</div>' +
+        '<div style="margin-top: 10px; display: flex; gap: 8px;">' +
+        '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'treatments\');" style="background: #698167; color: white;">View Animal</button>' +
+        '</div>';
+    }
+    
+    timelineHtml += '</div></div>';
+  });
+  
+  timelineHtml += '</div>';
+  
+  content.innerHTML = filterHtml + timelineHtml;
+}
 
+function filterDailySchedule(filter) {
+  // Update active tab
+  document.querySelectorAll('.filter-tab').forEach(function(tab) {
+    tab.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Filter timeline items
+  var items = document.querySelectorAll('.timeline-item');
+  items.forEach(function(item) {
+    var show = false;
+    
+    if (filter === 'all') {
+      show = true;
+    } else if (filter === 'feeding') {
+      show = item.getAttribute('data-type') === 'feeding';
+    } else if (filter === 'treatment') {
+      show = item.getAttribute('data-type') === 'treatment';
+    } else if (filter === 'pending') {
+      var status = item.getAttribute('data-status');
+      show = status === 'pending' || status === 'upcoming' || status === 'overdue';
+    } else if (filter === 'completed') {
+      show = item.getAttribute('data-status') === 'completed';
+    }
+    
+    item.style.display = show ? 'flex' : 'none';
+  });
+}
 function initApp() {
   loadData();
   setDefaultDates();
