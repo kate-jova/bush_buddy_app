@@ -2625,14 +2625,19 @@ function showDailySchedule() {
     return;
   }
   
-  // Create filter tabs
+ // Create filter tabs
+  var feedingCount = scheduleItems.filter(function(i) { return i.type === 'feeding'; }).length;
+  var treatmentCount = scheduleItems.filter(function(i) { return i.type === 'treatment'; }).length;
+  var pendingCount = scheduleItems.filter(function(i) { return i.status.class === 'pending' || i.status.class === 'upcoming' || i.status.class === 'overdue'; }).length;
+  var completedCount = scheduleItems.filter(function(i) { return i.status.class === 'completed'; }).length;
+  
   var filterHtml = 
     '<div class="filter-tabs">' +
     '<button class="filter-tab active" onclick="filterDailySchedule(\'all\')">All (' + scheduleItems.length + ')</button>' +
-    '<button class="filter-tab" onclick="filterDailySchedule(\'feeding\')">Feeding (' + scheduleItems.filter(function(i) { return i.type === 'feeding'; }).length + ')</button>' +
-    '<button class="filter-tab" onclick="filterDailySchedule(\'treatment\')">Treatments (' + scheduleItems.filter(function(i) { return i.type === 'treatment'; }).length + ')</button>' +
-    '<button class="filter-tab" onclick="filterDailySchedule(\'pending\')">Pending (' + scheduleItems.filter(function(i) { return i.status.class === 'pending' || i.status.class === 'upcoming' || i.status.class === 'overdue'; }).length + ')</button>' +
-    '<button class="filter-tab" onclick="filterDailySchedule(\'completed\')">Completed (' + scheduleItems.filter(function(i) { return i.status.class === 'completed'; }).length + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'feeding\')">Feeding (' + feedingCount + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'treatment\')">Treatments (' + treatmentCount + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'pending\')">Pending (' + pendingCount + ')</button>' +
+    '<button class="filter-tab" onclick="filterDailySchedule(\'completed\')">Completed (' + completedCount + ')</button>' +
     '</div>';
   
   // Create timeline
