@@ -622,21 +622,25 @@
     .filter-tab {
       padding: 8px 16px;
       border: 2px solid #e9ecef;
-      background: white;
+      background: white !important;
       border-radius: 20px;
       cursor: pointer;
       font-size: 14px;
       font-weight: 600;
       transition: all 0.3s ease;
+      color: #333 !important;
     }
 
     .filter-tab:hover {
       border-color: #698167;
+      background: white !important;
+      transform: none !important;
+      box-shadow: none !important;
     }
 
     .filter-tab.active {
-      background: #698167;
-      color: white;
+      background: #698167 !important;
+      color: white !important;
       border-color: #698167;
     }
   </style>
