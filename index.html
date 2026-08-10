@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -674,7 +673,7 @@
   <!-- Home Tab -->
   <div id="homeTab" class="tab-content active">
     <div class="card">
-      <h2>Your Lil Buddy</h2>
+      <h2>Your Animals</h2>
       
       <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
         <input type="text" id="animalSearch" placeholder="Search by name, species, or notes..." style="flex: 1; min-width: 200px;">
@@ -900,6 +899,7 @@ function loadData() {
     if (saved) {
       animals = JSON.parse(saved);
       migrateLogDates();
+      migrateOngoingTreatments();
       console.log('Data loaded successfully:', animals.length, 'animals');
     } else {
       animals = [];
@@ -1256,9 +1256,12 @@ function showHealthSection(animal, container) {
   updateHealthDisplay(animal);
 }
 function showTreatmentsSection(animal, container) {
+  renderTreatmentPlansCard(animal, container);
+
   var card = document.createElement('div');
   card.className = 'card';
-  card.innerHTML = '<h3>Treatment Tracking for ' + escapeHtml(animal.name) + '</h3>';
+  card.innerHTML = '<h3>One-Off Treatment Records</h3>' +
+    '<p style="color: #666; margin-top: -8px;">A single treatment that is not part of a repeating course.</p>';
   
   var form = document.createElement('div');
   form.style.cssText = 'margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px;';
@@ -1289,9 +1292,7 @@ function showTreatmentsSection(animal, container) {
     '</select></label></div>' +
     '</div>' +
     '<label style="margin-top: 15px;">Notes: <textarea id="treatmentNotes-' + animal.id + '" placeholder="Additional details about administration, animal response, etc..." style="min-height: 80px;"></textarea></label>' +
-    '<div style="margin-top: 15px;">' +
-    '<label style="display: inline-block; margin-right: 20px;"><input type="checkbox" id="treatmentOngoing-' + animal.id + '"> Ongoing treatment (requires repeat doses)</label>' +
-    '</div>' +
+    '<p style="margin-top: 15px; color: #666; font-size: 13px;">Repeating course? Use <strong>Scheduled Treatments</strong> above instead - it works out each dose and tracks whether it was given.</p>' +
     '<button onclick="addTreatment(' + animal.id + ')" style="margin-top: 15px;">Add Treatment Record</button>';
   card.appendChild(form);
   
@@ -1320,7 +1321,6 @@ function addTreatment(animalId) {
   var dosage = document.getElementById('treatmentDosage-' + animalId).value.trim();
   var route = document.getElementById('treatmentRoute-' + animalId).value;
   var notes = document.getElementById('treatmentNotes-' + animalId).value.trim();
-  var ongoing = document.getElementById('treatmentOngoing-' + animalId).checked;
   
   if (!date || !name) {
     alert('Please enter a date and treatment name.');
@@ -1338,7 +1338,7 @@ function addTreatment(animalId) {
     dosage: dosage,
     route: route,
     notes: notes,
-    ongoing: ongoing,
+    ongoing: false,
     createdAt: new Date().toISOString()
   });
   
@@ -1351,7 +1351,6 @@ function addTreatment(animalId) {
   document.getElementById('treatmentDosage-' + animalId).value = '';
   document.getElementById('treatmentRoute-' + animalId).value = 'Oral';
   document.getElementById('treatmentNotes-' + animalId).value = '';
-  document.getElementById('treatmentOngoing-' + animalId).checked = false;
   
   updateTreatmentDisplay(animal);
   alert('Treatment record added successfully!');
@@ -1369,7 +1368,7 @@ function updateTreatmentDisplay(animal) {
   }
   
   var totalTreatments = animal.treatments.length;
-  var ongoingTreatments = animal.treatments.filter(function(t) { return t.ongoing; }).length;
+  var activeSchedules = getTreatmentPlans(animal).filter(planIsCurrent).length;
   var recentTreatments = animal.treatments.filter(function(t) {
     var treatmentDate = new Date(t.date);
     var weekAgo = new Date();
@@ -1398,9 +1397,9 @@ function updateTreatmentDisplay(animal) {
       '<div class="summary-number">' + medicationCount + '</div>' +
       '<div class="summary-label">Different Meds</div>' +
       '</div>' +
-      '<div class="summary-card" style="' + (ongoingTreatments > 0 ? 'border-color: #ffc107;' : '') + '">' +
-      '<div class="summary-number" style="' + (ongoingTreatments > 0 ? 'color: #ffc107;' : '') + '">' + ongoingTreatments + '</div>' +
-      '<div class="summary-label">Ongoing</div>' +
+      '<div class="summary-card" style="' + (activeSchedules > 0 ? 'border-color: #698167;' : '') + '">' +
+      '<div class="summary-number" style="' + (activeSchedules > 0 ? 'color: #698167;' : '') + '">' + activeSchedules + '</div>' +
+      '<div class="summary-label">Active Schedules</div>' +
       '</div>';
   }
   
@@ -1448,6 +1447,863 @@ function updateTreatmentDisplay(animal) {
     historyDiv.appendChild(div);
   });
 }
+
+// ============================================================================
+//  SCHEDULED TREATMENTS
+//  A treatment plan is a course: what, how much, how often, for how long.
+//  Every individual dose given (or missed) is recorded in animal.treatmentLogs,
+//  so the record shows what actually happened, not just what was prescribed.
+// ============================================================================
+
+function getTreatmentPlans(animal) {
+  return animal.treatmentPlans || [];
+}
+
+function getTreatmentLogs(animal) {
+  return animal.treatmentLogs || [];
+}
+
+function parseLocalDate(dateStr) {
+  var p = String(dateStr).split('-');
+  return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+}
+
+function addDaysStr(dateStr, days) {
+  var d = parseLocalDate(dateStr);
+  d.setDate(d.getDate() + days);
+  return localDateOf(d);
+}
+
+function timeToMinutes(t) {
+  var p = String(t).split(':');
+  return Number(p[0]) * 60 + Number(p[1]);
+}
+
+function minutesToTime(m) {
+  m = ((m % 1440) + 1440) % 1440;
+  return pad2(Math.floor(m / 60)) + ':' + pad2(m % 60);
+}
+
+function roundSmart(n) {
+  if (n >= 100) return Math.round(n);
+  if (n >= 10) return Math.round(n * 10) / 10;
+  return Math.round(n * 100) / 100;
+}
+
+var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// ---------------------------------------------------------------- course dates
+
+function planEndDate(plan) {
+  if (plan.endMode === 'date') return plan.endDate || null;
+  if (plan.endMode === 'days' && plan.durationDays > 0) {
+    return addDaysStr(plan.startDate, plan.durationDays - 1);
+  }
+  return null;   // open-ended: runs until stopped
+}
+
+function planIsActiveOn(plan, dateStr) {
+  if (dateStr < plan.startDate) return false;
+  if (plan.stopped && plan.stoppedDate && dateStr > plan.stoppedDate) return false;
+  if (plan.stopped && !plan.stoppedDate) return false;
+  var end = planEndDate(plan);
+  if (end && dateStr > end) return false;
+  return true;
+}
+
+function planIsCurrent(plan) {
+  return !plan.stopped && planIsActiveOn(plan, localToday());
+}
+
+function planDayNumber(plan, dateStr) {
+  var d = parseLocalDate(dateStr) - parseLocalDate(plan.startDate);
+  return Math.round(d / 86400000) + 1;
+}
+
+function planTotalDays(plan) {
+  var end = planEndDate(plan);
+  if (!end) return null;
+  return Math.round((parseLocalDate(end) - parseLocalDate(plan.startDate)) / 86400000) + 1;
+}
+
+// ---------------------------------------------------------------- dose times
+
+function planDoseTimesFor(plan, dateStr) {
+  if (!planIsActiveOn(plan, dateStr)) return [];
+  var times;
+
+  if (plan.repeat === 'hours') {
+    times = [];
+    var start = timeToMinutes(plan.startTime || '08:00');
+    var step = (Number(plan.intervalHours) || 8) * 60;
+    for (var m = start; m < 1440; m += step) times.push(minutesToTime(m));
+  } else if (plan.repeat === 'days') {
+    var dow = parseLocalDate(dateStr).getDay();
+    if (!plan.daysOfWeek || plan.daysOfWeek.indexOf(dow) === -1) return [];
+    times = (plan.times || ['08:00']).slice();
+  } else {
+    times = (plan.times || ['08:00']).slice();
+  }
+
+  // A stopped course stops from the moment it was stopped, so doses later that
+  // same day drop off rather than sitting there as never-to-be-given.
+  if (plan.stopped && plan.stoppedAt) {
+    var stopMs = new Date(plan.stoppedAt).getTime();
+    times = times.filter(function(t) {
+      return new Date(dateStr + 'T' + t + ':00').getTime() <= stopMs;
+    });
+  }
+
+  return times;
+}
+
+function describePlanSchedule(plan) {
+  var times = plan.times || [];
+  if (plan.repeat === 'hours') {
+    var perDay = planDoseTimesFor(plan, plan.startDate).length;
+    return 'Every ' + (plan.intervalHours || 8) + ' hours from ' + formatTime(plan.startTime || '08:00') +
+      ' (' + perDay + ' dose' + (perDay === 1 ? '' : 's') + ' a day)';
+  }
+  if (plan.repeat === 'days') {
+    var days = (plan.daysOfWeek || []).slice().sort().map(function(d) { return DAY_NAMES[d]; }).join(', ');
+    return days + ' at ' + times.map(formatTime).join(', ');
+  }
+  var label = { 1: 'Once daily', 2: 'Twice daily', 3: 'Three times daily', 4: 'Four times daily' }[times.length] ||
+    (times.length + ' times daily');
+  return label + ' at ' + times.map(formatTime).join(', ');
+}
+
+function describePlanCourse(plan) {
+  var today = localToday();
+  var end = planEndDate(plan);
+  var total = planTotalDays(plan);
+
+  if (plan.stopped) return 'Stopped ' + (plan.stoppedDate ? formatDate(plan.stoppedDate) : '');
+  if (end && today > end) return 'Course finished ' + formatDate(end);
+  if (today < plan.startDate) return 'Starts ' + formatDate(plan.startDate);
+  if (plan.endMode === 'days' && total) {
+    return 'Day ' + planDayNumber(plan, today) + ' of ' + total + ' - ends ' + formatDate(end);
+  }
+  if (end) return 'Runs until ' + formatDate(end);
+  return 'Ongoing since ' + formatDate(plan.startDate);
+}
+
+// ---------------------------------------------------------------- dosing
+
+function calcTreatmentDose(animal, plan) {
+  if (plan.doseMode === 'perkg') {
+    var w = getCurrentWeight(animal);
+    if (!w) {
+      return { text: 'Needs a current weight', warning: true };
+    }
+    var kg = w / 1000;
+    var unit = plan.doseUnit || 'mg';
+    var amount = (Number(plan.doseRate) || 0) * kg;
+    var text = roundSmart(amount) + ' ' + unit;
+    if (unit === 'mg' && Number(plan.concentration) > 0) {
+      text += ' (' + roundSmart(amount / Number(plan.concentration)) + ' mL)';
+    }
+    return {
+      text: text,
+      detail: plan.doseRate + ' ' + unit + '/kg at ' + w + 'g' +
+        (Number(plan.concentration) > 0 ? ', ' + plan.concentration + ' mg/mL' : '')
+    };
+  }
+  return { text: plan.dose || 'Not specified' };
+}
+
+// ---------------------------------------------------------------- dose records
+
+function findTreatmentLog(animal, planId, dateStr, time) {
+  var logs = getTreatmentLogs(animal);
+  for (var i = 0; i < logs.length; i++) {
+    if (logs[i].planId == planId && logs[i].date === dateStr && logs[i].scheduledTime === time) return logs[i];
+  }
+  return null;
+}
+
+function getTreatmentDoseStatus(animal, plan, time, dateStr) {
+  var log = findTreatmentLog(animal, plan.id, dateStr, time);
+  if (log && log.given) return { class: 'completed', text: 'Given' };
+  if (log && log.skipped) return { class: 'overdue', text: 'Missed' };
+
+  var when = new Date(dateStr + 'T' + time + ':00');
+  var now = new Date();
+  if (now > new Date(when.getTime() + 30 * 60000)) return { class: 'overdue', text: 'Overdue' };
+  if (now >= new Date(when.getTime() - 60 * 60000)) return { class: 'upcoming', text: 'Soon' };
+  return { class: 'pending', text: 'Pending' };
+}
+
+function ensureTreatmentLog(animal, plan, dateStr, time) {
+  if (!animal.treatmentLogs) animal.treatmentLogs = [];
+  var log = findTreatmentLog(animal, plan.id, dateStr, time);
+  if (!log) {
+    log = { id: Date.now(), planId: plan.id, date: dateStr, scheduledTime: time };
+    animal.treatmentLogs.push(log);
+  }
+  return log;
+}
+
+function markTreatmentDose(animalId, planId, time, dateStr) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  var plan = getTreatmentPlans(animal).find(function(p) { return p.id == planId; });
+  if (!plan) return;
+
+  var now = new Date();
+  var log = ensureTreatmentLog(animal, plan, dateStr || localToday(), time);
+  log.given = true;
+  delete log.skipped;
+  delete log.missedReason;
+  log.actualTime = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+  log.completedAt = now.toISOString();
+  log.doseGiven = calcTreatmentDose(animal, plan).text;   // what was actually given, at this weight
+  log.weightAtDose = getCurrentWeight(animal);
+
+  if (!saveData()) return;
+  refreshTreatmentViews(animal);
+}
+
+function markTreatmentDoseMissed(animalId, planId, time, dateStr) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  var plan = getTreatmentPlans(animal).find(function(p) { return p.id == planId; });
+  if (!plan) return;
+
+  var log = ensureTreatmentLog(animal, plan, dateStr || localToday(), time);
+  log.skipped = true;
+  delete log.given;
+  delete log.actualTime;
+  delete log.completedAt;
+  log.recordedAt = new Date().toISOString();
+
+  if (!saveData()) return;
+  refreshTreatmentViews(animal);
+  showBanner('Dose recorded as missed. Add a note if you need to say why.');
+}
+
+function undoTreatmentDose(animalId, planId, time, dateStr) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.treatmentLogs) return;
+  var date = dateStr || localToday();
+  var log = findTreatmentLog(animal, planId, date, time);
+  if (!log) return;
+
+  if (log.notes && log.notes.trim()) {
+    // Keep the note - only clear the given/missed status
+    delete log.given;
+    delete log.skipped;
+    delete log.actualTime;
+    delete log.completedAt;
+  } else {
+    animal.treatmentLogs = animal.treatmentLogs.filter(function(l) { return l !== log; });
+  }
+
+  if (!saveData()) return;
+  refreshTreatmentViews(animal);
+}
+
+function showTreatmentDoseNotes(animalId, planId, time, dateStr) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  var plan = getTreatmentPlans(animal).find(function(p) { return p.id == planId; });
+  if (!plan) return;
+  var date = dateStr || localToday();
+  var log = findTreatmentLog(animal, planId, date, time);
+  var currentNotes = log && log.notes ? log.notes : '';
+
+  var statusLine;
+  if (log && log.given) {
+    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;"><strong>Given</strong> at ' +
+      (log.actualTime ? formatTime(log.actualTime) : 'unknown time') + (log.doseGiven ? ' - ' + escapeHtml(log.doseGiven) : '') + '</div>';
+  } else if (log && log.skipped) {
+    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #f8d7da; border: 1px solid #f5c2c7; border-radius: 5px; color: #721c24;"><strong>Recorded as missed</strong></div>';
+  } else {
+    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;"><strong>Not recorded yet</strong></div>';
+  }
+
+  var modalHtml =
+    '<div id="treatmentDoseModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
+    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+    '<h3 style="margin-top: 0;">' + escapeHtml(plan.name) + ' - ' + formatTime(time) + '</h3>' +
+    '<p style="color: #666; margin-bottom: 20px;">' + escapeHtml(animal.name) + ' - ' + formatDate(date) + '</p>' +
+    statusLine +
+    '<label style="display: block; margin-bottom: 10px; font-weight: 600;">Notes:</label>' +
+    '<textarea id="treatmentDoseNotesText" placeholder="Response to treatment, difficulty dosing, why a dose was missed, vet instructions..." style="width: 100%; height: 120px; padding: 12px; border: 2px solid #e1e8ed; border-radius: 8px; font-family: inherit; resize: vertical;">' + escapeHtml(currentNotes) + '</textarea>' +
+    '<div style="margin-top: 20px; text-align: right;">' +
+    '<button onclick="closeTreatmentDoseModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="saveTreatmentDoseNotes(' + animalId + ', ' + planId + ', \'' + time + '\', \'' + date + '\')">Save Notes</button>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  setTimeout(function() {
+    var t = document.getElementById('treatmentDoseNotesText');
+    if (t) t.focus();
+  }, 100);
+}
+
+function closeTreatmentDoseModal() {
+  var modal = document.getElementById('treatmentDoseModal');
+  if (modal) modal.remove();
+}
+
+function saveTreatmentDoseNotes(animalId, planId, time, dateStr) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  var plan = getTreatmentPlans(animal).find(function(p) { return p.id == planId; });
+  if (!plan) return;
+
+  var notes = document.getElementById('treatmentDoseNotesText').value.trim();
+  var log = ensureTreatmentLog(animal, plan, dateStr, time);
+  log.notes = notes;
+
+  if (!saveData()) return;
+  closeTreatmentDoseModal();
+  refreshTreatmentViews(animal);
+}
+
+function refreshTreatmentViews(animal) {
+  if (document.getElementById('treatmentPlans-' + animal.id)) updateTreatmentPlansDisplay(animal);
+  if (document.getElementById('timelineContainer')) showDailySchedule();
+}
+
+// ---------------------------------------------------------------- progress
+
+function getPlanProgress(animal, plan) {
+  var now = new Date();
+  var today = localToday();
+  var end = planEndDate(plan);
+  var last = today;
+  if (end && end < last) last = end;
+  if (plan.stopped && plan.stoppedDate && plan.stoppedDate < last) last = plan.stoppedDate;
+
+  var due = 0, given = 0, missed = 0;
+  var d = plan.startDate;
+  var guard = 0;
+
+  while (d <= last && guard++ < 400) {
+    var times = planDoseTimesFor(plan, d);
+    for (var i = 0; i < times.length; i++) {
+      if (new Date(d + 'T' + times[i] + ':00') > now) continue;
+      due++;
+      var log = findTreatmentLog(animal, plan.id, d, times[i]);
+      if (log && log.given) given++;
+      else if (log && log.skipped) missed++;
+    }
+    d = addDaysStr(d, 1);
+  }
+
+  return { due: due, given: given, missed: missed, unrecorded: due - given - missed };
+}
+
+function getNextDose(animal, plan) {
+  if (plan.stopped) return null;
+  var now = new Date();
+  var d = localToday();
+  if (d < plan.startDate) d = plan.startDate;
+  var end = planEndDate(plan);
+
+  for (var i = 0; i < 60; i++) {
+    if (end && d > end) return null;
+    var times = planDoseTimesFor(plan, d);
+    for (var j = 0; j < times.length; j++) {
+      var when = new Date(d + 'T' + times[j] + ':00');
+      if (when > now && !findTreatmentLog(animal, plan.id, d, times[j])) {
+        return { date: d, time: times[j], isToday: d === localToday() };
+      }
+    }
+    d = addDaysStr(d, 1);
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------- plan admin
+
+function addTreatmentPlan(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+
+  var g = function(id) { return document.getElementById(id + '-' + animalId); };
+
+  var name = g('tpName').value.trim();
+  if (!name) {
+    alert('Please enter a treatment name.');
+    return;
+  }
+
+  var repeat = g('tpRepeat').value;
+  var times = [];
+  var inputs = document.querySelectorAll('#tpTimesList-' + animalId + ' input[type="time"]');
+  for (var i = 0; i < inputs.length; i++) {
+    if (inputs[i].value) times.push(inputs[i].value);
+  }
+  times.sort();
+
+  var daysOfWeek = [];
+  var boxes = document.querySelectorAll('#tpDaysList-' + animalId + ' input[type="checkbox"]:checked');
+  for (var j = 0; j < boxes.length; j++) daysOfWeek.push(Number(boxes[j].value));
+
+  if (repeat !== 'hours' && times.length === 0) {
+    alert('Please set at least one dose time.');
+    return;
+  }
+  if (repeat === 'days' && daysOfWeek.length === 0) {
+    alert('Please choose which days of the week this treatment is given.');
+    return;
+  }
+
+  var doseMode = g('tpDoseMode').value;
+  if (doseMode === 'perkg' && !Number(g('tpDoseRate').value)) {
+    alert('Please enter a dose rate per kg.');
+    return;
+  }
+  if (doseMode === 'fixed' && !g('tpDose').value.trim()) {
+    alert('Please enter a dose.');
+    return;
+  }
+
+  var endMode = g('tpEndMode').value;
+  if (endMode === 'days' && !Number(g('tpDurationDays').value)) {
+    alert('Please enter how many days the course runs for.');
+    return;
+  }
+  if (endMode === 'date' && !g('tpEndDate').value) {
+    alert('Please choose an end date for the course.');
+    return;
+  }
+
+  var plan = {
+    id: Date.now(),
+    name: name,
+    type: g('tpType').value,
+    route: g('tpRoute').value,
+    doseMode: doseMode,
+    dose: doseMode === 'fixed' ? g('tpDose').value.trim() : '',
+    doseRate: doseMode === 'perkg' ? Number(g('tpDoseRate').value) : null,
+    doseUnit: doseMode === 'perkg' ? g('tpDoseUnit').value : '',
+    concentration: doseMode === 'perkg' ? Number(g('tpConcentration').value) || null : null,
+    repeat: repeat,
+    times: times,
+    intervalHours: repeat === 'hours' ? Number(g('tpIntervalHours').value) : null,
+    startTime: repeat === 'hours' ? g('tpStartTime').value : null,
+    daysOfWeek: repeat === 'days' ? daysOfWeek : null,
+    startDate: g('tpStartDate').value || localToday(),
+    endMode: endMode,
+    durationDays: endMode === 'days' ? Number(g('tpDurationDays').value) : null,
+    endDate: endMode === 'date' ? g('tpEndDate').value : null,
+    prescribedBy: g('tpPrescriber').value.trim(),
+    notes: g('tpNotes').value.trim(),
+    stopped: false,
+    createdAt: new Date().toISOString()
+  };
+
+  if (!animal.treatmentPlans) animal.treatmentPlans = [];
+  animal.treatmentPlans.push(plan);
+
+  if (!saveData()) {
+    animal.treatmentPlans.pop();
+    return;
+  }
+
+  // Reset the form
+  g('tpName').value = '';
+  g('tpDose').value = '';
+  g('tpDoseRate').value = '';
+  g('tpConcentration').value = '';
+  g('tpPrescriber').value = '';
+  g('tpNotes').value = '';
+  g('tpDurationDays').value = '7';
+  toggleTreatmentPlanForm(animalId, false);
+  updateTreatmentPlansDisplay(animal);
+  showBanner('Treatment schedule created.');
+}
+
+function stopTreatmentPlan(animalId, planId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  var plan = getTreatmentPlans(animal).find(function(p) { return p.id == planId; });
+  if (!plan) return;
+  if (!confirm('Stop "' + plan.name + '"? Doses already recorded are kept.')) return;
+
+  plan.stopped = true;
+  plan.stoppedDate = localToday();
+  plan.stoppedAt = new Date().toISOString();
+  if (!saveData()) return;
+  refreshTreatmentViews(animal);
+}
+
+function resumeTreatmentPlan(animalId, planId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  var plan = getTreatmentPlans(animal).find(function(p) { return p.id == planId; });
+  if (!plan) return;
+
+  plan.stopped = false;
+  delete plan.stoppedDate;
+  delete plan.stoppedAt;
+  if (!saveData()) return;
+  refreshTreatmentViews(animal);
+}
+
+function deleteTreatmentPlan(animalId, planId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+  var plan = getTreatmentPlans(animal).find(function(p) { return p.id == planId; });
+  if (!plan) return;
+
+  var doseCount = getTreatmentLogs(animal).filter(function(l) { return l.planId == planId; }).length;
+  var msg = 'Delete the schedule for "' + plan.name + '"?';
+  if (doseCount > 0) msg += '\n\nThis also deletes ' + doseCount + ' recorded dose' + (doseCount === 1 ? '' : 's') +
+    '. If you just want it to stop appearing, use Stop instead.';
+  if (!confirm(msg)) return;
+
+  animal.treatmentPlans = getTreatmentPlans(animal).filter(function(p) { return p.id != planId; });
+  animal.treatmentLogs = getTreatmentLogs(animal).filter(function(l) { return l.planId != planId; });
+  if (!saveData()) return;
+  refreshTreatmentViews(animal);
+}
+
+// ---------------------------------------------------------------- plan form
+
+function renderTreatmentPlansCard(animal, container) {
+  var id = animal.id;
+  var card = document.createElement('div');
+  card.className = 'card';
+
+  card.innerHTML =
+    '<h3>Scheduled Treatments</h3>' +
+    '<p style="color: #666; margin-top: -8px;">Repeating courses - antibiotics, pain relief, parasite treatment. Each dose gets ticked off as it is given.</p>' +
+    '<button onclick="toggleTreatmentPlanForm(' + id + ')" id="tpFormToggle-' + id + '">+ New treatment schedule</button>' +
+    '<div id="tpForm-' + id + '" style="display: none; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 12px;">' +
+
+      '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
+      '<div><label>Treatment name: <input type="text" id="tpName-' + id + '" placeholder="e.g. Baytril, Metacam"></label></div>' +
+      '<div><label>Type: <select id="tpType-' + id + '">' +
+        '<option value="Antibiotic">Antibiotic</option>' +
+        '<option value="Medication">Medication</option>' +
+        '<option value="Pain Relief">Pain Relief</option>' +
+        '<option value="Parasite Treatment">Parasite Treatment</option>' +
+        '<option value="Wound Care">Wound Care</option>' +
+        '<option value="Vitamin Supplement">Vitamin Supplement</option>' +
+        '<option value="Fluid Therapy">Fluid Therapy</option>' +
+        '<option value="Other">Other</option>' +
+      '</select></label></div>' +
+      '<div><label>Route: <select id="tpRoute-' + id + '">' +
+        '<option value="Oral">Oral</option>' +
+        '<option value="Topical">Topical</option>' +
+        '<option value="Injectable">Injectable</option>' +
+        '<option value="Other">Other</option>' +
+      '</select></label></div>' +
+      '</div>' +
+
+      // ---- dose
+      '<h4 style="color: #698167; margin-bottom: 5px;">Dose</h4>' +
+      '<label>How is the dose worked out? <select id="tpDoseMode-' + id + '" onchange="toggleTPDoseMode(' + id + ')">' +
+        '<option value="fixed">A fixed amount I type in</option>' +
+        '<option value="perkg">Per kg of body weight (recalculates as they grow)</option>' +
+      '</select></label>' +
+      '<div id="tpDoseFixed-' + id + '" style="margin-top: 10px;">' +
+        '<label>Dose: <input type="text" id="tpDose-' + id + '" placeholder="e.g. 0.5 mL, 1 tablet"></label>' +
+      '</div>' +
+      '<div id="tpDosePerKg-' + id + '" style="display: none; margin-top: 10px;">' +
+        '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">' +
+        '<div><label>Rate per kg: <input type="number" id="tpDoseRate-' + id + '" step="0.01" placeholder="e.g. 5"></label></div>' +
+        '<div><label>Unit: <select id="tpDoseUnit-' + id + '"><option value="mg">mg/kg</option><option value="mL">mL/kg</option></select></label></div>' +
+        '<div><label>Strength (mg/mL, optional): <input type="number" id="tpConcentration-' + id + '" step="0.01" placeholder="e.g. 25"></label></div>' +
+        '</div>' +
+        '<p style="color: #666; font-size: 13px; margin-top: 8px;">Add the strength and BushBuddy also shows the volume to draw up.</p>' +
+      '</div>' +
+
+      // ---- frequency
+      '<h4 style="color: #698167; margin-bottom: 5px;">How often</h4>' +
+      '<label>Repeat: <select id="tpRepeat-' + id + '" onchange="toggleTPRepeat(' + id + ')">' +
+        '<option value="times">At set times each day</option>' +
+        '<option value="hours">Every X hours</option>' +
+        '<option value="days">Certain days of the week only</option>' +
+      '</select></label>' +
+
+      '<div id="tpTimesBlock-' + id + '" style="margin-top: 10px;">' +
+        '<label>Doses per day: <select id="tpPerDay-' + id + '" onchange="renderTPTimes(' + id + ')">' +
+          '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>' +
+          '<option value="4">4</option><option value="5">5</option><option value="6">6</option>' +
+        '</select></label>' +
+        '<div id="tpTimesList-' + id + '" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>' +
+      '</div>' +
+
+      '<div id="tpHoursBlock-' + id + '" style="display: none; margin-top: 10px;">' +
+        '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">' +
+        '<div><label>Every: <select id="tpIntervalHours-' + id + '">' +
+          '<option value="4">4 hours</option><option value="6">6 hours</option><option value="8" selected>8 hours</option>' +
+          '<option value="12">12 hours</option><option value="24">24 hours</option>' +
+        '</select></label></div>' +
+        '<div><label>First dose at: <input type="time" id="tpStartTime-' + id + '" value="08:00"></label></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div id="tpDaysBlock-' + id + '" style="display: none; margin-top: 10px;">' +
+        '<label style="font-weight: 600;">Days:</label>' +
+        '<div id="tpDaysList-' + id + '" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;">' +
+          [0,1,2,3,4,5,6].map(function(d) {
+            return '<label style="display: inline-flex; align-items: center; gap: 5px; margin: 0;">' +
+              '<input type="checkbox" value="' + d + '"> ' + DAY_NAMES[d] + '</label>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+
+      // ---- course length
+      '<h4 style="color: #698167; margin-bottom: 5px;">Course length</h4>' +
+      '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
+      '<div><label>Start date: <input type="date" id="tpStartDate-' + id + '" value="' + localToday() + '"></label></div>' +
+      '<div><label>Ends: <select id="tpEndMode-' + id + '" onchange="toggleTPEndMode(' + id + ')">' +
+        '<option value="days">After a number of days</option>' +
+        '<option value="date">On a set date</option>' +
+        '<option value="open">Runs until I stop it</option>' +
+      '</select></label></div>' +
+      '<div id="tpDaysCountBlock-' + id + '"><label>Number of days: <input type="number" id="tpDurationDays-' + id + '" min="1" value="7"></label></div>' +
+      '<div id="tpEndDateBlock-' + id + '" style="display: none;"><label>End date: <input type="date" id="tpEndDate-' + id + '"></label></div>' +
+      '</div>' +
+
+      '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">' +
+      '<div><label>Prescribed by (optional): <input type="text" id="tpPrescriber-' + id + '" placeholder="e.g. Dr Smith, Vet clinic"></label></div>' +
+      '</div>' +
+      '<label style="margin-top: 15px;">Notes: <textarea id="tpNotes-' + id + '" placeholder="Give with food, watch for drowsiness, store in fridge..." style="min-height: 70px;"></textarea></label>' +
+
+      '<div style="margin-top: 15px; display: flex; gap: 10px;">' +
+      '<button onclick="addTreatmentPlan(' + id + ')">Create Schedule</button>' +
+      '<button onclick="toggleTreatmentPlanForm(' + id + ', false)" style="background: #6c757d;">Cancel</button>' +
+      '</div>' +
+    '</div>' +
+
+    '<div id="treatmentPlans-' + id + '" style="margin-top: 20px;"></div>';
+
+  container.appendChild(card);
+  renderTPTimes(id);
+  updateTreatmentPlansDisplay(animal);
+}
+
+function toggleTreatmentPlanForm(animalId, show) {
+  var form = document.getElementById('tpForm-' + animalId);
+  var toggle = document.getElementById('tpFormToggle-' + animalId);
+  if (!form) return;
+  var open = (show === undefined) ? form.style.display === 'none' : show;
+  form.style.display = open ? 'block' : 'none';
+  if (toggle) toggle.textContent = open ? 'Close' : '+ New treatment schedule';
+}
+
+function toggleTPDoseMode(animalId) {
+  var mode = document.getElementById('tpDoseMode-' + animalId).value;
+  document.getElementById('tpDoseFixed-' + animalId).style.display = mode === 'fixed' ? 'block' : 'none';
+  document.getElementById('tpDosePerKg-' + animalId).style.display = mode === 'perkg' ? 'block' : 'none';
+}
+
+function toggleTPRepeat(animalId) {
+  var mode = document.getElementById('tpRepeat-' + animalId).value;
+  document.getElementById('tpTimesBlock-' + animalId).style.display = (mode === 'times' || mode === 'days') ? 'block' : 'none';
+  document.getElementById('tpHoursBlock-' + animalId).style.display = mode === 'hours' ? 'block' : 'none';
+  document.getElementById('tpDaysBlock-' + animalId).style.display = mode === 'days' ? 'block' : 'none';
+}
+
+function toggleTPEndMode(animalId) {
+  var mode = document.getElementById('tpEndMode-' + animalId).value;
+  document.getElementById('tpDaysCountBlock-' + animalId).style.display = mode === 'days' ? 'block' : 'none';
+  document.getElementById('tpEndDateBlock-' + animalId).style.display = mode === 'date' ? 'block' : 'none';
+}
+
+function renderTPTimes(animalId) {
+  var list = document.getElementById('tpTimesList-' + animalId);
+  if (!list) return;
+  var n = Number(document.getElementById('tpPerDay-' + animalId).value);
+  var defaults = {
+    1: ['08:00'],
+    2: ['08:00', '20:00'],
+    3: ['08:00', '14:00', '20:00'],
+    4: ['06:00', '12:00', '18:00', '00:00'],
+    5: ['06:00', '11:00', '16:00', '21:00', '02:00'],
+    6: ['06:00', '10:00', '14:00', '18:00', '22:00', '02:00']
+  };
+  var existing = [];
+  var inputs = list.querySelectorAll('input[type="time"]');
+  for (var k = 0; k < inputs.length; k++) existing.push(inputs[k].value);
+
+  var times = defaults[n] || defaults[2];
+  var html = '';
+  for (var i = 0; i < n; i++) {
+    html += '<label style="margin: 0;">Dose ' + (i + 1) + ': <input type="time" value="' + (existing[i] || times[i]) + '"></label>';
+  }
+  list.innerHTML = html;
+}
+
+// ---------------------------------------------------------------- plan display
+
+function updateTreatmentPlansDisplay(animal) {
+  var wrap = document.getElementById('treatmentPlans-' + animal.id);
+  if (!wrap) return;
+
+  var plans = getTreatmentPlans(animal);
+  if (plans.length === 0) {
+    wrap.innerHTML = '<p style="color: #666; font-style: italic;">No treatment schedules yet.</p>';
+    return;
+  }
+
+  var today = localToday();
+  var sorted = plans.slice().sort(function(a, b) {
+    var aCurrent = planIsCurrent(a) ? 0 : 1;
+    var bCurrent = planIsCurrent(b) ? 0 : 1;
+    if (aCurrent !== bCurrent) return aCurrent - bCurrent;
+    return String(b.startDate).localeCompare(String(a.startDate));
+  });
+
+  var html = '';
+  sorted.forEach(function(plan) {
+    var current = planIsCurrent(plan);
+    var dose = calcTreatmentDose(animal, plan);
+    var progress = getPlanProgress(animal, plan);
+    var next = getNextDose(animal, plan);
+    var todayTimes = planDoseTimesFor(plan, today);
+
+    html +=
+      '<div style="padding: 18px; margin: 12px 0; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 5px solid ' +
+        (current ? '#698167' : '#adb5bd') + '; ' + (current ? '' : 'opacity: 0.75;') + '">' +
+
+      '<div style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">' +
+      '<div>' +
+      '<strong style="font-size: 18px;">' + escapeHtml(plan.name) + '</strong>' +
+      '<div style="margin-top: 6px;">' +
+        '<span style="display: inline-block; padding: 3px 9px; background: #698167; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + escapeHtml(String(plan.type).toUpperCase()) + '</span> ' +
+        '<span style="display: inline-block; padding: 3px 9px; background: #e9ecef; color: #495057; border-radius: 12px; font-size: 11px; font-weight: 600;">' + escapeHtml(String(plan.route).toUpperCase()) + '</span>' +
+        (current ? '' : ' <span style="display: inline-block; padding: 3px 9px; background: #adb5bd; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + (plan.stopped ? 'STOPPED' : 'FINISHED') + '</span>') +
+      '</div>' +
+      '</div>' +
+      '<button class="small" onclick="deleteTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">&#128465;</button>' +
+      '</div>' +
+
+      '<div style="margin-top: 12px; padding: 12px; background: ' + (dose.warning ? '#fff3cd' : '#f1f6f0') + '; border-radius: 8px;">' +
+      '<div style="font-size: 17px; font-weight: 600; color: ' + (dose.warning ? '#856404' : '#3f5a45') + ';">' + escapeHtml(dose.text) + ' per dose</div>' +
+      (dose.detail ? '<div style="font-size: 13px; color: #666; margin-top: 3px;">' + escapeHtml(dose.detail) + '</div>' : '') +
+      '</div>' +
+
+      '<p style="margin: 10px 0 4px;">' + escapeHtml(describePlanSchedule(plan)) + '</p>' +
+      '<p style="margin: 0 0 4px; color: #666;">' + escapeHtml(describePlanCourse(plan)) + '</p>' +
+      (plan.prescribedBy ? '<p style="margin: 0 0 4px; color: #666;">Prescribed by ' + escapeHtml(plan.prescribedBy) + '</p>' : '') +
+      (plan.notes ? '<div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; line-height: 1.5;">' + escapeHtml(plan.notes) + '</div>' : '') +
+
+      '<p style="margin: 8px 0; font-weight: 600;">' + progress.given + ' of ' + progress.due + ' doses given' +
+        (progress.missed > 0 ? ' <span style="color: #dc3545;">- ' + progress.missed + ' missed</span>' : '') +
+        (progress.unrecorded > 0 ? ' <span style="color: #fd7e14;">- ' + progress.unrecorded + ' not recorded</span>' : '') +
+      '</p>' +
+      (next ? '<p style="margin: 0 0 8px; color: #666;">Next dose: ' + (next.isToday ? 'today' : formatDate(next.date)) + ' at ' + formatTime(next.time) + '</p>' : '');
+
+    // Today's doses
+    if (todayTimes.length > 0) {
+      html += '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e9ecef;">' +
+        '<strong style="font-size: 14px; color: #698167;">Today</strong>';
+      todayTimes.forEach(function(t) {
+        var status = getTreatmentDoseStatus(animal, plan, t, today);
+        var log = findTreatmentLog(animal, plan.id, today, t);
+        var hasNotes = log && log.notes && log.notes.trim();
+        html +=
+          '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px;">' +
+          '<strong style="min-width: 75px;">' + formatTime(t) + '</strong>' +
+          '<span class="status-badge status-' + status.class + '">' + status.text + '</span>' +
+          (status.class === 'completed' || status.text === 'Missed' ?
+            '<button class="small" onclick="undoTreatmentDose(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #6c757d; color: white;">Undo</button>' :
+            '<button class="small" onclick="markTreatmentDose(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #28a745; color: white;">Give</button>' +
+            '<button class="small" onclick="markTreatmentDoseMissed(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #dc3545; color: white;">Missed</button>') +
+          '<button class="small" onclick="showTreatmentDoseNotes(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #17a2b8; color: white;">' + (hasNotes ? 'Notes*' : 'Notes') + '</button>' +
+          '</div>' +
+          (hasNotes ? '<div style="margin: 4px 0 0 83px; font-size: 13px; color: #555;">' + escapeHtml(log.notes) + '</div>' : '');
+      });
+      html += '</div>';
+    }
+
+    html +=
+      '<div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px;">' +
+      (plan.stopped ?
+        '<button class="small" onclick="resumeTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #698167; color: white;">Resume</button>' :
+        '<button class="small" onclick="stopTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #6c757d; color: white;">Stop course</button>') +
+      '<button class="small" onclick="toggleDoseHistory(' + plan.id + ')" style="background: #698167; color: white;">Dose history</button>' +
+      '</div>' +
+
+      '<div id="doseHistory-' + plan.id + '" style="display: none; margin-top: 12px;">' + renderDoseHistory(animal, plan) + '</div>' +
+      '</div>';
+  });
+
+  wrap.innerHTML = html;
+}
+
+function renderDoseHistory(animal, plan) {
+  var logs = getTreatmentLogs(animal).filter(function(l) { return l.planId == plan.id; });
+  if (logs.length === 0) return '<p style="color: #666; font-style: italic;">No doses recorded yet.</p>';
+
+  logs.sort(function(a, b) {
+    return (b.date + b.scheduledTime).localeCompare(a.date + a.scheduledTime);
+  });
+
+  var html = '<table style="width: 100%; border-collapse: collapse; font-size: 14px;">';
+  logs.forEach(function(log) {
+    var label = log.given ? 'Given' : (log.skipped ? 'Missed' : 'Note only');
+    var colour = log.given ? '#28a745' : (log.skipped ? '#dc3545' : '#6c757d');
+    html +=
+      '<tr style="border-bottom: 1px solid #e9ecef;">' +
+      '<td style="padding: 8px 6px; white-space: nowrap;">' + formatDate(log.date) + '<br><span style="color: #666;">' + formatTime(log.scheduledTime) + '</span></td>' +
+      '<td style="padding: 8px 6px;"><span style="color: ' + colour + '; font-weight: 600;">' + label + '</span>' +
+        (log.actualTime ? ' <span style="color: #666;">at ' + formatTime(log.actualTime) + '</span>' : '') +
+        (log.doseGiven ? '<br><span style="color: #666;">' + escapeHtml(log.doseGiven) + '</span>' : '') +
+        (log.notes ? '<br><span style="color: #555;">' + escapeHtml(log.notes) + '</span>' : '') +
+      '</td>' +
+      '</tr>';
+  });
+  return html + '</table>';
+}
+
+function toggleDoseHistory(planId) {
+  var el = document.getElementById('doseHistory-' + planId);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ---------------------------------------------------------------- migration
+
+function migrateOngoingTreatments() {
+  // Treatments previously ticked as "ongoing" used to sit on Today's Schedule
+  // forever with no way to tick them off. Turn each into a proper daily
+  // schedule so nothing is lost and they can now be recorded dose by dose.
+  if (localStorage.getItem('bushbuddy_treatmentPlans_v1') === 'done') return;
+  var converted = 0;
+
+  animals.forEach(function(animal) {
+    if (!animal.treatments) return;
+    animal.treatments.forEach(function(t) {
+      if (!t.ongoing) return;
+      if (!animal.treatmentPlans) animal.treatmentPlans = [];
+      animal.treatmentPlans.push({
+        id: Date.now() + converted,
+        name: t.name,
+        type: t.type || 'Medication',
+        route: t.route || 'Oral',
+        doseMode: 'fixed',
+        dose: t.dosage || '',
+        repeat: 'times',
+        times: [t.time || '09:00'],
+        startDate: t.date || localToday(),
+        endMode: 'open',
+        notes: t.notes || '',
+        stopped: false,
+        createdAt: new Date().toISOString(),
+        convertedFrom: t.id
+      });
+      converted++;
+    });
+  });
+
+  if (converted > 0) {
+    saveData();
+    console.log('Converted ' + converted + ' ongoing treatment(s) into schedules.');
+  }
+  try { localStorage.setItem('bushbuddy_treatmentPlans_v1', 'done'); } catch (e) {}
+}
+
 
 function deleteTreatment(animalId, treatmentId) {
   var animal = animals.find(function(a) { return a.id == animalId; });
@@ -2637,6 +3493,7 @@ function restoreData() {
 }
 function showDailySchedule() {
   var today = new Date();
+  var todayLocal = localToday();
   var dateStr = today.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   document.getElementById('todayDate').textContent = dateStr;
   
@@ -2666,23 +3523,21 @@ function showDailySchedule() {
       });
     }
     
-    // Add ongoing treatments for today
-    if (animal.treatments && animal.treatments.length > 0) {
-      animal.treatments.forEach(function(treatment) {
-        if (treatment.ongoing) {
-          // Show ongoing treatments at their original time or at 9am if no time specified
-          var treatmentTime = treatment.time || '09:00';
-          scheduleItems.push({
-            time: treatmentTime,
-            type: 'treatment',
-            animal: animal,
-            status: { class: 'pending', text: 'Pending' },
-            description: treatment.name,
-            treatment: treatment
-          });
-        }
+    // Add today's scheduled treatment doses
+    getTreatmentPlans(animal).forEach(function(plan) {
+      planDoseTimesFor(plan, todayLocal).forEach(function(doseTime) {
+        scheduleItems.push({
+          time: doseTime,
+          type: 'treatment',
+          animal: animal,
+          status: getTreatmentDoseStatus(animal, plan, doseTime, todayLocal),
+          description: plan.name,
+          plan: plan,
+          log: findTreatmentLog(animal, plan.id, todayLocal, doseTime),
+          dose: calcTreatmentDose(animal, plan)
+        });
       });
-    }
+    });
   });
   
   // Sort by time
@@ -2762,19 +3617,38 @@ function showDailySchedule() {
         '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'schedule\');" style="background: #698167; color: white;">View Animal</button>' +
         '</div>';
     } else {
+      var plan = item.plan;
+      var course = describePlanCourse(plan);
+      
       timelineHtml += 
         '<div class="timeline-details">' +
-        '<strong>' + item.treatment.type + '</strong><br>' +
-        'Dosage: ' + (item.treatment.dosage || 'Not specified') + '<br>' +
-        'Route: ' + item.treatment.route + '<br>';
+        '<strong>' + escapeHtml(plan.name) + '</strong> (' + escapeHtml(plan.type) + ')<br>' +
+        'Dose: <strong>' + escapeHtml(item.dose.text) + '</strong>' + (item.dose.detail ? ' <span style="color: #666;">- ' + escapeHtml(item.dose.detail) + '</span>' : '') + '<br>' +
+        'Route: ' + escapeHtml(plan.route) + '<br>' +
+        (course ? '<span style="color: #666;">' + escapeHtml(course) + '</span><br>' : '');
       
-      if (item.treatment.notes) {
-        timelineHtml += 'Notes: ' + escapeHtml(item.treatment.notes) + '<br>';
+      if (plan.notes) {
+        timelineHtml += escapeHtml(plan.notes) + '<br>';
+      }
+      if (item.log && item.log.notes) {
+        timelineHtml += 'Notes: ' + escapeHtml(item.log.notes) + '<br>';
       }
       
       timelineHtml += 
         '</div>' +
-        '<div style="margin-top: 10px; display: flex; gap: 8px;">' +
+        '<div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">';
+      
+      if (item.status.class === 'completed' || item.status.text === 'Missed') {
+        timelineHtml += 
+          '<button class="small" onclick="undoTreatmentDose(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #6c757d; color: white;">Undo</button>';
+      } else {
+        timelineHtml += 
+          '<button class="small" onclick="markTreatmentDose(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #28a745; color: white;">Mark Given</button>' +
+          '<button class="small" onclick="markTreatmentDoseMissed(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #dc3545; color: white;">Missed</button>';
+      }
+      
+      timelineHtml += 
+        '<button class="small" onclick="showTreatmentDoseNotes(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #17a2b8; color: white;">Add Notes</button>' +
         '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'treatments\');" style="background: #698167; color: white;">View Animal</button>' +
         '</div>';
     }
