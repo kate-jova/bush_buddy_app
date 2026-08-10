@@ -642,6 +642,52 @@
       color: white !important;
       border-color: #698167;
     }
+
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin: 12px 0 0;
+      padding: 16px 18px;
+      text-align: left;
+      font-size: 16px;
+      font-weight: 600;
+      background: #f1f6f0;
+      color: #3f5a45;
+      border: 2px solid #dfe9dd;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .accordion-header:hover {
+      background: #e6efe4;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .accordion-header.open {
+      background: #698167;
+      color: white;
+      border-color: #698167;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .accordion-chevron {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .accordion-panel {
+      padding: 20px;
+      background: #f8f9fa;
+      border: 2px solid #698167;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -1260,13 +1306,13 @@ function showTreatmentsSection(animal, container) {
 
   var card = document.createElement('div');
   card.className = 'card';
-  card.innerHTML = '<h3>One-Off Treatment Records</h3>' +
-    '<p style="color: #666; margin-top: -8px;">A single treatment that is not part of a repeating course.</p>';
   
-  var form = document.createElement('div');
-  form.style.cssText = 'margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px;';
+  // The one-off form lives inside the accordion panel rendered above, so both
+  // ways of adding a treatment sit together at the top of the page.
+  var form = document.getElementById('oneOffForm-' + animal.id);
+  if (!form) return;
   form.innerHTML = 
-    '<h4 style="margin-top: 0; color: #698167;">Record Treatment</h4>' +
+    '<p style="margin-top: 0; color: #666;">A single treatment that is not part of a repeating course - a dressing change, a one-off injection.</p>' +
     '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
     '<div><label>Date: <input type="date" id="treatmentDate-' + animal.id + '" value="' + localToday() + '"></label></div>' +
     '<div><label>Time: <input type="time" id="treatmentTime-' + animal.id + '" value="' + new Date().toTimeString().substr(0, 5) + '"></label></div>' +
@@ -1292,9 +1338,11 @@ function showTreatmentsSection(animal, container) {
     '</select></label></div>' +
     '</div>' +
     '<label style="margin-top: 15px;">Notes: <textarea id="treatmentNotes-' + animal.id + '" placeholder="Additional details about administration, animal response, etc..." style="min-height: 80px;"></textarea></label>' +
-    '<p style="margin-top: 15px; color: #666; font-size: 13px;">Repeating course? Use <strong>Scheduled Treatments</strong> above instead - it works out each dose and tracks whether it was given.</p>' +
-    '<button onclick="addTreatment(' + animal.id + ')" style="margin-top: 15px;">Add Treatment Record</button>';
-  card.appendChild(form);
+    '<p style="margin-top: 15px; color: #666; font-size: 13px;">Repeating course? Use <strong>New Treatment Schedule</strong> above instead - it works out each dose and tracks whether it was given.</p>' +
+    '<div style="margin-top: 15px; display: flex; gap: 10px;">' +
+    '<button onclick="addTreatment(' + animal.id + ')">Add Treatment Record</button>' +
+    '<button onclick="setTreatmentAccordion(' + animal.id + ', \'oneoff\', false)" style="background: #6c757d;">Cancel</button>' +
+    '</div>';
   
   var summaryDiv = document.createElement('div');
   summaryDiv.className = 'schedule-summary';
@@ -1352,8 +1400,9 @@ function addTreatment(animalId) {
   document.getElementById('treatmentRoute-' + animalId).value = 'Oral';
   document.getElementById('treatmentNotes-' + animalId).value = '';
   
+  setTreatmentAccordion(animalId, 'oneoff', false);
   updateTreatmentDisplay(animal);
-  alert('Treatment record added successfully!');
+  showBanner('Treatment record added.');
 }
 
 function updateTreatmentDisplay(animal) {
@@ -1973,10 +2022,12 @@ function renderTreatmentPlansCard(animal, container) {
   card.className = 'card';
 
   card.innerHTML =
-    '<h3>Scheduled Treatments</h3>' +
-    '<p style="color: #666; margin-top: -8px;">Repeating courses - antibiotics, pain relief, parasite treatment. Each dose gets ticked off as it is given.</p>' +
-    '<button onclick="toggleTreatmentPlanForm(' + id + ')" id="tpFormToggle-' + id + '">+ New treatment schedule</button>' +
-    '<div id="tpForm-' + id + '" style="display: none; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 12px;">' +
+    '<h3>Treatments for ' + escapeHtml(animal.name) + '</h3>' +
+
+    '<button class="accordion-header" id="tpFormToggle-' + id + '" onclick="toggleTreatmentAccordion(' + id + ', \'schedule\')">' +
+      '<span>&#128197; New Treatment Schedule</span><span class="accordion-chevron">&#9662;</span></button>' +
+    '<div id="tpForm-' + id + '" class="accordion-panel" style="display: none;">' +
+      '<p style="margin-top: 0; color: #666;">A repeating course - antibiotics, pain relief, parasite treatment. Each dose gets ticked off as it is given.</p>' +
 
       '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
       '<div><label>Treatment name: <input type="text" id="tpName-' + id + '" placeholder="e.g. Baytril, Metacam"></label></div>' +
@@ -2076,20 +2127,66 @@ function renderTreatmentPlansCard(animal, container) {
       '</div>' +
     '</div>' +
 
-    '<div id="treatmentPlans-' + id + '" style="margin-top: 20px;"></div>';
+    '<button class="accordion-header" id="oneOffToggle-' + id + '" onclick="toggleTreatmentAccordion(' + id + ', \'oneoff\')">' +
+      '<span>&#128138; One-Off Treatment Record</span><span class="accordion-chevron">&#9662;</span></button>' +
+    '<div id="oneOffForm-' + id + '" class="accordion-panel" style="display: none;"></div>' +
+
+    '<h4 style="color: #698167; margin: 25px 0 0;">Current Schedules</h4>' +
+    '<div id="treatmentPlans-' + id + '" style="margin-top: 10px;"></div>';
 
   container.appendChild(card);
   renderTPTimes(id);
   updateTreatmentPlansDisplay(animal);
 }
 
+var TREATMENT_ACCORDIONS = {
+  schedule: { panel: 'tpForm-', header: 'tpFormToggle-' },
+  oneoff: { panel: 'oneOffForm-', header: 'oneOffToggle-' }
+};
+
+function setTreatmentAccordion(animalId, which, open) {
+  var ref = TREATMENT_ACCORDIONS[which];
+  if (!ref) return;
+  var panel = document.getElementById(ref.panel + animalId);
+  var header = document.getElementById(ref.header + animalId);
+  if (!panel) return;
+
+  panel.style.display = open ? 'block' : 'none';
+  if (header) {
+    header.className = open ? 'accordion-header open' : 'accordion-header';
+    var chevron = header.querySelector('.accordion-chevron');
+    if (chevron) chevron.innerHTML = open ? '&#9652;' : '&#9662;';
+  }
+}
+
+function toggleTreatmentAccordion(animalId, which) {
+  var ref = TREATMENT_ACCORDIONS[which];
+  if (!ref) return;
+  var panel = document.getElementById(ref.panel + animalId);
+  if (!panel) return;
+
+  var open = !panel.style.display || panel.style.display === 'none';
+
+  // Only one open at a time - they are two ways of doing the same job, and on a
+  // phone two open forms means a lot of scrolling.
+  Object.keys(TREATMENT_ACCORDIONS).forEach(function(key) {
+    setTreatmentAccordion(animalId, key, key === which ? open : false);
+  });
+
+  if (open) {
+    var header = document.getElementById(ref.header + animalId);
+    if (header && header.scrollIntoView) {
+      setTimeout(function() {
+        try { header.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        catch (e) { header.scrollIntoView(); }
+      }, 60);
+    }
+  }
+}
+
 function toggleTreatmentPlanForm(animalId, show) {
-  var form = document.getElementById('tpForm-' + animalId);
-  var toggle = document.getElementById('tpFormToggle-' + animalId);
-  if (!form) return;
-  var open = (show === undefined) ? form.style.display === 'none' : show;
-  form.style.display = open ? 'block' : 'none';
-  if (toggle) toggle.textContent = open ? 'Close' : '+ New treatment schedule';
+  if (show === false) setTreatmentAccordion(animalId, 'schedule', false);
+  else toggleTreatmentAccordion(animalId, 'schedule');
 }
 
 function toggleTPDoseMode(animalId) {
