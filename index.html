@@ -796,6 +796,122 @@
       font-size: 21px;
       line-height: 1;
     }
+
+    /* ---------- Species picker (searchable combo) ---------- */
+    .species-combo { position: relative; }
+    .species-combo input { margin-bottom: 0; }
+    .species-options {
+      display: none;
+      position: absolute;
+      left: 0; right: 0; top: 100%;
+      z-index: 60;
+      max-height: 300px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: #fffdf8;
+      border: 1px solid #cfc9b8;
+      border-radius: 8px;
+      box-shadow: 0 6px 24px rgba(44,49,38,0.14);
+      margin-top: 4px;
+    }
+    .species-options.open { display: block; }
+    .species-group-label {
+      padding: 9px 14px 5px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8a8d7c;
+      background: #f6f4ed;
+      border-top: 1px solid #ece7db;
+      position: sticky; top: 0;
+    }
+    .species-option {
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #2c3126;
+      cursor: pointer;
+      border-top: 1px solid #f1eee4;
+    }
+    .species-option:hover, .species-option.active { background: #e7f5e4; }
+    .species-freetext {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #55684f;
+      background: #f6f4ed;
+      cursor: pointer;
+      border-top: 1px solid #ece7db;
+    }
+    .species-hint { font-size: 12px; color: #6b6f60; margin-top: 6px; font-weight: 400; }
+
+    /* ---------- Feed log ---------- */
+    .feedlog-day {
+      background: #fffdf8;
+      border: 1px solid #e3dfd4;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .feedlog-day-head {
+      padding: 12px 15px;
+      background: #f6f4ed;
+      border-bottom: 1px solid #e3dfd4;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 6px 16px;
+    }
+    .feedlog-day-date { font-weight: 600; color: #3b4a33; font-size: 15px; }
+    .feedlog-day-totals { font-size: 13px; color: #55684f; }
+    .feedlog-row {
+      padding: 12px 15px;
+      border-top: 1px solid #f1eee4;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .feedlog-row:first-child { border-top: none; }
+    .feedlog-main { flex: 1; min-width: 0; }
+    .feedlog-time { font-size: 12px; color: #8a8d7c; letter-spacing: 0.02em; }
+    .feedlog-food { font-weight: 600; color: #2c3126; margin: 2px 0 3px; }
+    .feedlog-amount { font-size: 14px; color: #3b4a33; }
+    .feedlog-meta { font-size: 12px; color: #6b6f60; margin-top: 3px; }
+    .feedlog-refused { color: #a2482f; }
+    .feedlog-form {
+      margin-bottom: 22px;
+      padding: 18px 20px;
+      background: #f6f4ed;
+      border-radius: 12px;
+    }
+    .feedlog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px 15px;
+    }
+    .feedlog-form label { margin-top: 0; }
+    .no-guidance-note {
+      margin-top: 15px;
+      padding: 14px 16px;
+      background: #f6f4ed;
+      border-left: 3px solid #7a7d6e;
+      border-radius: 0 6px 6px 0;
+      font-size: 14px;
+      color: #565a4c;
+      line-height: 1.5;
+    }
+    .measure-toggle {
+      margin-top: 4px;
+      font-size: 13px;
+      color: #4e7c7a;
+      background: none;
+      border: none;
+      padding: 6px 0;
+      min-height: 0;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -833,9 +949,6 @@
         <input type="text" id="animalSearch" placeholder="Search by name, species, or notes..." style="flex: 1; min-width: 200px;">
         <select id="speciesFilter" style="min-width: 200px;">
           <option value="">All Species</option>
-          <option value="Common Brushtail Possum">Common Brushtail Possum</option>
-          <option value="Ringtail Possum">Ringtail Possum</option>
-          <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
         </select>
       </div>
       
@@ -851,12 +964,12 @@
     <div class="card">
       <h2>Add New Animal</h2>
       <label>Name: <input type="text" id="animalName" placeholder="Enter animal name"></label>
-      <label>Species: 
-        <select id="animalSpecies">
-          <option value="Common Brushtail Possum">Common Brushtail Possum</option>
-          <option value="Ringtail Possum">Ringtail Possum</option>
-          <option value="Short-Eared Brushtail Possum">Short-Eared Brushtail Possum</option>
-        </select>
+      <label>Species:
+        <div class="species-combo" id="speciesCombo">
+          <input type="text" id="animalSpecies" placeholder="Start typing, e.g. lorikeet, magpie, wallaby..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="speciesOptions">
+          <div class="species-options" id="speciesOptions" role="listbox"></div>
+        </div>
+        <div class="species-hint">Not on the list? Type the species name as you'd write it on the record - it will be saved exactly as entered.</div>
       </label>
       <label>Intake Date: <input type="date" id="intakeDate"></label>
       <label>Intake Notes: <textarea id="intakeNotes" placeholder="Circumstances of rescue, initial condition, etc."></textarea></label>
@@ -889,10 +1002,22 @@
           <option value="">Select an animal...</option>
         </select>
       </label>
-      <button onclick="exportAnimalData()">Export Care Data</button>
+      <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+        <button onclick="exportAnimalData()">Export Care Data (JSON)</button>
+        <button onclick="exportFeedCsv('one')" style="background: #4e7c7a;">Feed Log (CSV)</button>
+        <button onclick="exportWeightCsv('one')" style="background: #4e7c7a;">Weights (CSV)</button>
+      </div>
+
+      <div style="margin-top: 20px; padding: 20px; background: #f6f4ed; border: 1px solid #e3dfd4; border-radius: 8px;">
+        <h4 style="margin-top: 0;">Spreadsheet Export &mdash; All Animals</h4>
+        <p style="font-size: 13px; color: #6b6f60; margin-top: 0;">CSV files open in Excel or Google Sheets. Useful for permit returns and group records.</p>
+        <button onclick="exportFeedCsv('all')" style="background: #4e7c7a;">All Feed Records (CSV)</button>
+        <button onclick="exportWeightCsv('all')" style="background: #4e7c7a;">All Weights &amp; Measurements (CSV)</button>
+      </div>
       
       <div style="margin-top: 20px; padding: 20px; background: #f6f4ed; border: 1px solid #e3dfd4; border-radius: 8px;">
-        <h4>Backup & Restore</h4>
+        <h4 style="margin-top: 0;">Backup &amp; Restore</h4>
+        <p style="font-size: 13px; color: #6b6f60; margin-top: 0;">The JSON backup is the only format BushBuddy can read back in. Take one before clearing space or changing devices.</p>
         <button onclick="exportAllData()">Backup All Data</button>
         <label>Restore Data: <input type="file" id="restoreInput" accept=".json"></label>
         <button onclick="restoreData()">Restore from Backup</button>
@@ -958,8 +1083,277 @@ var speciesData = {
   ]
 };
 
+
+// ============================================================================
+//  SPECIES REGISTRY
+//  The list of species offered in the picker. This is deliberately SEPARATE
+//  from speciesData above: speciesData holds weight-banded feeding guidance and
+//  currently exists for three possums only. Everything else in this registry is
+//  a species the app will happily keep records for with no feeding guidance
+//  attached. The picker also accepts free text, so a species missing from this
+//  list never blocks an admission.
+// ============================================================================
+
+var SPECIES_GROUPS = [
+  { label: 'Possums & Gliders', birds: false, species: [
+    'Common Brushtail Possum', 'Short-Eared Brushtail Possum', 'Mountain Brushtail Possum',
+    'Ringtail Possum', 'Green Ringtail Possum', 'Herbert River Ringtail Possum',
+    'Lemuroid Ringtail Possum', 'Daintree River Ringtail Possum', 'Striped Possum',
+    'Common Spotted Cuscus', 'Sugar Glider', 'Squirrel Glider', 'Mahogany Glider',
+    'Yellow-bellied Glider', 'Greater Glider', 'Feathertail Glider'
+  ]},
+  { label: 'Kangaroos & Wallabies', birds: false, species: [
+    'Eastern Grey Kangaroo', 'Red Kangaroo', 'Antilopine Wallaroo', 'Common Wallaroo',
+    'Agile Wallaby', 'Red-necked Wallaby', 'Swamp Wallaby', 'Whiptail Wallaby',
+    'Northern Nailtail Wallaby', 'Red-legged Pademelon', 'Red-necked Pademelon',
+    'Allied Rock-wallaby', 'Mareeba Rock-wallaby', 'Lumholtz Tree-kangaroo',
+    'Bennett\u2019s Tree-kangaroo', 'Musky Rat-kangaroo', 'Rufous Bettong', 'Long-nosed Potoroo'
+  ]},
+  { label: 'Flying-foxes & Bats', birds: false, species: [
+    'Spectacled Flying-fox', 'Black Flying-fox', 'Grey-headed Flying-fox',
+    'Little Red Flying-fox', 'Eastern Tube-nosed Bat', 'Eastern Blossom Bat',
+    'Microbat (species unconfirmed)', 'Eastern Horseshoe Bat', 'Ghost Bat',
+    'White-striped Freetail Bat', 'Gould\u2019s Wattled Bat'
+  ]},
+  { label: 'Other Mammals', birds: false, species: [
+    'Koala', 'Short-beaked Echidna', 'Platypus', 'Northern Brown Bandicoot',
+    'Long-nosed Bandicoot', 'Northern Quoll', 'Spotted-tailed Quoll',
+    'Yellow-footed Antechinus', 'Rakali (Water Rat)', 'Fawn-footed Melomys',
+    'Bush Rat', 'Giant White-tailed Rat'
+  ]},
+  { label: 'Birds \u2014 Parrots & Cockatoos', birds: true, species: [
+    'Rainbow Lorikeet', 'Scaly-breasted Lorikeet', 'Red-collared Lorikeet',
+    'Little Lorikeet', 'Varied Lorikeet', 'Musk Lorikeet', 'Double-eyed Fig-Parrot',
+    'Sulphur-crested Cockatoo', 'Galah', 'Little Corella', 'Long-billed Corella',
+    'Red-tailed Black-Cockatoo', 'Yellow-tailed Black-Cockatoo', 'Gang-gang Cockatoo',
+    'Cockatiel', 'Australian King-Parrot', 'Red-winged Parrot', 'Eclectus Parrot',
+    'Eastern Rosella', 'Pale-headed Rosella', 'Crimson Rosella', 'Australian Ringneck',
+    'Red-rumped Parrot', 'Budgerigar'
+  ]},
+  { label: 'Birds \u2014 Honeyeaters & Small Songbirds', birds: true, species: [
+    'Noisy Miner', 'Yellow-throated Miner', 'Blue-faced Honeyeater', 'Lewin\u2019s Honeyeater',
+    'Brown Honeyeater', 'White-plumed Honeyeater', 'Singing Honeyeater',
+    'New Holland Honeyeater', 'Helmeted Friarbird', 'Noisy Friarbird', 'Little Friarbird',
+    'Red Wattlebird', 'Little Wattlebird', 'Eastern Spinebill', 'Silvereye',
+    'Yellow-bellied Sunbird', 'Mistletoebird', 'Spotted Pardalote', 'Striated Pardalote',
+    'Willie Wagtail', 'Grey Fantail', 'Rufous Fantail', 'Fairy-wren',
+    'Eastern Yellow Robin', 'Pale-yellow Robin', 'Golden Whistler', 'Welcome Swallow',
+    'Fairy Martin', 'Tree Martin', 'White-breasted Woodswallow', 'Zebra Finch',
+    'Double-barred Finch', 'Red-browed Finch', 'Chestnut-breasted Mannikin',
+    'Crimson Finch', 'Olive-backed Sunbird'
+  ]},
+  { label: 'Birds \u2014 Magpies, Crows & Larger Songbirds', birds: true, species: [
+    'Australian Magpie', 'Pied Butcherbird', 'Grey Butcherbird', 'Black Butcherbird',
+    'Pied Currawong', 'Magpie-lark (Peewee)', 'Torresian Crow', 'Australian Raven',
+    'Little Crow', 'Spangled Drongo', 'Black-faced Cuckoo-shrike', 'Barred Cuckoo-shrike',
+    'Grey Shrike-thrush', 'Eastern Whipbird', 'Noisy Pitta', 'Bassian Thrush',
+    'White-winged Chough', 'Grey-crowned Babbler', 'Metallic Starling', 'Figbird',
+    'Olive-backed Oriole', 'Yellow Oriole', 'Green Catbird', 'Spotted Catbird',
+    'Satin Bowerbird', 'Great Bowerbird', 'Golden Bowerbird', 'Victoria\u2019s Riflebird'
+  ]},
+  { label: 'Birds \u2014 Kookaburras, Cuckoos & Night Birds', birds: true, species: [
+    'Laughing Kookaburra', 'Blue-winged Kookaburra', 'Forest Kingfisher',
+    'Sacred Kingfisher', 'Azure Kingfisher', 'Little Kingfisher', 'Buff-breasted Paradise-Kingfisher',
+    'Rainbow Bee-eater', 'Dollarbird', 'Tawny Frogmouth', 'Papuan Frogmouth',
+    'Australian Owlet-nightjar', 'White-throated Nightjar', 'Eastern Koel',
+    'Channel-billed Cuckoo', 'Pheasant Coucal', 'Pallid Cuckoo', 'Fan-tailed Cuckoo',
+    'Brush Cuckoo', 'Little Bronze-Cuckoo'
+  ]},
+  { label: 'Birds \u2014 Raptors & Owls', birds: true, species: [
+    'Black Kite', 'Whistling Kite', 'Brahminy Kite', 'Black-shouldered Kite',
+    'Wedge-tailed Eagle', 'White-bellied Sea-Eagle', 'Little Eagle',
+    'Black-breasted Buzzard', 'Brown Falcon', 'Nankeen Kestrel', 'Peregrine Falcon',
+    'Australian Hobby', 'Brown Goshawk', 'Grey Goshawk', 'Collared Sparrowhawk',
+    'Pacific Baza', 'Swamp Harrier', 'Spotted Harrier', 'Osprey', 'Eastern Barn Owl',
+    'Barking Owl', 'Southern Boobook', 'Powerful Owl', 'Rufous Owl',
+    'Eastern Grass Owl', 'Lesser Sooty Owl'
+  ]},
+  { label: 'Birds \u2014 Waterbirds & Seabirds', birds: true, species: [
+    'Pacific Black Duck', 'Australian Wood Duck', 'Plumed Whistling-Duck',
+    'Wandering Whistling-Duck', 'Grey Teal', 'Hardhead', 'Australasian Shoveler',
+    'Magpie Goose', 'Black Swan', 'Radjah Shelduck', 'Australasian Grebe',
+    'Dusky Moorhen', 'Eurasian Coot', 'Purple Swamphen', 'Buff-banded Rail',
+    'Comb-crested Jacana', 'Masked Lapwing (Plover)', 'Bush Stone-curlew',
+    'Beach Stone-curlew', 'Pied Oystercatcher', 'Pied Stilt', 'Australian White Ibis',
+    'Straw-necked Ibis', 'Glossy Ibis', 'Royal Spoonbill', 'White-faced Heron',
+    'Cattle Egret', 'Great Egret', 'Intermediate Egret', 'Little Egret',
+    'Eastern Reef Egret', 'Nankeen Night-Heron', 'Striated Heron', 'Black-necked Stork',
+    'Brolga', 'Sarus Crane', 'Australian Pelican', 'Little Pied Cormorant',
+    'Little Black Cormorant', 'Great Cormorant', 'Pied Cormorant', 'Australasian Darter',
+    'Silver Gull', 'Crested Tern', 'Little Tern', 'Common Noddy', 'Brown Booby',
+    'Lesser Frigatebird', 'Wedge-tailed Shearwater', 'Little Penguin'
+  ]},
+  { label: 'Birds \u2014 Pigeons & Doves', birds: true, species: [
+    'Crested Pigeon', 'Peaceful Dove', 'Bar-shouldered Dove', 'Emerald Dove',
+    'Brown Cuckoo-Dove', 'Wonga Pigeon', 'Common Bronzewing', 'Brush Bronzewing',
+    'White-headed Pigeon', 'Rose-crowned Fruit-Dove', 'Superb Fruit-Dove',
+    'Wompoo Fruit-Dove', 'Torresian Imperial-Pigeon', 'Topknot Pigeon'
+  ]},
+  { label: 'Birds \u2014 Ground Birds & Other', birds: true, species: [
+    'Australian Brush-turkey', 'Orange-footed Scrubfowl', 'Brown Quail',
+    'Stubble Quail', 'Painted Button-quail', 'Little Button-quail',
+    'Southern Cassowary', 'Emu', 'Superb Lyrebird'
+  ]},
+  { label: 'Reptiles', birds: false, species: [
+    'Eastern Blue-tongued Lizard', 'Northern Blue-tongued Lizard', 'Lace Monitor',
+    'Yellow-spotted Monitor', 'Eastern Water Dragon', 'Frilled-neck Lizard',
+    'Bearded Dragon', 'Carpet Python', 'Amethystine Python', 'Common Tree Snake',
+    'Keelback', 'Eastern Brown Snake', 'Eastern Long-necked Turtle',
+    'Saw-shelled Turtle', 'Krefft\u2019s River Turtle', 'Green Sea Turtle',
+    'Loggerhead Turtle', 'Hawksbill Turtle', 'Flatback Turtle'
+  ]},
+  { label: 'Amphibians', birds: false, species: [
+    'Green Tree Frog', 'White-lipped Tree Frog', 'Dainty Green Tree Frog',
+    'Giant Barred Frog', 'Cane Toad (pest - for records only)'
+  ]}
+];
+
+// Flat lookup: species name -> group definition.
+var SPECIES_INDEX = (function() {
+  var idx = {};
+  SPECIES_GROUPS.forEach(function(g) {
+    g.species.forEach(function(name) { idx[name.toLowerCase()] = g; });
+  });
+  return idx;
+})();
+
+function speciesGroupFor(name) {
+  if (!name) return null;
+  return SPECIES_INDEX[String(name).toLowerCase()] || null;
+}
+
+function isBirdSpecies(name) {
+  var g = speciesGroupFor(name);
+  return !!(g && g.birds);
+}
+
+// True only where weight-banded feeding guidance actually exists for the species.
+// Everything else records weights, health and feeds without any guidance shown.
+function hasFeedingGuidance(species) {
+  return !!(species && speciesData[species]);
+}
+
+// ---------------------------------------------------------------- species picker
+var _speciesComboBound = false;
+
+function bindSpeciesCombo() {
+  if (_speciesComboBound) return;
+  var input = document.getElementById('animalSpecies');
+  var box = document.getElementById('speciesOptions');
+  if (!input || !box) return;
+
+  input.addEventListener('input', function() { renderSpeciesOptions(input.value); });
+  input.addEventListener('focus', function() { renderSpeciesOptions(input.value); });
+  input.addEventListener('blur', function() {
+    // Delay so a tap on an option registers before the list is hidden.
+    setTimeout(function() { closeSpeciesOptions(); }, 180);
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeSpeciesOptions(); }
+    else if (e.key === 'Enter') { closeSpeciesOptions(); }
+  });
+
+  // Delegated, and on mousedown so it beats the blur.
+  box.addEventListener('mousedown', function(e) {
+    var opt = e.target.closest ? e.target.closest('[data-species]') : null;
+    if (!opt) return;
+    e.preventDefault();
+    input.value = opt.getAttribute('data-species');
+    closeSpeciesOptions();
+  });
+
+  _speciesComboBound = true;
+}
+
+function closeSpeciesOptions() {
+  var box = document.getElementById('speciesOptions');
+  var input = document.getElementById('animalSpecies');
+  if (box) box.classList.remove('open');
+  if (input) input.setAttribute('aria-expanded', 'false');
+}
+
+// Species names in the list use typographic apostrophes (Lewin\u2019s, Krefft\u2019s),
+// but a carer typing on a phone will produce a straight one - or none at all.
+// Apostrophes are dropped from both sides so "lewins" finds it too, and
+// match on tokens so word order doesn't matter - "cockatoo black" finds
+// "Red-tailed Black-Cockatoo" just as "black cockatoo" does.
+function normaliseSpeciesText(str) {
+  return String(str || '')
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u02bc\u0060\u00b4']/g, '')
+    .replace(/[\u2010-\u2015]/g, '-');
+}
+
+function speciesMatches(name, tokens) {
+  if (tokens.length === 0) return true;
+  var hay = normaliseSpeciesText(name);
+  return tokens.every(function(t) { return hay.indexOf(t) !== -1; });
+}
+
+function renderSpeciesOptions(query) {
+  var box = document.getElementById('speciesOptions');
+  var input = document.getElementById('animalSpecies');
+  if (!box) return;
+
+  var q = (query || '').trim().toLowerCase();
+  var tokens = normaliseSpeciesText(query).split(/\s+/).filter(Boolean);
+  var html = '';
+  var shown = 0;
+
+  SPECIES_GROUPS.forEach(function(group) {
+    var matches = group.species.filter(function(name) {
+      return speciesMatches(name, tokens);
+    });
+    if (matches.length === 0) return;
+    html += '<div class="species-group-label">' + escapeHtml(group.label) + '</div>';
+    matches.forEach(function(name) {
+      shown++;
+      html += '<div class="species-option" role="option" data-species="' + escapeHtml(name) + '">' +
+        escapeHtml(name) + '</div>';
+    });
+  });
+
+  if (q && shown === 0) {
+    html = '<div class="species-freetext" data-species="' + escapeHtml(query.trim()) + '">' +
+      'No match in the list. Tap here to record this animal as ' +
+      '<strong>' + escapeHtml(query.trim()) + '</strong>.</div>';
+  } else if (q) {
+    html += '<div class="species-freetext" data-species="' + escapeHtml(query.trim()) + '">' +
+      'Or use exactly what you typed: <strong>' + escapeHtml(query.trim()) + '</strong></div>';
+  }
+
+  box.innerHTML = html;
+  box.classList.add('open');
+  if (input) input.setAttribute('aria-expanded', 'true');
+}
+
+// Species filter on the Your Animals tab is built from what is actually in care,
+// so it never lists 200 species the carer has never admitted.
+function updateSpeciesFilter() {
+  var sel = document.getElementById('speciesFilter');
+  if (!sel) return;
+  var current = sel.value;
+  var present = [];
+  animals.forEach(function(a) {
+    if (a.species && present.indexOf(a.species) === -1) present.push(a.species);
+  });
+  present.sort();
+  sel.innerHTML = '<option value="">All Species</option>';
+  present.forEach(function(name) {
+    var o = document.createElement('option');
+    o.value = name;
+    o.textContent = name;
+    sel.appendChild(o);
+  });
+  if (current && present.indexOf(current) !== -1) sel.value = current;
+}
+
+// A species with no guidance table returns null rather than silently falling back
+// to the possum schedule. Handing a carer possum milk figures for a kookaburra
+// would be worse than showing nothing, so every caller must handle null.
 function getFeedsPerDay(weight, species) {
-  var schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  var schedule = speciesData[species];
+  if (!schedule) return null;
   for (var i = 0; i < schedule.length; i++) {
     if (weight >= schedule[i].weight) return schedule[i].feeds;
   }
@@ -967,7 +1361,8 @@ function getFeedsPerDay(weight, species) {
 }
 
 function getAnimalInfo(weight, species) {
-  var schedule = speciesData[species] || speciesData["Common Brushtail Possum"];
+  var schedule = speciesData[species];
+  if (!schedule) return null;
   for (var i = 0; i < schedule.length; i++) {
     if (weight >= schedule[i].weight) return schedule[i];
   }
@@ -1061,6 +1456,7 @@ function loadData() {
       animals = JSON.parse(saved);
       migrateLogDates();
       migrateOngoingTreatments();
+      migrateSchema();
       console.log('Data loaded successfully:', animals.length, 'animals');
     } else {
       animals = [];
@@ -1070,6 +1466,22 @@ function loadData() {
     console.error('Error loading data:', e);
     animals = [];
   }
+}
+
+// Brings older saved records up to the current shape. Adding species beyond the
+// three possums meant every animal now needs a feed-record array, whether or not
+// it has feeding guidance attached.
+function migrateSchema() {
+  var changed = false;
+  animals.forEach(function(animal) {
+    if (!animal.feedRecords) { animal.feedRecords = []; changed = true; }
+    if (!animal.weights) { animal.weights = []; changed = true; }
+    if (!animal.healthEntries) { animal.healthEntries = []; changed = true; }
+    if (!animal.feedingLogs) { animal.feedingLogs = []; changed = true; }
+    if (!animal.feedingTimes) { animal.feedingTimes = []; changed = true; }
+  });
+  if (changed) saveData();
+  try { localStorage.setItem('bushbuddy_schema', '3'); } catch (e) {}
 }
 
 function migrateLogDates() {
@@ -1156,7 +1568,7 @@ function addAnimal() {
   console.log('addAnimal function called');
   
   var name = document.getElementById('animalName').value.trim();
-  var species = document.getElementById('animalSpecies').value;
+  var species = document.getElementById('animalSpecies').value.trim();
   var intakeDate = document.getElementById('intakeDate').value;
   var intakeNotes = document.getElementById('intakeNotes').value.trim();
   
@@ -1178,7 +1590,8 @@ function addAnimal() {
     photos: [],
     treatments: [],
     feedingLogs: [],
-    feedingTimes: []
+    feedingTimes: [],
+    feedRecords: []
   };
   
   animals.push(newAnimal);
@@ -1188,11 +1601,14 @@ function addAnimal() {
   
   // Clear form
   document.getElementById('animalName').value = '';
+  document.getElementById('animalSpecies').value = '';
   document.getElementById('intakeDate').value = localToday();
   document.getElementById('intakeNotes').value = '';
+  closeSpeciesOptions();
   
   renderAnimals();
   updateSelects();
+  updateSpeciesFilter();
   alert(name + ' has been added successfully!');
   
   showTab('home');
@@ -1271,6 +1687,7 @@ function deleteAnimal(id) {
   saveData();
   renderAnimals();
   updateSelects();
+  updateSpeciesFilter();
   
   var detailTab = document.getElementById('animalDetailTab');
   if (detailTab && detailTab.classList.contains('active')) {
@@ -1305,6 +1722,7 @@ function showAnimalDetail(animalId) {
     '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'health\')"><span class="section-btn-icon">' + icon('pulse', 21) + '</span> Health Tracking</button>' +
     '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'treatments\')"><span class="section-btn-icon">' + icon('pill', 21) + '</span> Treatments</button>' +
     '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'schedule\')"><span class="section-btn-icon">' + icon('clock', 21) + '</span> Feeding Schedule</button>' +
+    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'feedlog\')"><span class="section-btn-icon">' + icon('bottle', 21) + '</span> Feed Log</button>' +
     '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'photos\')"><span class="section-btn-icon">' + icon('camera', 21) + '</span> Photo Gallery</button>' +
     '</div>' +
     '</div>' +
@@ -1330,8 +1748,8 @@ function showAnimalSection(animalId, section) {
     case 'treatments':
       showTreatmentsSection(animal, content);
       break;
-    case 'feeding':
-      content.innerHTML = '<div class="card"><h3>Daily Feeding</h3><p>Daily feeding checklist features coming soon...</p></div>';
+    case 'feedlog':
+      showFeedLogSection(animal, content);
       break;
     case 'schedule':
       showScheduleSection(animal, content);
@@ -1345,15 +1763,36 @@ function showAnimalSection(animalId, section) {
 function showWeightSection(animal, container) {
   var card = document.createElement('div');
   card.className = 'card';
-  card.innerHTML = '<h3>Weight Tracking & Feed Calculator</h3>';
+  card.innerHTML = '<h3>' + (hasFeedingGuidance(animal.species)
+    ? 'Weight Tracking &amp; Feed Calculator'
+    : 'Weight &amp; Measurements') + '</h3>';
   
+  var bird = isBirdSpecies(animal.species);
+
   var form = document.createElement('div');
   form.innerHTML = 
-    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">' +
+    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 12px;">' +
     '<div><label>Date: <input type="date" id="weightDate-' + animal.id + '" value="' + localToday() + '"></label></div>' +
-    '<div><label>Weight (g): <input type="number" id="animalWeight-' + animal.id + '" placeholder="Enter weight in grams"></label></div>' +
+    '<div><label>Weight (g): <input type="number" step="any" id="animalWeight-' + animal.id + '" placeholder="Enter weight in grams"></label></div>' +
     '<div style="display: flex; align-items: end;"><button onclick="addWeightForAnimal(' + animal.id + ')">Add Weight</button></div>' +
-    '</div>';
+    '</div>' +
+    // Skeletal measurements track age far more reliably than weight in birds,
+    // which usually arrive underweight. Offered for birds, hidden by default.
+    (bird
+      ? '<button type="button" class="measure-toggle" onclick="toggleMeasurements(' + animal.id + ')" ' +
+        'id="measureToggle-' + animal.id + '">+ Add measurements (bill, wing, tarsus, tail)</button>' +
+        '<div id="measureFields-' + animal.id + '" style="display: none; margin-top: 10px; padding: 14px 16px; background: #f6f4ed; border-radius: 10px;">' +
+        '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">' +
+        '<label style="margin-top: 0;">Bill (mm)<input type="number" step="any" id="mBill-' + animal.id + '"></label>' +
+        '<label style="margin-top: 0;">Wing (mm)<input type="number" step="any" id="mWing-' + animal.id + '"></label>' +
+        '<label style="margin-top: 0;">Tarsus (mm)<input type="number" step="any" id="mTarsus-' + animal.id + '"></label>' +
+        '<label style="margin-top: 0;">Tail (mm)<input type="number" step="any" id="mTail-' + animal.id + '"></label>' +
+        '</div>' +
+        '<p style="font-size: 12px; color: #6b6f60; margin: 10px 0 0;">Saved with the weight record. ' +
+        'Body weight is a poor indicator of age in birds; these lengths are not.</p>' +
+        '</div>'
+      : '') +
+    '<div style="margin-bottom: 20px;"></div>';
   card.appendChild(form);
   
   var resultDiv = document.createElement('div');
@@ -2981,32 +3420,45 @@ function showScheduleSection(animal, container) {
   card.innerHTML = '<h3>Feeding Schedule for ' + escapeHtml(animal.name) + '</h3>';
   
   // Get current feeding requirements
+  var guided = hasFeedingGuidance(animal.species);
   var currentWeight = getCurrentWeight(animal);
-  var feedsPerDay = currentWeight ? getFeedsPerDay(currentWeight, animal.species) : 0;
+  var feedsPerDay = (guided && currentWeight) ? getFeedsPerDay(currentWeight, animal.species) : 0;
   
   // Initialize feeding times if they don't exist
   if (!animal.feedingTimes) {
     animal.feedingTimes = [];
   }
   
-  // Generate default schedule if empty and we have weight data
+  // Only auto-generate a schedule where guidance says how many feeds a day.
+  // For everything else the carer sets the times themselves.
   if (animal.feedingTimes.length === 0 && feedsPerDay > 0) {
     generateDefaultSchedule(animal, feedsPerDay);
   }
   
   // Schedule management section
   var scheduleControls = document.createElement('div');
-  scheduleControls.innerHTML = 
-    '<div style="margin-bottom: 20px; padding: 15px; background: #f6f4ed; border-radius: 10px;">' +
-    '<h4>Schedule Management</h4>' +
-    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
-    '<div><label>Current Weight (g): <input type="number" id="scheduleWeight-' + animal.id + '" value="' + (currentWeight || '') + '" placeholder="Enter current weight"></label></div>' +
-    '<div style="display: flex; align-items: end; gap: 10px;">' +
-    '<button onclick="updateScheduleForWeight(' + animal.id + ')">Update Schedule</button>' +
-    '<button onclick="addCustomFeedingTime(' + animal.id + ')" style="background: #4e6b43;">Add Custom Time</button>' +
-    '</div>' +
-    '</div>' +
-    '</div>';
+  if (guided) {
+    scheduleControls.innerHTML = 
+      '<div style="margin-bottom: 20px; padding: 15px; background: #f6f4ed; border-radius: 10px;">' +
+      '<h4>Schedule Management</h4>' +
+      '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
+      '<div><label>Current Weight (g): <input type="number" id="scheduleWeight-' + animal.id + '" value="' + (currentWeight || '') + '" placeholder="Enter current weight"></label></div>' +
+      '<div style="display: flex; align-items: end; gap: 10px;">' +
+      '<button onclick="updateScheduleForWeight(' + animal.id + ')">Update Schedule</button>' +
+      '<button onclick="addCustomFeedingTime(' + animal.id + ')" style="background: #4e6b43;">Add Custom Time</button>' +
+      '</div>' +
+      '</div>' +
+      '</div>';
+  } else {
+    scheduleControls.innerHTML = 
+      '<div style="margin-bottom: 20px; padding: 15px; background: #f6f4ed; border-radius: 10px;">' +
+      '<h4>Schedule Management</h4>' +
+      '<p style="font-size: 14px; color: #565a4c; line-height: 1.5; margin: 0 0 6px;">' +
+      'BushBuddy has no feeding guidance for ' + escapeHtml(animal.species) + ', so set the ' +
+      'times that suit this animal. Each time you add appears on Today\u2019s Schedule.</p>' +
+      '<button onclick="addCustomFeedingTime(' + animal.id + ')" style="background: #4e6b43;">Add Feeding Time</button>' +
+      '</div>';
+  }
   card.appendChild(scheduleControls);
   
   // Summary cards
@@ -3073,6 +3525,11 @@ function updateScheduleForWeight(animalId) {
   }
   
   var feedsPerDay = getFeedsPerDay(weight, animal.species);
+  
+  if (feedsPerDay === null) {
+    alert('There is no feeding guidance for ' + animal.species + ', so the schedule can\'t be generated from weight.\n\nUse "Add Feeding Time" to set the times yourself.');
+    return;
+  }
   
   if (confirm('This will update the feeding schedule to ' + feedsPerDay + ' feeds per day based on ' + weight + 'g weight. Continue?')) {
     generateDefaultSchedule(animal, feedsPerDay);
@@ -3180,7 +3637,11 @@ function updateScheduleDisplay(animal) {
   scheduleDiv.innerHTML = '';
   
   if (!animal.feedingTimes || animal.feedingTimes.length === 0) {
-    scheduleDiv.innerHTML = '<p style="text-align: center; color: #6b6f60; font-style: italic; grid-column: 1/-1;">No feeding schedule set. Enter a current weight to generate a schedule.</p>';
+    scheduleDiv.innerHTML = '<p style="text-align: center; color: #6b6f60; font-style: italic; grid-column: 1/-1;">' +
+      (hasFeedingGuidance(animal.species)
+        ? 'No feeding schedule set. Enter a current weight to generate a schedule.'
+        : 'No feeding times set yet. Use "Add Feeding Time" above to build a schedule for this animal.') +
+      '</p>';
     return;
   }
   
@@ -3506,6 +3967,42 @@ function deleteFeedingTime(animalId, feedingTimeId) {
   updateScheduleDisplay(animal);
 }
 
+function toggleMeasurements(animalId) {
+  var box = document.getElementById('measureFields-' + animalId);
+  var btn = document.getElementById('measureToggle-' + animalId);
+  if (!box) return;
+  var open = box.style.display !== 'none';
+  box.style.display = open ? 'none' : 'block';
+  if (btn) btn.textContent = open
+    ? '+ Add measurements (bill, wing, tarsus, tail)'
+    : '\u2212 Hide measurements';
+}
+
+function readMeasurements(animalId) {
+  var keys = { mBill: 'bill', mWing: 'wing', mTarsus: 'tarsus', mTail: 'tail' };
+  var out = {};
+  var any = false;
+  Object.keys(keys).forEach(function(k) {
+    var el = document.getElementById(k + '-' + animalId);
+    if (!el || el.value === '') return;
+    var v = parseFloat(el.value);
+    if (isNaN(v) || v < 0) return;
+    out[keys[k]] = v;
+    any = true;
+  });
+  return any ? out : null;
+}
+
+function describeMeasurements(m) {
+  if (!m) return '';
+  var bits = [];
+  if (typeof m.bill === 'number') bits.push('bill ' + m.bill + 'mm');
+  if (typeof m.wing === 'number') bits.push('wing ' + m.wing + 'mm');
+  if (typeof m.tarsus === 'number') bits.push('tarsus ' + m.tarsus + 'mm');
+  if (typeof m.tail === 'number') bits.push('tail ' + m.tail + 'mm');
+  return bits.join(' \u00b7 ');
+}
+
 function addWeightForAnimal(animalId) {
   var animal = animals.find(function(a) { return a.id == animalId; });
   if (!animal) return;
@@ -3519,15 +4016,22 @@ function addWeightForAnimal(animalId) {
   }
   
   if (!animal.weights) animal.weights = [];
-  animal.weights.push({ date: date, weight: weight });
+  var record = { date: date, weight: weight };
+  var measurements = readMeasurements(animalId);
+  if (measurements) record.measurements = measurements;
+  animal.weights.push(record);
   
   saveData();
   showWeightHistoryForAnimal(animal);
   
   document.getElementById('weightDate-' + animalId).value = localToday();
   document.getElementById('animalWeight-' + animalId).value = '';
+  ['mBill', 'mWing', 'mTarsus', 'mTail'].forEach(function(k) {
+    var el = document.getElementById(k + '-' + animalId);
+    if (el) el.value = '';
+  });
   
-  alert('Weight added successfully!');
+  showBanner('Weight recorded for ' + animal.name + '.');
 }
 
 function showFeedCalcForAnimal(animal) {
@@ -3543,25 +4047,438 @@ function showFeedCalcForAnimal(animal) {
   }
   
   var species = animal.species;
+  var resultDiv = document.getElementById('feedResult-' + animal.id);
+  if (!resultDiv) return;
+
+  if (!hasFeedingGuidance(species)) {
+    resultDiv.innerHTML = noGuidanceHtml(animal, weight);
+    return;
+  }
+
   var feeds = getFeedsPerDay(weight, species);
   var dailyMilk = weight * 0.15;
   var perFeed = dailyMilk / feeds;
   var info = getAnimalInfo(weight, species);
   
-  var resultDiv = document.getElementById('feedResult-' + animal.id);
-  if (resultDiv) {
-    resultDiv.innerHTML = 
-      '<strong>Feed Calculation for ' + species + ' - ' + weight + 'g:</strong><br>' +
-      'Feeds per day: ' + feeds + '<br>' +
-      'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
-      'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
-      '<strong>Care Information:</strong><br>' +
-      '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
-      '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
-      '<strong>Housing:</strong> ' + info.housing + '<br>' +
-      '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
-      '<strong>Milk Formula:</strong> ' + info.milkFormula;
+  resultDiv.innerHTML = 
+    '<strong>Feed Calculation for ' + escapeHtml(species) + ' - ' + weight + 'g:</strong><br>' +
+    'Feeds per day: ' + feeds + '<br>' +
+    'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
+    'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
+    '<strong>Care Information:</strong><br>' +
+    '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
+    '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
+    '<strong>Housing:</strong> ' + info.housing + '<br>' +
+    '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
+    '<strong>Milk Formula:</strong> ' + info.milkFormula;
+}
+
+// Shown in place of the feed calculator for any species with no guidance table.
+// It states plainly that BushBuddy has nothing to offer here, rather than leaving
+// an empty panel that could read as "nothing needed".
+function noGuidanceHtml(animal, weight) {
+  var bird = isBirdSpecies(animal.species);
+  var latest = getCurrentWeight(animal);
+  var w = weight || latest;
+  var body = '<strong>' + escapeHtml(animal.species) + '</strong>' +
+    (w ? ' \u2014 ' + w + 'g' : '') + '<br>' +
+    'BushBuddy has no feeding guidance for this species. Weights, measurements, ' +
+    'health notes and feeds are all still recorded \u2014 follow your usual reference ' +
+    'for what and how much to feed.';
+  if (bird) {
+    body += '<br><br><em>For birds, body weight is a poor guide to age: most arrive ' +
+      'underweight. Record bill, wing and tarsus lengths alongside weight and use ' +
+      'those with developmental stage instead.</em>';
   }
+  return '<div class="no-guidance-note">' + body + '</div>';
+}
+
+
+// ============================================================================
+//  FEED LOG
+//  A record of what was actually offered and actually eaten. Separate from the
+//  feeding SCHEDULE (which is about times and ticking them off) and from the
+//  feed CALCULATOR (guidance, possums only). This works for every species,
+//  including all the ones BushBuddy has no guidance for.
+// ============================================================================
+
+var FEED_UNITS = ['g', 'mL', 'items'];
+var FEED_METHODS = [
+  'Syringe', 'Crop tube / gavage', 'Bottle / teat', 'Hand / tong fed',
+  'Self-fed from bowl', 'Free access / ad lib', 'Assisted', 'Other'
+];
+
+function getFeedRecords(animal) {
+  return animal.feedRecords || [];
+}
+
+function fmtAmount(n) {
+  if (n === null || n === undefined || n === '') return '';
+  var v = Number(n);
+  if (isNaN(v)) return '';
+  return (Math.round(v * 100) / 100).toString();
+}
+
+// Every distinct food a carer has entered before, across all animals, so the
+// same item gets typed the same way each time and the totals stay meaningful.
+function knownFoodItems() {
+  var seen = {};
+  var out = [];
+  animals.forEach(function(a) {
+    getFeedRecords(a).forEach(function(r) {
+      var f = (r.food || '').trim();
+      if (f && !seen[f.toLowerCase()]) { seen[f.toLowerCase()] = true; out.push(f); }
+    });
+  });
+  out.sort(function(x, y) { return x.localeCompare(y); });
+  return out;
+}
+
+function feedFoodDatalistHtml() {
+  var html = '<datalist id="feedFoodList">';
+  knownFoodItems().forEach(function(f) {
+    html += '<option value="' + escapeHtml(f) + '"></option>';
+  });
+  return html + '</datalist>';
+}
+
+function lastCarerName() {
+  try { return localStorage.getItem('bushbuddy_lastCarer') || ''; } catch (e) { return ''; }
+}
+
+// The most recent weight recorded on or before a given date - used to express
+// intake as a percentage of body weight for that day.
+function weightOnOrBefore(animal, dateStr) {
+  if (!animal.weights || animal.weights.length === 0) return null;
+  var candidates = animal.weights.filter(function(w) { return w.date <= dateStr; });
+  if (candidates.length === 0) return null;
+  candidates.sort(function(a, b) { return b.date.localeCompare(a.date); });
+  return candidates[0].weight;
+}
+
+function feedFormHtml(animal, prefix) {
+  var id = prefix + '-' + animal.id;
+  var now = new Date();
+  var unitOptions = FEED_UNITS.map(function(u) {
+    return '<option value="' + u + '"' + (u === 'g' ? ' selected' : '') + '>' + u + '</option>';
+  }).join('');
+  var methodOptions = FEED_METHODS.map(function(m) {
+    return '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + '</option>';
+  }).join('');
+
+  return feedFoodDatalistHtml() +
+    '<div class="feedlog-grid">' +
+    '<label>Date<input type="date" id="fl-date-' + id + '" value="' + localToday() + '"></label>' +
+    '<label>Time<input type="time" id="fl-time-' + id + '" value="' + now.toTimeString().substr(0, 5) + '"></label>' +
+    '<label>Food / formula<input type="text" id="fl-food-' + id + '" list="feedFoodList" placeholder="e.g. Insectivore mix, Wombaroo, mince"></label>' +
+    '<label>Unit<select id="fl-unit-' + id + '">' + unitOptions + '</select></label>' +
+    '<label>Offered<input type="number" step="any" min="0" id="fl-offered-' + id + '" placeholder="Amount put out"></label>' +
+    '<label>Taken<input type="number" step="any" min="0" id="fl-consumed-' + id + '" placeholder="Amount actually eaten"></label>' +
+    '<label>Method<select id="fl-method-' + id + '">' + methodOptions + '</select></label>' +
+    '<label>Made up as<input type="text" id="fl-prep-' + id + '" placeholder="e.g. 1:2 powder:water"></label>' +
+    '<label>Fed by<input type="text" id="fl-carer-' + id + '" value="' + escapeHtml(lastCarerName()) + '" placeholder="Carer name"></label>' +
+    '</div>' +
+    '<label style="margin-top: 12px;">Notes<textarea id="fl-notes-' + id + '" placeholder="Appetite, begging response, refusals, regurgitation, droppings..." style="min-height: 70px;"></textarea></label>';
+}
+
+function readFeedForm(animal, prefix) {
+  var id = prefix + '-' + animal.id;
+  function val(k) {
+    var el = document.getElementById('fl-' + k + '-' + id);
+    return el ? el.value : '';
+  }
+  function num(k) {
+    var v = val(k).trim();
+    if (v === '') return null;
+    var n = parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+
+  var food = val('food').trim();
+  var offered = num('offered');
+  var consumed = num('consumed');
+
+  if (!food) { alert('Please enter what was fed.'); return null; }
+  if (offered === null && consumed === null) {
+    alert('Please enter an amount - either what was offered, what was taken, or both.');
+    return null;
+  }
+  if (offered !== null && offered < 0) { alert('Amount offered can\u2019t be negative.'); return null; }
+  if (consumed !== null && consumed < 0) { alert('Amount taken can\u2019t be negative.'); return null; }
+
+  var carer = val('carer').trim();
+  if (carer) { try { localStorage.setItem('bushbuddy_lastCarer', carer); } catch (e) {} }
+
+  return {
+    id: Date.now(),
+    date: val('date') || localToday(),
+    time: val('time') || new Date().toTimeString().substr(0, 5),
+    food: food,
+    unit: val('unit') || 'g',
+    offered: offered,
+    consumed: consumed,
+    method: val('method') || '',
+    prep: val('prep').trim(),
+    carer: carer,
+    notes: val('notes').trim(),
+    recordedAt: new Date().toISOString()
+  };
+}
+
+function clearFeedForm(animal, prefix) {
+  var id = prefix + '-' + animal.id;
+  ['food', 'offered', 'consumed', 'prep', 'notes'].forEach(function(k) {
+    var el = document.getElementById('fl-' + k + '-' + id);
+    if (el) el.value = '';
+  });
+  var t = document.getElementById('fl-time-' + id);
+  if (t) t.value = new Date().toTimeString().substr(0, 5);
+}
+
+function addFeedRecord(animalId, prefix) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+
+  var rec = readFeedForm(animal, prefix);
+  if (!rec) return;
+
+  if (!animal.feedRecords) animal.feedRecords = [];
+  animal.feedRecords.push(rec);
+
+  if (!saveData()) return;
+  clearFeedForm(animal, prefix);
+  showBanner('Feed recorded for ' + animal.name + '.');
+
+  if (prefix === 'sec') {
+    updateFeedLogDisplay(animal);
+  } else {
+    closeQuickFeedModal();
+    if (document.getElementById('dailyScheduleContent')) showDailySchedule();
+  }
+}
+
+function deleteFeedRecord(animalId, recordId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal || !animal.feedRecords) return;
+  if (!confirm('Delete this feed record?')) return;
+  animal.feedRecords = animal.feedRecords.filter(function(r) { return r.id !== recordId; });
+  saveData();
+  updateFeedLogDisplay(animal);
+}
+
+// Totals per unit for one day. Units are kept apart deliberately: adding 20g of
+// mince to 30mL of formula would produce a number that means nothing.
+function summariseFeedDay(records) {
+  var totals = {};
+  records.forEach(function(r) {
+    var u = r.unit || 'g';
+    if (!totals[u]) totals[u] = { offered: 0, consumed: 0, hasOffered: false, hasConsumed: false };
+    if (typeof r.offered === 'number') { totals[u].offered += r.offered; totals[u].hasOffered = true; }
+    if (typeof r.consumed === 'number') { totals[u].consumed += r.consumed; totals[u].hasConsumed = true; }
+  });
+  return totals;
+}
+
+function showFeedLogSection(animal, container) {
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<h3>Feed Log for ' + escapeHtml(animal.name) + '</h3>' +
+    '<p style="color: #6b6f60; font-size: 14px; margin-top: -6px;">What was actually offered and eaten. ' +
+    'Recording both shows up refusals, which are often the first sign something is wrong.</p>';
+
+  var form = document.createElement('div');
+  form.className = 'feedlog-form';
+  form.innerHTML = '<h4 style="margin-top: 0; color: #55684f;">Record a Feed</h4>' +
+    feedFormHtml(animal, 'sec') +
+    '<button onclick="addFeedRecord(' + animal.id + ', \'sec\')" style="margin-top: 15px;">Add Feed Record</button>';
+  card.appendChild(form);
+
+  var summaryDiv = document.createElement('div');
+  summaryDiv.className = 'schedule-summary';
+  summaryDiv.id = 'feedLogSummary-' + animal.id;
+  card.appendChild(summaryDiv);
+
+  var historyDiv = document.createElement('div');
+  historyDiv.id = 'feedLogHistory-' + animal.id;
+  card.appendChild(historyDiv);
+
+  container.appendChild(card);
+  updateFeedLogDisplay(animal);
+}
+
+function updateFeedLogDisplay(animal) {
+  var summaryDiv = document.getElementById('feedLogSummary-' + animal.id);
+  var historyDiv = document.getElementById('feedLogHistory-' + animal.id);
+  if (!historyDiv) return;
+
+  var records = getFeedRecords(animal).slice();
+
+  if (summaryDiv) {
+    var today = localToday();
+    var todayRecs = records.filter(function(r) { return r.date === today; });
+    var todayTotals = summariseFeedDay(todayRecs);
+    var totalStr = Object.keys(todayTotals).map(function(u) {
+      return fmtAmount(todayTotals[u].hasConsumed ? todayTotals[u].consumed : todayTotals[u].offered) + ' ' + u;
+    }).join(' + ') || '0';
+
+    // Days with at least one record in the last 7, as a rough "is this being kept up" signal.
+    var cutoff = addDaysStr(today, -6);
+    var recentDays = {};
+    records.forEach(function(r) { if (r.date >= cutoff && r.date <= today) recentDays[r.date] = true; });
+
+    var refusals = todayRecs.filter(function(r) {
+      return typeof r.offered === 'number' && typeof r.consumed === 'number' && r.consumed < r.offered;
+    }).length;
+
+    summaryDiv.innerHTML =
+      '<div class="summary-card"><div class="summary-number">' + todayRecs.length + '</div>' +
+      '<div class="summary-label">Feeds Today</div></div>' +
+      '<div class="summary-card"><div class="summary-number" style="font-size: 20px;">' + escapeHtml(totalStr) + '</div>' +
+      '<div class="summary-label">Taken Today</div></div>' +
+      '<div class="summary-card"><div class="summary-number">' + refusals + '</div>' +
+      '<div class="summary-label">Part-Refused Today</div></div>' +
+      '<div class="summary-card"><div class="summary-number">' + Object.keys(recentDays).length + '/7</div>' +
+      '<div class="summary-label">Days Logged</div></div>';
+  }
+
+  historyDiv.innerHTML = '';
+
+  if (records.length === 0) {
+    historyDiv.innerHTML = '<p style="color: #6b6f60; font-style: italic;">No feed records yet. ' +
+      'Add the first one above.</p>';
+    return;
+  }
+
+  // Group by date, newest day first, newest feed first within the day.
+  var byDate = {};
+  records.forEach(function(r) {
+    if (!byDate[r.date]) byDate[r.date] = [];
+    byDate[r.date].push(r);
+  });
+  var dates = Object.keys(byDate).sort(function(a, b) { return b.localeCompare(a); });
+
+  var html = '<div style="margin: 22px 0 12px;"><strong>Feed History</strong></div>';
+
+  dates.forEach(function(date) {
+    var dayRecs = byDate[date].slice().sort(function(a, b) {
+      return (b.time || '').localeCompare(a.time || '');
+    });
+    var totals = summariseFeedDay(dayRecs);
+    var bw = weightOnOrBefore(animal, date);
+
+    var totalsBits = Object.keys(totals).map(function(u) {
+      var t = totals[u];
+      var bit = '';
+      if (t.hasConsumed) {
+        bit = 'taken ' + fmtAmount(t.consumed) + ' ' + u;
+        if (t.hasOffered && t.offered > t.consumed) {
+          bit += ' <span class="feedlog-refused">(of ' + fmtAmount(t.offered) + ' offered)</span>';
+        }
+      } else if (t.hasOffered) {
+        bit = 'offered ' + fmtAmount(t.offered) + ' ' + u;
+      }
+      // % of body weight only where the unit is comparable to a mass.
+      if (bw && (u === 'g' || u === 'mL')) {
+        var amt = t.hasConsumed ? t.consumed : t.offered;
+        var pct = (amt / bw) * 100;
+        bit += ' \u2014 ' + pct.toFixed(1) + '% of ' + bw + 'g';
+      }
+      return bit;
+    }).filter(Boolean);
+
+    html += '<div class="feedlog-day">' +
+      '<div class="feedlog-day-head">' +
+      '<span class="feedlog-day-date">' + formatDate(date) + '</span>' +
+      '<span class="feedlog-day-totals">' + dayRecs.length + ' feed' + (dayRecs.length === 1 ? '' : 's') +
+      (totalsBits.length ? ' \u00b7 ' + totalsBits.join(' \u00b7 ') : '') + '</span>' +
+      '</div>';
+
+    dayRecs.forEach(function(r) {
+      var amount = '';
+      if (typeof r.consumed === 'number' && typeof r.offered === 'number') {
+        amount = fmtAmount(r.consumed) + ' ' + r.unit + ' taken of ' + fmtAmount(r.offered) + ' ' + r.unit + ' offered';
+        if (r.consumed < r.offered) {
+          amount += ' <span class="feedlog-refused">(' + fmtAmount(r.offered - r.consumed) + ' ' + r.unit + ' left)</span>';
+        }
+      } else if (typeof r.consumed === 'number') {
+        amount = fmtAmount(r.consumed) + ' ' + r.unit + ' taken';
+      } else if (typeof r.offered === 'number') {
+        amount = fmtAmount(r.offered) + ' ' + r.unit + ' offered';
+      }
+
+      var meta = [];
+      if (r.method) meta.push(escapeHtml(r.method));
+      if (r.prep) meta.push('made up ' + escapeHtml(r.prep));
+      if (r.carer) meta.push('by ' + escapeHtml(r.carer));
+
+      html += '<div class="feedlog-row">' +
+        '<div class="feedlog-main">' +
+        '<div class="feedlog-time">' + formatTime(r.time) + '</div>' +
+        '<div class="feedlog-food">' + escapeHtml(r.food) + '</div>' +
+        '<div class="feedlog-amount">' + amount + '</div>' +
+        (meta.length ? '<div class="feedlog-meta">' + meta.join(' \u00b7 ') + '</div>' : '') +
+        (r.notes ? '<div class="feedlog-meta">' + escapeHtml(r.notes) + '</div>' : '') +
+        '</div>' +
+        '<button class="small" onclick="deleteFeedRecord(' + animal.id + ', ' + r.id + ')" ' +
+        'style="background: #f6f4ed; color: #7a7d6e; border: 1px solid #ddd8cb;">' + icon('trash', 15) + '</button>' +
+        '</div>';
+    });
+
+    html += '</div>';
+  });
+
+  historyDiv.innerHTML += html;
+}
+
+// ---------------------------------------------------------------- quick log modal
+function quickLogFeed(animalId) {
+  var animal = animals.find(function(a) { return a.id == animalId; });
+  if (!animal) return;
+
+  var existing = document.getElementById('quickFeedModal');
+  if (existing) existing.remove();
+
+  var wrap = document.createElement('div');
+  wrap.id = 'quickFeedModal';
+  wrap.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; ' +
+    'background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+  wrap.innerHTML =
+    '<div style="background: #fffdf8; padding: 26px; border-radius: 10px; max-width: 560px; width: 92%; max-height: 88vh; overflow-y: auto;">' +
+    '<h3 style="margin-top: 0;">Log a Feed \u2014 ' + escapeHtml(animal.name) + '</h3>' +
+    '<p style="color: #6b6f60; font-size: 13px; margin-top: -8px;">' + escapeHtml(animal.species) + '</p>' +
+    feedFormHtml(animal, 'mod') +
+    '<div style="margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end;">' +
+    '<button onclick="closeQuickFeedModal()" style="background: #7a7d6e;">Cancel</button>' +
+    '<button onclick="addFeedRecord(' + animal.id + ', \'mod\')">Save Feed</button>' +
+    '</div>' +
+    '</div>';
+
+  wrap.addEventListener('mousedown', function(e) {
+    if (e.target === wrap) closeQuickFeedModal();
+  });
+
+  document.body.appendChild(wrap);
+
+  // Pre-fill the food with whatever this animal had last - usually the same thing.
+  var recs = getFeedRecords(animal);
+  if (recs.length) {
+    var last = recs.slice().sort(function(a, b) {
+      return (b.date + (b.time || '')).localeCompare(a.date + (a.time || ''));
+    })[0];
+    var foodEl = document.getElementById('fl-food-mod-' + animal.id);
+    var unitEl = document.getElementById('fl-unit-mod-' + animal.id);
+    var methEl = document.getElementById('fl-method-mod-' + animal.id);
+    var prepEl = document.getElementById('fl-prep-mod-' + animal.id);
+    if (foodEl) foodEl.value = last.food || '';
+    if (unitEl && last.unit) unitEl.value = last.unit;
+    if (methEl && last.method) methEl.value = last.method;
+    if (prepEl && last.prep) prepEl.value = last.prep;
+  }
+}
+
+function closeQuickFeedModal() {
+  var m = document.getElementById('quickFeedModal');
+  if (m) m.remove();
 }
 
 var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -3738,27 +4655,30 @@ function showWeightHistoryForAnimal(animal) {
   
   if (mostRecent) {
     var species = animal.species;
-    var feeds = getFeedsPerDay(mostRecent.weight, species);
-    var dailyMilk = mostRecent.weight * 0.15;
-    var perFeed = dailyMilk / feeds;
-    var info = getAnimalInfo(mostRecent.weight, species);
-    
     var currentWeightInput = document.getElementById('animalWeight-' + animal.id);
     if (!currentWeightInput || !currentWeightInput.value || parseFloat(currentWeightInput.value) <= 0) {
       var resultDiv = document.getElementById('feedResult-' + animal.id);
       if (resultDiv) {
-        resultDiv.innerHTML = 
-          '<strong>Current Feed Calculation for ' + species + ' - ' + mostRecent.weight + 'g:</strong><br>' +
-          '<em>Based on most recent weight (' + formatDate(mostRecent.date) + ')</em><br><br>' +
-          'Feeds per day: ' + feeds + '<br>' +
-          'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
-          'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
-          '<strong>Care Information:</strong><br>' +
-          '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
-          '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
-          '<strong>Housing:</strong> ' + info.housing + '<br>' +
-          '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
-          '<strong>Milk Formula:</strong> ' + info.milkFormula;
+        if (!hasFeedingGuidance(species)) {
+          resultDiv.innerHTML = noGuidanceHtml(animal, mostRecent.weight);
+        } else {
+          var feeds = getFeedsPerDay(mostRecent.weight, species);
+          var dailyMilk = mostRecent.weight * 0.15;
+          var perFeed = dailyMilk / feeds;
+          var info = getAnimalInfo(mostRecent.weight, species);
+          resultDiv.innerHTML = 
+            '<strong>Current Feed Calculation for ' + escapeHtml(species) + ' - ' + mostRecent.weight + 'g:</strong><br>' +
+            '<em>Based on most recent weight (' + formatDate(mostRecent.date) + ')</em><br><br>' +
+            'Feeds per day: ' + feeds + '<br>' +
+            'Daily milk: ' + dailyMilk.toFixed(1) + ' g<br>' +
+            'Milk per feed: ' + perFeed.toFixed(1) + ' g<br><br>' +
+            '<strong>Care Information:</strong><br>' +
+            '<strong>Predicted Age:</strong> ' + info.predictedAge + '<br>' +
+            '<strong>Features/Behaviour:</strong> ' + info.features + '<br>' +
+            '<strong>Housing:</strong> ' + info.housing + '<br>' +
+            '<strong>Feeding Notes:</strong> ' + info.feedingNotes + '<br>' +
+            '<strong>Milk Formula:</strong> ' + info.milkFormula;
+        }
       }
     }
   }
@@ -3787,10 +4707,13 @@ function showWeightHistoryForAnimal(animal) {
       }
     }
     
+    var measureLine = describeMeasurements(w.measurements);
+
     div.innerHTML = 
       '<div>' +
       '<strong>' + formatDate(w.date) + '</strong><br>' +
       w.weight + 'g' + weightChange +
+      (measureLine ? '<br><span style="font-size: 12px; color: #6b6f60;">' + measureLine + '</span>' : '') +
       '</div>' +
       '<div style="display: flex; gap: 5px;">' +
       '<button class="small" onclick="deleteWeightForAnimal(' + animal.id + ', \'' + w.date + '\', ' + w.weight + ')" style="background: #f6f4ed; color: #7a7d6e; border: 1px solid #ddd8cb;">' + icon('trash', 15) + '</button>' +
@@ -3814,6 +4737,103 @@ function deleteWeightForAnimal(animalId, date, weight) {
   
   saveData();
   showWeightHistoryForAnimal(animal);
+}
+
+
+// ============================================================================
+//  CSV EXPORT
+//  The JSON backup is for BushBuddy to read back. CSV is for everyone else -
+//  records officers, permit returns, a vet who wants the intake history in a
+//  spreadsheet.
+// ============================================================================
+
+function csvCell(v) {
+  if (v === null || v === undefined) return '';
+  var str = String(v);
+  if (/[",\n\r]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+  return str;
+}
+
+function csvRows(rows) {
+  return rows.map(function(r) { return r.map(csvCell).join(','); }).join('\r\n');
+}
+
+function downloadCsv(filename, rows) {
+  // BOM so Excel opens it as UTF-8 and doesn't mangle species names.
+  var blob = new Blob(['\ufeff' + csvRows(rows)], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  setTimeout(function() { URL.revokeObjectURL(link.href); }, 1000);
+}
+
+function buildFeedCsvRows(list) {
+  var rows = [['Animal', 'Species', 'Date', 'Time', 'Food / formula', 'Offered',
+    'Taken', 'Unit', 'Method', 'Made up as', 'Fed by', 'Notes']];
+  list.forEach(function(a) {
+    getFeedRecords(a).slice().sort(function(x, y) {
+      return (x.date + (x.time || '')).localeCompare(y.date + (y.time || ''));
+    }).forEach(function(r) {
+      rows.push([a.name, a.species, r.date, r.time, r.food,
+        (typeof r.offered === 'number' ? r.offered : ''),
+        (typeof r.consumed === 'number' ? r.consumed : ''),
+        r.unit || '', r.method || '', r.prep || '', r.carer || '', r.notes || '']);
+    });
+  });
+  return rows;
+}
+
+function buildWeightCsvRows(list) {
+  var rows = [['Animal', 'Species', 'Date', 'Weight (g)', 'Bill (mm)', 'Wing (mm)',
+    'Tarsus (mm)', 'Tail (mm)']];
+  list.forEach(function(a) {
+    (a.weights || []).slice().sort(function(x, y) {
+      return x.date.localeCompare(y.date);
+    }).forEach(function(w) {
+      var m = w.measurements || {};
+      rows.push([a.name, a.species, w.date, w.weight,
+        (typeof m.bill === 'number' ? m.bill : ''),
+        (typeof m.wing === 'number' ? m.wing : ''),
+        (typeof m.tarsus === 'number' ? m.tarsus : ''),
+        (typeof m.tail === 'number' ? m.tail : '')]);
+    });
+  });
+  return rows;
+}
+
+function exportFeedCsv(scope) {
+  var list = animals;
+  var suffix = 'all_animals';
+
+  if (scope === 'one') {
+    var id = document.getElementById('exportAnimalSelect').value;
+    var animal = animals.find(function(a) { return a.id == id; });
+    if (!animal) { alert('Please select an animal first.'); return; }
+    list = [animal];
+    suffix = animal.name.replace(/[^a-z0-9]/gi, '_');
+  }
+
+  var rows = buildFeedCsvRows(list);
+  if (rows.length === 1) { alert('There are no feed records to export yet.'); return; }
+  downloadCsv('bushbuddy_feeds_' + suffix + '_' + localToday() + '.csv', rows);
+}
+
+function exportWeightCsv(scope) {
+  var list = animals;
+  var suffix = 'all_animals';
+
+  if (scope === 'one') {
+    var id = document.getElementById('exportAnimalSelect').value;
+    var animal = animals.find(function(a) { return a.id == id; });
+    if (!animal) { alert('Please select an animal first.'); return; }
+    list = [animal];
+    suffix = animal.name.replace(/[^a-z0-9]/gi, '_');
+  }
+
+  var rows = buildWeightCsvRows(list);
+  if (rows.length === 1) { alert('There are no weight records to export yet.'); return; }
+  downloadCsv('bushbuddy_weights_' + suffix + '_' + localToday() + '.csv', rows);
 }
 
 function exportAnimalData() {
@@ -3892,9 +4912,11 @@ function restoreData() {
         throw new Error('Invalid backup file format');
       }
       
+      migrateSchema();
       saveData();
       renderAnimals();
       updateSelects();
+      updateSpeciesFilter();
       alert('Data restored successfully!');
       
     } catch (error) {
@@ -3960,8 +4982,41 @@ function showDailySchedule() {
     return a.time.localeCompare(b.time);
   });
   
+  // Animals with nothing scheduled today would otherwise vanish from this screen.
+  // Self-feeding birds and reptiles often have no timed schedule at all, so they
+  // get a strip at the bottom with a one-tap way into the feed log.
+  var scheduledIds = {};
+  scheduleItems.forEach(function(i) { scheduledIds[i.animal.id] = true; });
+  var unscheduled = animals.filter(function(a) { return !scheduledIds[a.id]; });
+
+  var unscheduledHtml = '';
+  if (unscheduled.length > 0) {
+    unscheduledHtml = '<div style="margin-top: 26px; padding-top: 20px; border-top: 1px solid #e3dfd4;">' +
+      '<h4 style="margin: 0 0 4px;">Also in care today</h4>' +
+      '<p style="color: #6b6f60; font-size: 13px; margin: 0 0 14px;">' +
+      'No timed schedule set \u2014 record feeds and observations as they happen.</p>';
+    unscheduled.forEach(function(a) {
+      var fedToday = getFeedRecords(a).filter(function(r) { return r.date === todayLocal; }).length;
+      unscheduledHtml +=
+        '<div style="padding: 12px 15px; margin-bottom: 8px; background: #fffdf8; border: 1px solid #e3dfd4; ' +
+        'border-radius: 8px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center;">' +
+        '<div style="min-width: 0;">' +
+        '<div style="font-weight: 600; color: #3b4a33;">' + escapeHtml(a.name) + '</div>' +
+        '<div style="font-size: 12px; color: #6b6f60;">' + escapeHtml(a.species) +
+        ' \u00b7 ' + fedToday + ' feed' + (fedToday === 1 ? '' : 's') + ' logged today</div>' +
+        '</div>' +
+        '<div style="display: flex; gap: 6px; flex-wrap: wrap;">' +
+        '<button class="small" onclick="quickLogFeed(' + a.id + ')" style="background: #6a7f5e; color: white;">Log Feed</button>' +
+        '<button class="small" onclick="showAnimalDetail(' + a.id + ')" style="background: #55684f; color: white;">Open Record</button>' +
+        '</div>' +
+        '</div>';
+    });
+    unscheduledHtml += '</div>';
+  }
+
   if (scheduleItems.length === 0) {
-    content.innerHTML = '<div class="no-schedule">No scheduled feeds or treatments for today. Add animals and set up their feeding schedules to see them here!</div>';
+    content.innerHTML = (unscheduledHtml ||
+      '<div class="no-schedule">No scheduled feeds or treatments for today. Add animals and set up their feeding schedules to see them here!</div>');
     return;
   }
   
@@ -4027,6 +5082,7 @@ function showDailySchedule() {
       }
       
       timelineHtml += 
+        '<button class="small" onclick="quickLogFeed(' + item.animal.id + ')" style="background: #6a7f5e; color: white;">Log Feed</button>' +
         '<button class="small" onclick="showFeedingNotes(' + item.animal.id + ', \'' + item.feedTime.time + '\')" style="background: #4e7c7a; color: white;">Add Notes</button>' +
         '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'schedule\');" style="background: #55684f; color: white;">View Animal</button>' +
         '</div>';
@@ -4072,7 +5128,7 @@ function showDailySchedule() {
   
   timelineHtml += '</div>';
   
-  content.innerHTML = filterHtml + timelineHtml;
+  content.innerHTML = filterHtml + timelineHtml + unscheduledHtml;
 }
 
 function filterDailySchedule(filter) {
@@ -4107,6 +5163,8 @@ function initApp() {
   loadData();
   setDefaultDates();
   updateSelects();
+  updateSpeciesFilter();
+  bindSpeciesCombo();
   renderAnimals();
   
   var searchInput = document.getElementById('animalSearch');
