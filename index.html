@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#698167">
+  <meta name="theme-color" content="#55684f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="BushBuddy">
@@ -12,42 +12,54 @@
   <title>BushBuddy</title>
   <style>
     body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; 
       margin: 0; 
-      padding: 20px; 
-      background: linear-gradient(135deg, #f5f7fa 0%, #e7f5e4 100%); 
+      padding: 24px 20px 40px; 
+      background: #f4f1e9; 
+      color: #2c3126;
       min-height: 100vh; 
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #3b4a33;
     }
     
-    .container { max-width: 1200px; margin: 0 auto; }
-    .header { text-align: center; margin-bottom: 30px; color: #657a6b; }
+    .container { max-width: 1120px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 30px; color: #55684f; }
 
     .header-logo {
       display: block;
       width: 100%;
       height: auto;
       margin: 0 auto;
+      border-radius: 10px;
     }
 
     .main-nav { 
       display: flex; 
       justify-content: center;
       margin-bottom: 30px; 
-      background: white; 
-      border-radius: 15px; 
-      padding: 10px; 
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
+      background: #fffdf8; 
+      border-radius: 10px; 
+      padding: 8px; 
+      border: 1px solid #e3dfd4;
+      box-shadow: 0 1px 2px rgba(44,49,38,0.04); 
       overflow-x: auto; 
       overflow-y: hidden;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
-      scrollbar-color: #698167 #f1f1f1;
+      scrollbar-color: #55684f #e9e5da;
     }
 
     .main-nav::-webkit-scrollbar { height: 6px; }
-    .main-nav::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
-    .main-nav::-webkit-scrollbar-thumb { background: #698167; border-radius: 3px; }
+    .main-nav::-webkit-scrollbar-track { background: #e9e5da; border-radius: 3px; }
+    .main-nav::-webkit-scrollbar-thumb { background: #55684f; border-radius: 3px; }
 
     .nav-tab { 
       display: flex; 
@@ -57,40 +69,58 @@
       margin: 0 4px; 
       border: none; 
       background: transparent; 
-      color: #666; 
+      color: #6b6f60; 
       cursor: pointer; 
-      border-radius: 10px; 
-      transition: all 0.3s ease; 
-      font-weight: 600; 
+      border-radius: 8px; 
+      transition: background 0.2s ease, color 0.2s ease; 
+      font-weight: 500; 
       min-width: 80px; 
       font-size: 12px; 
       flex-shrink: 0;
       white-space: nowrap;
     }
     
-    .nav-tab-icon { font-size: 30px; line-height: 1; margin-bottom: 6px; }
-    .nav-tab-text { font-size: 12px; text-align: center; line-height: 1.2; }
-    .nav-tab:hover { background: rgba(43,122,120,0.1); color: #657a6b; }
-    .nav-tab.active { background: linear-gradient(135deg, #698167, #a0b2af); color: white; box-shadow: 0 4px 15px rgba(43,122,120,0.3); }
+    .nav-tab-icon { line-height: 0; margin-bottom: 7px; }
+    .nav-tab-icon svg { width: 26px; height: 26px; }
+
+    .icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+
+    .accordion-chevron { line-height: 0; }
+    .accordion-chevron svg { transition: transform 0.2s ease; }
+    .accordion-header.open .accordion-chevron svg { transform: rotate(180deg); }
+
+    .accordion-label { display: inline-flex; align-items: center; gap: 10px; }
+
+    .timeline-type { display: flex; align-items: center; gap: 6px; }
+    .timeline-time svg { width: 12px; height: 12px; stroke-width: 2.8; }
+
+    .btn-label { display: inline-flex; align-items: center; gap: 7px; }
+    .nav-tab-text { font-size: 12px; text-align: center; line-height: 1.25; letter-spacing: 0.01em; }
+    .nav-tab:hover { background: rgba(85,104,79,0.08); color: #55684f; }
+    .nav-tab.active { background: #55684f; color: #f7f4ec; }
 
     .card { 
-      background: white; 
-      padding: 25px; 
-      border-radius: 20px; 
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
-      margin-bottom: 25px; 
+      background: #fffdf8; 
+      padding: 26px 28px; 
+      border-radius: 10px; 
+      border: 1px solid #e3dfd4;
+      box-shadow: 0 1px 2px rgba(44,49,38,0.04); 
+      margin-bottom: 20px; 
     }
     
-    .card h2 { margin-top: 0; color: #698167; font-size: 1.8em; }
-    .card h3 { color: #698167; font-size: 1.4em; }
+    .card h2 { margin-top: 0; font-size: 1.45em; }
+    .card h3 { font-size: 1.15em; margin-bottom: 14px; }
+    .card p { line-height: 1.6; }
 
-    label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
+    label { display: block; margin-top: 15px; font-weight: 500; font-size: 14px; color: #565a4c; letter-spacing: 0.01em; }
     input, select, textarea { 
       width: 100%; 
-      padding: 12px; 
+      padding: 11px 12px; 
       margin-top: 6px; 
-      border-radius: 10px; 
-      border: 2px solid #e1e8ed; 
+      border-radius: 6px; 
+      border: 1px solid #ddd8cb; 
+      background: #fffdf8;
+      color: #2c3126;
       box-sizing: border-box; 
       font-size: 16px; 
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -98,29 +128,30 @@
     
     input:focus, select:focus, textarea:focus { 
       outline: none; 
-      border-color: #698167; 
-      box-shadow: 0 0 0 3px rgba(43,122,120,0.1); 
+      border-color: #55684f; 
+      box-shadow: 0 0 0 3px rgba(85,104,79,0.12); 
     }
     
     textarea { resize: vertical; min-height: 80px; }
 
     button { 
       margin: 8px 4px; 
-      padding: 12px 20px; 
-      border: none; 
-      border-radius: 10px; 
-      background: linear-gradient(135deg, #698167, #a0b2af); 
-      color: white; 
+      padding: 12px 18px; 
+      border: 1px solid transparent; 
+      border-radius: 6px; 
+      background: #55684f; 
+      color: #f7f4ec; 
       cursor: pointer; 
-      font-weight: 600; 
-      transition: all 0.3s ease; 
+      font-weight: 500; 
+      letter-spacing: 0.01em;
+      transition: background 0.2s ease, border-color 0.2s ease; 
       min-height: 44px; 
       font-size: 14px; 
+      font-family: inherit;
     }
     
     button:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 6px 20px rgba(43,122,120,0.3); 
+      background: #45553f; 
     }
     
     button.small { 
@@ -142,29 +173,29 @@
     }
     
     .animal-item { 
-      background: white; 
+      background: #fffdf8; 
       padding: 20px; 
-      border-radius: 15px; 
-      box-shadow: 0 6px 25px rgba(0,0,0,0.1); 
+      border-radius: 10px; 
+      border: 1px solid #e3dfd4;
       position: relative; 
       cursor: pointer; 
-      transition: all 0.3s ease; 
+      transition: border-color 0.2s ease, background 0.2s ease; 
     }
     
     .animal-item:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15); 
+      border-color: #b9bda9; 
+      background: #fffefa;
     }
     
-    .animal-item h4 { margin-top: 0; color: #698167; }
+    .animal-item h4 { margin-top: 0; margin-bottom: 10px; font-size: 1.15em; }
     .animal-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
 
     .result { 
       margin-top: 15px; 
-      padding: 15px; 
-      border-radius: 12px; 
-      background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
-      border-left: 4px solid #698167; 
+      padding: 15px 16px; 
+      border-radius: 0 6px 6px 0; 
+      background: #f6f4ed; 
+      border-left: 3px solid #55684f; 
     }
 
     .feeding-schedule-grid {
@@ -175,32 +206,31 @@
     }
 
     .feeding-time-card {
-      background: #f8f9fa;
+      background: #f6f4ed;
       padding: 15px;
-      border-radius: 12px;
-      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      border: 1px solid #e3dfd4;
       position: relative;
-      transition: all 0.3s ease;
+      transition: border-color 0.2s ease;
     }
 
     .feeding-time-card:hover {
-      border-color: #698167;
-      transform: translateY(-2px);
+      border-color: #b9bda9;
     }
 
     .feeding-time-card.completed {
-      background: #d4edda;
-      border-color: #c3e6cb;
+      background: #e4ebdd;
+      border-color: #c6d3ba;
     }
 
     .feeding-time-card.overdue {
-      background: #f8d7da;
-      border-color: #f5c6cb;
+      background: #f2e1da;
+      border-color: #e3c9be;
     }
 
     .feeding-time-card.upcoming {
-      background: #fff3cd;
-      border-color: #ffeaa7;
+      background: #f6edda;
+      border-color: #e6d6a9;
     }
 
     .feeding-time-header {
@@ -228,7 +258,7 @@
 
     .feeding-time-select {
       padding: 6px 8px;
-      border: 1px solid #ddd;
+      border: 1px solid #ddd8cb;
       border-radius: 6px;
       font-size: 16px;
       font-weight: bold;
@@ -240,7 +270,7 @@
       border: none;
       background: transparent;
       font-size: 13px;
-      color: #666;
+      color: #6b6f60;
       padding: 2px 0;
       width: 100%;
       margin-top: 5px;
@@ -271,18 +301,19 @@
     .notes-preview {
       margin: 8px 0;
       padding: 8px 10px;
-      background: rgba(40, 167, 69, 0.1);
-      border-left: 3px solid #28a745;
+      background: rgba(78,107,67,0.09);
+      border-left: 3px solid #4e6b43;
       border-radius: 4px;
       font-size: 12px;
       line-height: 1.3;
     }
 
     .status-badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       white-space: nowrap;
     }
@@ -302,7 +333,7 @@
     }
 
     .notes-button:hover {
-      background: #f8f9fa !important;
+      background: #f6f4ed !important;
       transform: translateY(0) !important;
     }
 
@@ -373,10 +404,10 @@
       }
     }
 
-    .status-completed { background: #28a745; color: white; }
-    .status-overdue { background: #dc3545; color: white; }
-    .status-upcoming { background: #ffc107; color: #212529; }
-    .status-pending { background: #6c757d; color: white; }
+    .status-completed { background: #4e6b43; color: white; }
+    .status-overdue { background: #a2482f; color: white; }
+    .status-upcoming { background: #c08a2e; color: #262b20; }
+    .status-pending { background: #7a7d6e; color: white; }
 
     .schedule-summary {
       display: grid;
@@ -386,23 +417,26 @@
     }
 
     .summary-card {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 10px;
+      background: #f6f4ed;
+      padding: 16px 12px;
+      border-radius: 8px;
       text-align: center;
-      border: 2px solid #e9ecef;
+      border: 1px solid #e3dfd4;
     }
 
     .summary-number {
-      font-size: 24px;
-      font-weight: bold;
-      color: #698167;
+      font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: #55684f;
     }
 
     .summary-label {
-      font-size: 12px;
-      color: #666;
-      margin-top: 5px;
+      font-size: 11px;
+      color: #6b6f60;
+      margin-top: 4px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
     .photo-gallery {
       display: grid;
@@ -412,17 +446,16 @@
     }
 
     .photo-card {
-      background: white;
-      border-radius: 12px;
+      background: #fffdf8;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
+      border: 1px solid #e3dfd4;
+      transition: border-color 0.2s ease;
       cursor: pointer;
     }
 
     .photo-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      border-color: #b9bda9;
     }
 
     .photo-card img {
@@ -438,19 +471,19 @@
 
     .photo-info-date {
       font-size: 12px;
-      color: #666;
+      color: #6b6f60;
       margin-bottom: 5px;
     }
 
     .photo-info-caption {
       font-size: 13px;
-      color: #333;
+      color: #2c3126;
       line-height: 1.4;
     }
 
     .photo-actions {
       padding: 8px 12px;
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid #e3dfd4;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -488,7 +521,7 @@
       top: -40px;
       right: 0;
       background: white;
-      color: #333;
+      color: #2c3126;
       border: none;
       padding: 10px 20px;
       border-radius: 8px;
@@ -534,7 +567,7 @@
       top: 30px;
       bottom: -20px;
       width: 2px;
-      background: #e9ecef;
+      background: #e3dfd4;
     }
 
     .timeline-item:last-child:before {
@@ -556,31 +589,31 @@
     }
 
     .timeline-time.completed {
-      background: #28a745;
+      background: #4e6b43;
       color: white;
     }
 
     .timeline-time.pending {
-      background: #6c757d;
+      background: #7a7d6e;
       color: white;
     }
 
     .timeline-time.overdue {
-      background: #dc3545;
+      background: #a2482f;
       color: white;
     }
 
     .timeline-time.upcoming {
-      background: #ffc107;
-      color: #212529;
+      background: #c08a2e;
+      color: #262b20;
     }
 
     .timeline-content {
       flex: 1;
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: #fffdf8;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #e3dfd4;
     }
 
     .timeline-header {
@@ -591,31 +624,33 @@
     }
 
     .timeline-animal {
-      font-size: 18px;
-      font-weight: bold;
-      color: #698167;
+      font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #3b4a33;
     }
 
     .timeline-type {
       font-size: 14px;
-      color: #666;
+      color: #6b6f60;
       margin-top: 2px;
     }
 
     .timeline-details {
       margin-top: 10px;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 8px;
+      padding: 11px 12px;
+      background: #f6f4ed;
+      border-radius: 6px;
       font-size: 13px;
       line-height: 1.6;
     }
 
     .no-schedule {
       text-align: center;
-      padding: 40px 20px;
-      color: #666;
-      font-style: italic;
+      padding: 44px 20px;
+      color: #6b6f60;
+      font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+      font-size: 15px;
     }
 
     .filter-tabs {
@@ -626,28 +661,28 @@
     }
 
     .filter-tab {
-      padding: 8px 16px;
-      border: 2px solid #e9ecef;
-      background: white !important;
-      border-radius: 20px;
+      padding: 8px 14px;
+      border: 1px solid #e3dfd4;
+      background: #fffdf8 !important;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 500;
       transition: all 0.3s ease;
-      color: #333 !important;
+      color: #2c3126 !important;
     }
 
     .filter-tab:hover {
-      border-color: #698167;
-      background: white !important;
+      border-color: #b9bda9;
+      background: #fffdf8 !important;
       transform: none !important;
       box-shadow: none !important;
     }
 
     .filter-tab.active {
-      background: #698167 !important;
+      background: #55684f !important;
       color: white !important;
-      border-color: #698167;
+      border-color: #55684f;
     }
 
     .accordion-header {
@@ -657,27 +692,27 @@
       gap: 10px;
       width: 100%;
       margin: 12px 0 0;
-      padding: 16px 18px;
+      padding: 15px 18px;
       text-align: left;
-      font-size: 16px;
-      font-weight: 600;
-      background: #f1f6f0;
-      color: #3f5a45;
-      border: 2px solid #dfe9dd;
-      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      background: #edefe6;
+      color: #3b4a33;
+      border: 1px solid #dddfd2;
+      border-radius: 8px;
       cursor: pointer;
     }
 
     .accordion-header:hover {
-      background: #e6efe4;
+      background: #e4e7da;
       transform: none;
       box-shadow: none;
     }
 
     .accordion-header.open {
-      background: #698167;
-      color: white;
-      border-color: #698167;
+      background: #55684f;
+      color: #f7f4ec;
+      border-color: #55684f;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
     }
@@ -689,10 +724,10 @@
 
     .accordion-panel {
       padding: 20px;
-      background: #f8f9fa;
-      border: 2px solid #698167;
+      background: #f6f4ed;
+      border: 1px solid #55684f;
       border-top: none;
-      border-radius: 0 0 12px 12px;
+      border-radius: 0 0 8px 8px;
       margin-bottom: 10px;
     }
 
@@ -702,10 +737,19 @@
       gap: 12px;
       width: 100%;
       margin: 0;
-      padding: 14px 16px;
+      padding: 12px 14px;
       text-align: left;
       font-size: 15px;
+      font-weight: 500;
       line-height: 1.3;
+      background: #edefe6;
+      color: #3b4a33;
+      border: 1px solid #dddfd2;
+    }
+
+    .section-btn:hover {
+      background: #e4e7da;
+      color: #3b4a33;
     }
 
     .section-btn-icon {
@@ -713,13 +757,11 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: #fdfdfb;
-      border: 1px solid rgba(255,255,255,0.9);
-      box-shadow: inset 0 1px 2px rgba(63,90,69,0.15);
-      font-size: 22px;
+      background: #f7f4ec;
+      font-size: 21px;
       line-height: 1;
     }
   </style>
@@ -733,19 +775,19 @@
 
   <div class="main-nav">
     <button class="nav-tab active" onclick="showTab('home')">
-      <div class="nav-tab-icon">🦘</div>
+      <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="13.2" r="6"/><circle cx="5.6" cy="7.6" r="2.7"/><circle cx="18.4" cy="7.6" r="2.7"/><ellipse cx="12" cy="14" rx="1.7" ry="2.1"/><circle cx="9.4" cy="11.2" r="0.75" fill="currentColor" stroke="none"/><circle cx="14.6" cy="11.2" r="0.75" fill="currentColor" stroke="none"/></svg></div>
       <div class="nav-tab-text">Your<br>Animals</div>
     </button>
     <button class="nav-tab" onclick="showTab('daily')">
-      <div class="nav-tab-icon">📅</div>
+      <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M8 3.2v4.4M16 3.2v4.4M3.5 10.5h17"/></svg></div>
       <div class="nav-tab-text">Today's<br>Schedule</div>
     </button>
     <button class="nav-tab" onclick="showTab('add')">
-      <div class="nav-tab-icon">➕</div>
+      <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.2v7.6M8.2 12h7.6"/></svg></div>
       <div class="nav-tab-text">Add New<br>Animal</div>
     </button>
     <button class="nav-tab" onclick="showTab('export')">
-      <div class="nav-tab-icon">📋</div>
+      <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.8" y="3.8" width="18.4" height="4.8" rx="1.2"/><path d="M4.4 8.6V19a1.6 1.6 0 0 0 1.6 1.6h12a1.6 1.6 0 0 0 1.6-1.6V8.6"/><path d="M10 12.4h4"/></svg></div>
       <div class="nav-tab-text">Backup &<br>Export</div>
     </button>
   </div>
@@ -765,9 +807,9 @@
         </select>
       </div>
       
-      <p id="animalCounter" style="color: #666; font-size: 14px; margin-bottom: 10px;"></p>
+      <p id="animalCounter" style="color: #6b6f60; font-size: 14px; margin-bottom: 10px;"></p>
       <div id="animalList" class="animal-grid">
-        <p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal using the "Add New Animal" tab!</p>
+        <p style="text-align: center; color: #6b6f60; font-style: italic;">No animals added yet. Add your first animal using the "Add New Animal" tab!</p>
       </div>
     </div>
   </div>
@@ -801,7 +843,7 @@
   <!-- Animal Detail View -->
   <div id="animalDetailTab" class="tab-content">
     <div style="margin-bottom: 20px;">
-      <button onclick="showTab('home')" style="background: #6c757d;">← Back to Animals</button>
+      <button onclick="showTab('home')" style="background: #7a7d6e;"><span class="btn-label"><svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19.4 12H5"/><path d="m11 6-6 6 6 6"/></svg> Back to Animals</span></button>
     </div>
     <div id="animalDetailContent"></div>
   </div>
@@ -817,7 +859,7 @@
       </label>
       <button onclick="exportAnimalData()">Export Care Data</button>
       
-      <div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 15px;">
+      <div style="margin-top: 20px; padding: 20px; background: #f6f4ed; border: 1px solid #e3dfd4; border-radius: 8px;">
         <h4>Backup & Restore</h4>
         <button onclick="exportAllData()">Backup All Data</button>
         <label>Restore Data: <input type="file" id="restoreInput" accept=".json"></label>
@@ -827,10 +869,10 @@
   </div>
 </div>
 
-<footer style="margin-top: 50px; padding: 30px 20px; background: rgba(255,255,255,0.9); border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #666;">
+<footer style="margin-top: 50px; padding: 30px 20px; background: rgba(255,255,255,0.9); border-top: 1px solid #e3dfd4; text-align: center; font-size: 12px; color: #6b6f60;">
   <div style="max-width: 1200px; margin: 0 auto;">
     <p><strong>Disclaimer:</strong> BushBuddy is a record-keeping tool designed to assist qualified wildlife carers. This application does not provide veterinary or professional wildlife care advice. Always consult with licensed wildlife veterinarians and follow established wildlife care protocols.</p>
-    <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">© 2026 BushBuddy. All rights reserved.</p>
+    <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e3dfd4;">© 2026 BushBuddy. All rights reserved.</p>
   </div>
 </footer>
 
@@ -949,9 +991,9 @@ function showBanner(message, isError) {
     el.onclick = function() { el.style.display = 'none'; };
     document.body.appendChild(el);
   }
-  el.style.background = isError ? '#f8d7da' : '#e7f5e4';
-  el.style.color = isError ? '#721c24' : '#2f4f3a';
-  el.style.border = '1px solid ' + (isError ? '#f5c2c7' : '#b7d9b0');
+  el.style.background = isError ? '#f2e1da' : '#e7f5e4';
+  el.style.color = isError ? '#6b2a1b' : '#3b4a33';
+  el.style.border = '1px solid ' + (isError ? '#e3c9be' : '#c3cdb4');
   el.textContent = message;
   el.style.display = 'block';
   clearTimeout(el._t);
@@ -1128,7 +1170,7 @@ function renderAnimals() {
   counter.textContent = '';
 
   if (animals.length === 0) {
-    list.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No animals added yet. Add your first animal using the "Add New Animal" tab!</p>';
+    list.innerHTML = '<p style="text-align: center; color: #6b6f60; font-style: italic;">No animals added yet. Add your first animal using the "Add New Animal" tab!</p>';
     return;
   }
 
@@ -1146,7 +1188,7 @@ function renderAnimals() {
   counter.textContent = 'Showing ' + filteredAnimals.length + ' of ' + animals.length + ' animals';
 
   if (filteredAnimals.length === 0) {
-    list.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No matches found. Try adjusting your search or filter.</p>';
+    list.innerHTML = '<p style="text-align: center; color: #6b6f60; font-style: italic;">No matches found. Try adjusting your search or filter.</p>';
     return;
   }
 
@@ -1167,14 +1209,14 @@ function renderAnimals() {
     
     div.innerHTML = 
       '<div class="animal-actions">' +
-      '<button class="small" onclick="event.stopPropagation(); deleteAnimal(' + animal.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>' +
+      '<button class="small" onclick="event.stopPropagation(); deleteAnimal(' + animal.id + ')" style="background: #f6f4ed; color: #7a7d6e; border: 1px solid #ddd8cb;">' + icon('trash', 15) + '</button>' +
       '</div>' +
       '<h4>' + escapeHtml(animal.name) + '</h4>' +
       '<p><strong>Species:</strong> ' + escapeHtml(animal.species) + '</p>' +
       '<p><strong>Intake:</strong> ' + formatDate(animal.intakeDate) + ' (' + daysSinceIntake + ' days ago)</p>' +
       '<p><strong>Records:</strong> ' + (animal.weights ? animal.weights.length : 0) + ' weights, ' + (animal.healthEntries ? animal.healthEntries.length : 0) + ' health entries' + latestWeight + '</p>' +
       (animal.intakeNotes ? '<p><strong>Notes:</strong> ' + escapeHtml(animal.intakeNotes.length > 100 ? animal.intakeNotes.substring(0, 100) + '...' : animal.intakeNotes) + '</p>' : '') +
-      '<div style="margin-top: 10px; padding: 8px; background: #e7f5e4; border-radius: 5px; font-size: 12px; color: #657a6b; text-align: center;">Click to view full record</div>';
+      '<div style="margin-top: 10px; padding: 8px; background: #e7f5e4; border-radius: 5px; font-size: 12px; color: #55684f; text-align: center;">Click to view full record</div>';
     
     list.appendChild(div);
   });
@@ -1220,11 +1262,11 @@ function showAnimalDetail(animalId) {
     '<div class="card">' +
     '<h3>Care Sections</h3>' +
     '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">' +
-    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'weight\')"><span class="section-btn-icon">⚖️</span> Weight &amp; Feeding</button>' +
-    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'health\')"><span class="section-btn-icon">🏥</span> Health Tracking</button>' +
-    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'treatments\')"><span class="section-btn-icon">💊</span> Treatments</button>' +
-    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'schedule\')"><span class="section-btn-icon">⏰</span> Feeding Schedule</button>' +
-    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'photos\')"><span class="section-btn-icon">📸</span> Photo Gallery</button>' +
+    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'weight\')"><span class="section-btn-icon">' + icon('scales', 21) + '</span> Weight &amp; Feeding</button>' +
+    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'health\')"><span class="section-btn-icon">' + icon('pulse', 21) + '</span> Health Tracking</button>' +
+    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'treatments\')"><span class="section-btn-icon">' + icon('pill', 21) + '</span> Treatments</button>' +
+    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'schedule\')"><span class="section-btn-icon">' + icon('clock', 21) + '</span> Feeding Schedule</button>' +
+    '<button class="section-btn" onclick="showAnimalSection(' + animal.id + ', \'photos\')"><span class="section-btn-icon">' + icon('camera', 21) + '</span> Photo Gallery</button>' +
     '</div>' +
     '</div>' +
     '<div id="animalSectionContent"></div>';
@@ -1299,9 +1341,9 @@ function showHealthSection(animal, container) {
   card.innerHTML = '<h3>Health Tracking for ' + escapeHtml(animal.name) + '</h3>';
   
   var form = document.createElement('div');
-  form.style.cssText = 'margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px;';
+  form.style.cssText = 'margin-bottom: 25px; padding: 20px; background: #f6f4ed; border-radius: 12px;';
   form.innerHTML = 
-    '<h4 style="margin-top: 0; color: #698167;">Record Health Observation</h4>' +
+    '<h4 style="margin-top: 0; color: #55684f;">Record Health Observation</h4>' +
     '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
     '<div><label>Date: <input type="date" id="healthDate-' + animal.id + '" value="' + localToday() + '"></label></div>' +
     '<div><label>Time: <input type="time" id="healthTime-' + animal.id + '" value="' + new Date().toTimeString().substr(0, 5) + '"></label></div>' +
@@ -1346,7 +1388,7 @@ function showTreatmentsSection(animal, container) {
   var form = document.getElementById('oneOffForm-' + animal.id);
   if (!form) return;
   form.innerHTML = 
-    '<p style="margin-top: 0; color: #666;">A single treatment that is not part of a repeating course - a dressing change, a one-off injection.</p>' +
+    '<p style="margin-top: 0; color: #6b6f60;">A single treatment that is not part of a repeating course - a dressing change, a one-off injection.</p>' +
     '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
     '<div><label>Date: <input type="date" id="treatmentDate-' + animal.id + '" value="' + localToday() + '"></label></div>' +
     '<div><label>Time: <input type="time" id="treatmentTime-' + animal.id + '" value="' + new Date().toTimeString().substr(0, 5) + '"></label></div>' +
@@ -1372,10 +1414,10 @@ function showTreatmentsSection(animal, container) {
     '</select></label></div>' +
     '</div>' +
     '<label style="margin-top: 15px;">Notes: <textarea id="treatmentNotes-' + animal.id + '" placeholder="Additional details about administration, animal response, etc..." style="min-height: 80px;"></textarea></label>' +
-    '<p style="margin-top: 15px; color: #666; font-size: 13px;">Repeating course? Use <strong>New Treatment Schedule</strong> above instead - it works out each dose and tracks whether it was given.</p>' +
+    '<p style="margin-top: 15px; color: #6b6f60; font-size: 13px;">Repeating course? Use <strong>New Treatment Schedule</strong> above instead - it works out each dose and tracks whether it was given.</p>' +
     '<div style="margin-top: 15px; display: flex; gap: 10px;">' +
     '<button onclick="addTreatment(' + animal.id + ')">Add Treatment Record</button>' +
-    '<button onclick="setTreatmentAccordion(' + animal.id + ', \'oneoff\', false)" style="background: #6c757d;">Cancel</button>' +
+    '<button onclick="setTreatmentAccordion(' + animal.id + ', \'oneoff\', false)" style="background: #7a7d6e;">Cancel</button>' +
     '</div>';
   
   var summaryDiv = document.createElement('div');
@@ -1443,10 +1485,10 @@ function updateTreatmentDisplay(animal) {
   var historyDiv = document.getElementById('treatmentHistory-' + animal.id);
   if (!historyDiv) return;
   
-  historyDiv.innerHTML = '<h4 style="color: #698167;">Treatment History</h4>';
+  historyDiv.innerHTML = '<h4 style="color: #55684f;">Treatment History</h4>';
   
   if (!animal.treatments || animal.treatments.length === 0) {
-    historyDiv.innerHTML += '<p style="color: #666; font-style: italic;">No treatment records yet.</p>';
+    historyDiv.innerHTML += '<p style="color: #6b6f60; font-style: italic;">No treatment records yet.</p>';
     return;
   }
   
@@ -1480,8 +1522,8 @@ function updateTreatmentDisplay(animal) {
       '<div class="summary-number">' + medicationCount + '</div>' +
       '<div class="summary-label">Different Meds</div>' +
       '</div>' +
-      '<div class="summary-card" style="' + (activeSchedules > 0 ? 'border-color: #698167;' : '') + '">' +
-      '<div class="summary-number" style="' + (activeSchedules > 0 ? 'color: #698167;' : '') + '">' + activeSchedules + '</div>' +
+      '<div class="summary-card" style="' + (activeSchedules > 0 ? 'border-color: #55684f;' : '') + '">' +
+      '<div class="summary-number" style="' + (activeSchedules > 0 ? 'color: #55684f;' : '') + '">' + activeSchedules + '</div>' +
       '<div class="summary-label">Active Schedules</div>' +
       '</div>';
   }
@@ -1494,41 +1536,77 @@ function updateTreatmentDisplay(animal) {
   
   sorted.forEach(function(treatment) {
     var div = document.createElement('div');
-    div.style.cssText = 'padding: 15px; margin: 10px 0; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); ' + 
-      (treatment.ongoing ? 'border-left: 4px solid #ffc107;' : 'border-left: 4px solid #698167;');
+    div.style.cssText = 'padding: 15px 16px; margin: 10px 0; background: #fffdf8; border-radius: 8px; border: 1px solid #e3dfd4; ' + 
+      (treatment.ongoing ? 'border-left: 4px solid #c08a2e;' : 'border-left: 4px solid #55684f;');
     
     var typeColor = {
-      'Medication': '#007bff',
-      'Wound Care': '#dc3545',
-      'Parasite Treatment': '#28a745',
-      'Vitamin Supplement': '#17a2b8',
-      'Antibiotic': '#6f42c1',
-      'Pain Relief': '#fd7e14',
-      'Fluid Therapy': '#20c997',
-      'Other': '#6c757d'
+      'Medication': '#3f6480',
+      'Wound Care': '#a2482f',
+      'Parasite Treatment': '#4e6b43',
+      'Vitamin Supplement': '#4e7c7a',
+      'Antibiotic': '#6b5b8a',
+      'Pain Relief': '#b5702a',
+      'Fluid Therapy': '#4e8c74',
+      'Other': '#7a7d6e'
     };
     
-    var color = typeColor[treatment.type] || '#698167';
+    var color = typeColor[treatment.type] || '#55684f';
     
     div.innerHTML = 
       '<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">' +
       '<div>' +
       '<strong style="font-size: 18px;">' + escapeHtml(treatment.name) + '</strong>' +
-      (treatment.dosage ? ' <span style="color: #666;">(' + treatment.dosage + ')</span>' : '') +
+      (treatment.dosage ? ' <span style="color: #6b6f60;">(' + treatment.dosage + ')</span>' : '') +
       '<br>' +
       '<strong style="font-size: 14px;">' + formatDate(treatment.date) + '</strong>' +
-      (treatment.time ? ' <span style="color: #666;">at ' + formatTime(treatment.time) + '</span>' : '') +
+      (treatment.time ? ' <span style="color: #6b6f60;">at ' + formatTime(treatment.time) + '</span>' : '') +
       '<br>' +
       '<span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: ' + color + '; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + treatment.type.toUpperCase() + '</span>' +
-      ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #e9ecef; color: #495057; border-radius: 12px; font-size: 11px; font-weight: 600;">' + treatment.route.toUpperCase() + '</span>' +
-      (treatment.ongoing ? ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #ffc107; color: #212529; border-radius: 12px; font-size: 11px; font-weight: 600;">🔄 ONGOING</span>' : '') +
+      ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #e3dfd4; color: #4a4e42; border-radius: 12px; font-size: 11px; font-weight: 600;">' + treatment.route.toUpperCase() + '</span>' +
+      (treatment.ongoing ? ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #c08a2e; color: #262b20; border-radius: 12px; font-size: 11px; font-weight: 600;">ONGOING</span>' : '') +
       '</div>' +
-      '<button class="small" onclick="deleteTreatment(' + animal.id + ', ' + treatment.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>' +
+      '<button class="small" onclick="deleteTreatment(' + animal.id + ', ' + treatment.id + ')" style="background: #f6f4ed; color: #7a7d6e; border: 1px solid #ddd8cb;">' + icon('trash', 15) + '</button>' +
       '</div>' +
-      (treatment.notes ? '<div style="margin-top: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; line-height: 1.6;">' + escapeHtml(treatment.notes) + '</div>' : '');
+      (treatment.notes ? '<div style="margin-top: 10px; padding: 12px; background: #f6f4ed; border-radius: 8px; line-height: 1.6;">' + escapeHtml(treatment.notes) + '</div>' : '');
     
     historyDiv.appendChild(div);
   });
+}
+
+// ============================================================================
+//  LINE ICONS
+//  Drawn on a 24x24 grid and stroked in currentColor, so each icon takes the
+//  colour of the button or tab it sits in - no separate light/dark artwork,
+//  and no dependency on which emoji a given phone happens to ship.
+// ============================================================================
+
+var ICONS = {
+  koala: '<circle cx="12" cy="13.2" r="6"/><circle cx="5.6" cy="7.6" r="2.7"/><circle cx="18.4" cy="7.6" r="2.7"/><ellipse cx="12" cy="14" rx="1.7" ry="2.1"/><circle cx="9.4" cy="11.2" r="0.75" fill="currentColor" stroke="none"/><circle cx="14.6" cy="11.2" r="0.75" fill="currentColor" stroke="none"/>',
+  calendar: '<rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M8 3.2v4.4M16 3.2v4.4M3.5 10.5h17"/>',
+  plusCircle: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8.2v7.6M8.2 12h7.6"/>',
+  archive: '<rect x="2.8" y="3.8" width="18.4" height="4.8" rx="1.2"/><path d="M4.4 8.6V19a1.6 1.6 0 0 0 1.6 1.6h12a1.6 1.6 0 0 0 1.6-1.6V8.6"/><path d="M10 12.4h4"/>',
+  scales: '<path d="M12 5.2v14.3M7.6 19.5h8.8M5 8.9 12 7l7 1.9"/><path d="M2.6 14.4 5 8.9l2.4 5.5a2.55 2.55 0 0 1-4.8 0Z"/><path d="M16.6 14.4 19 8.9l2.4 5.5a2.55 2.55 0 0 1-4.8 0Z"/>',
+  pulse: '<path d="M2.8 12.4h4.3l2-4.9 3.1 9.6 2.4-4.7h6.6"/>',
+  pill: '<rect x="2.9" y="8.6" width="18.2" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="m9.6 9.6 4.8 4.8"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.2v5.1l3.2 1.9"/>',
+  camera: '<path d="M2.6 9.6a1.6 1.6 0 0 1 1.6-1.6h2.6l1.5-2.4h7.4l1.5 2.4h2.6a1.6 1.6 0 0 1 1.6 1.6v8.4a1.6 1.6 0 0 1-1.6 1.6H4.2a1.6 1.6 0 0 1-1.6-1.6Z"/><circle cx="12" cy="13.6" r="3.3"/>',
+  trash: '<path d="M4.2 6.8h15.6M9.6 6.8V4.6h4.8v2.2"/><path d="m6.6 6.8.9 12.3a1.6 1.6 0 0 0 1.6 1.5h5.8a1.6 1.6 0 0 0 1.6-1.5l.9-12.3"/><path d="M10.4 10.6v6M13.6 10.6v6"/>',
+  bottle: '<path d="M9.4 3.4h5.2"/><path d="M10.2 3.4v2.1c0 .9-.4 1.4-1 2-.6.7-1 1.4-1 2.5v8.5a2.2 2.2 0 0 0 2.2 2.1h3.2a2.2 2.2 0 0 0 2.2-2.1V10c0-1.1-.4-1.8-1-2.5-.6-.6-1-1.1-1-2V3.4"/><path d="M8.2 12.2h7.6"/>',
+  note: '<path d="M6.2 3.6h8.1L18.6 8v12.4H6.2z"/><path d="M14.3 3.6V8h4.3"/><path d="M9.2 12.4h6.2M9.2 16h4"/>',
+  download: '<path d="M12 4.2v10.6M7.6 10.6 12 15l4.4-4.4"/><path d="M4.6 19.6h14.8"/>',
+  check: '<path d="m5 12.6 4.9 4.9L19 6.9"/>',
+  chevron: '<path d="m6.4 9.6 5.6 5.6 5.6-5.6"/>',
+  arrowLeft: '<path d="M19.4 12H5"/><path d="m11 6-6 6 6 6"/>',
+  close: '<path d="m6.2 6.2 11.6 11.6M17.8 6.2 6.2 17.8"/>'
+};
+
+function icon(name, size) {
+  var d = ICONS[name];
+  if (!d) return '';
+  var px = size || 20;
+  return '<svg class="icon" width="' + px + '" height="' + px + '" viewBox="0 0 24 24" fill="none" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ' +
+    'aria-hidden="true" focusable="false">' + d + '</svg>';
 }
 
 // ============================================================================
@@ -1797,24 +1875,24 @@ function showTreatmentDoseNotes(animalId, planId, time, dateStr) {
 
   var statusLine;
   if (log && log.given) {
-    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;"><strong>Given</strong> at ' +
+    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #e4ebdd; border: 1px solid #c6d3ba; border-radius: 5px; color: #33482c;"><strong>Given</strong> at ' +
       (log.actualTime ? formatTime(log.actualTime) : 'unknown time') + (log.doseGiven ? ' - ' + escapeHtml(log.doseGiven) : '') + '</div>';
   } else if (log && log.skipped) {
-    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #f8d7da; border: 1px solid #f5c2c7; border-radius: 5px; color: #721c24;"><strong>Recorded as missed</strong></div>';
+    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #f2e1da; border: 1px solid #e3c9be; border-radius: 5px; color: #6b2a1b;"><strong>Recorded as missed</strong></div>';
   } else {
-    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;"><strong>Not recorded yet</strong></div>';
+    statusLine = '<div style="margin-bottom: 15px; padding: 10px; background: #f6edda; border: 1px solid #e6d6a9; border-radius: 5px; color: #7a5a18;"><strong>Not recorded yet</strong></div>';
   }
 
   var modalHtml =
     '<div id="treatmentDoseModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
-    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+    '<div style="background: #fffdf8; padding: 28px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
     '<h3 style="margin-top: 0;">' + escapeHtml(plan.name) + ' - ' + formatTime(time) + '</h3>' +
-    '<p style="color: #666; margin-bottom: 20px;">' + escapeHtml(animal.name) + ' - ' + formatDate(date) + '</p>' +
+    '<p style="color: #6b6f60; margin-bottom: 20px;">' + escapeHtml(animal.name) + ' - ' + formatDate(date) + '</p>' +
     statusLine +
     '<label style="display: block; margin-bottom: 10px; font-weight: 600;">Notes:</label>' +
-    '<textarea id="treatmentDoseNotesText" placeholder="Response to treatment, difficulty dosing, why a dose was missed, vet instructions..." style="width: 100%; height: 120px; padding: 12px; border: 2px solid #e1e8ed; border-radius: 8px; font-family: inherit; resize: vertical;">' + escapeHtml(currentNotes) + '</textarea>' +
+    '<textarea id="treatmentDoseNotesText" placeholder="Response to treatment, difficulty dosing, why a dose was missed, vet instructions..." style="width: 100%; height: 120px; padding: 12px; border: 2px solid #ddd8cb; border-radius: 8px; font-family: inherit; resize: vertical;">' + escapeHtml(currentNotes) + '</textarea>' +
     '<div style="margin-top: 20px; text-align: right;">' +
-    '<button onclick="closeTreatmentDoseModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="closeTreatmentDoseModal()" style="background: #7a7d6e; margin-right: 10px;">Cancel</button>' +
     '<button onclick="saveTreatmentDoseNotes(' + animalId + ', ' + planId + ', \'' + time + '\', \'' + date + '\')">Save Notes</button>' +
     '</div>' +
     '</div>' +
@@ -2059,9 +2137,10 @@ function renderTreatmentPlansCard(animal, container) {
     '<h3>Treatments for ' + escapeHtml(animal.name) + '</h3>' +
 
     '<button class="accordion-header" id="tpFormToggle-' + id + '" onclick="toggleTreatmentAccordion(' + id + ', \'schedule\')">' +
-      '<span>&#128197; New Treatment Schedule</span><span class="accordion-chevron">&#9662;</span></button>' +
+      '<span class="accordion-label">' + icon('calendar', 18) + 'New Treatment Schedule</span>' +
+      '<span class="accordion-chevron">' + icon('chevron', 18) + '</span></button>' +
     '<div id="tpForm-' + id + '" class="accordion-panel" style="display: none;">' +
-      '<p style="margin-top: 0; color: #666;">A repeating course - antibiotics, pain relief, parasite treatment. Each dose gets ticked off as it is given.</p>' +
+      '<p style="margin-top: 0; color: #6b6f60;">A repeating course - antibiotics, pain relief, parasite treatment. Each dose gets ticked off as it is given.</p>' +
 
       '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
       '<div><label>Treatment name: <input type="text" id="tpName-' + id + '" placeholder="e.g. Baytril, Metacam"></label></div>' +
@@ -2084,7 +2163,7 @@ function renderTreatmentPlansCard(animal, container) {
       '</div>' +
 
       // ---- dose
-      '<h4 style="color: #698167; margin-bottom: 5px;">Dose</h4>' +
+      '<h4 style="color: #55684f; margin-bottom: 5px;">Dose</h4>' +
       '<label>How is the dose worked out? <select id="tpDoseMode-' + id + '" onchange="toggleTPDoseMode(' + id + ')">' +
         '<option value="fixed">A fixed amount I type in</option>' +
         '<option value="perkg">Per kg of body weight (recalculates as they grow)</option>' +
@@ -2098,11 +2177,11 @@ function renderTreatmentPlansCard(animal, container) {
         '<div><label>Unit: <select id="tpDoseUnit-' + id + '"><option value="mg">mg/kg</option><option value="mL">mL/kg</option></select></label></div>' +
         '<div><label>Strength (mg/mL, optional): <input type="number" id="tpConcentration-' + id + '" step="0.01" placeholder="e.g. 25"></label></div>' +
         '</div>' +
-        '<p style="color: #666; font-size: 13px; margin-top: 8px;">Add the strength and BushBuddy also shows the volume to draw up.</p>' +
+        '<p style="color: #6b6f60; font-size: 13px; margin-top: 8px;">Add the strength and BushBuddy also shows the volume to draw up.</p>' +
       '</div>' +
 
       // ---- frequency
-      '<h4 style="color: #698167; margin-bottom: 5px;">How often</h4>' +
+      '<h4 style="color: #55684f; margin-bottom: 5px;">How often</h4>' +
       '<label>Repeat: <select id="tpRepeat-' + id + '" onchange="toggleTPRepeat(' + id + ')">' +
         '<option value="times">At set times each day</option>' +
         '<option value="hours">Every X hours</option>' +
@@ -2138,7 +2217,7 @@ function renderTreatmentPlansCard(animal, container) {
       '</div>' +
 
       // ---- course length
-      '<h4 style="color: #698167; margin-bottom: 5px;">Course length</h4>' +
+      '<h4 style="color: #55684f; margin-bottom: 5px;">Course length</h4>' +
       '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
       '<div><label>Start date: <input type="date" id="tpStartDate-' + id + '" value="' + localToday() + '"></label></div>' +
       '<div><label>Ends: <select id="tpEndMode-' + id + '" onchange="toggleTPEndMode(' + id + ')">' +
@@ -2157,15 +2236,16 @@ function renderTreatmentPlansCard(animal, container) {
 
       '<div style="margin-top: 15px; display: flex; gap: 10px;">' +
       '<button onclick="addTreatmentPlan(' + id + ')">Create Schedule</button>' +
-      '<button onclick="toggleTreatmentPlanForm(' + id + ', false)" style="background: #6c757d;">Cancel</button>' +
+      '<button onclick="toggleTreatmentPlanForm(' + id + ', false)" style="background: #7a7d6e;">Cancel</button>' +
       '</div>' +
     '</div>' +
 
     '<button class="accordion-header" id="oneOffToggle-' + id + '" onclick="toggleTreatmentAccordion(' + id + ', \'oneoff\')">' +
-      '<span>&#128138; One-Off Treatment Record</span><span class="accordion-chevron">&#9662;</span></button>' +
+      '<span class="accordion-label">' + icon('pill', 18) + 'One-Off Treatment Record</span>' +
+      '<span class="accordion-chevron">' + icon('chevron', 18) + '</span></button>' +
     '<div id="oneOffForm-' + id + '" class="accordion-panel" style="display: none;"></div>' +
 
-    '<h4 style="color: #698167; margin: 25px 0 0;">Current Schedules</h4>' +
+    '<h4 style="color: #55684f; margin: 25px 0 0;">Current Schedules</h4>' +
     '<div id="treatmentPlans-' + id + '" style="margin-top: 10px;"></div>';
 
   container.appendChild(card);
@@ -2188,8 +2268,6 @@ function setTreatmentAccordion(animalId, which, open) {
   panel.style.display = open ? 'block' : 'none';
   if (header) {
     header.className = open ? 'accordion-header open' : 'accordion-header';
-    var chevron = header.querySelector('.accordion-chevron');
-    if (chevron) chevron.innerHTML = open ? '&#9652;' : '&#9662;';
   }
 }
 
@@ -2274,7 +2352,7 @@ function updateTreatmentPlansDisplay(animal) {
 
   var plans = getTreatmentPlans(animal);
   if (plans.length === 0) {
-    wrap.innerHTML = '<p style="color: #666; font-style: italic;">No treatment schedules yet.</p>';
+    wrap.innerHTML = '<p style="color: #6b6f60; font-style: italic;">No treatment schedules yet.</p>';
     return;
   }
 
@@ -2295,41 +2373,41 @@ function updateTreatmentPlansDisplay(animal) {
     var todayTimes = planDoseTimesFor(plan, today);
 
     html +=
-      '<div style="padding: 18px; margin: 12px 0; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 5px solid ' +
-        (current ? '#698167' : '#adb5bd') + '; ' + (current ? '' : 'opacity: 0.75;') + '">' +
+      '<div style="padding: 18px; margin: 12px 0; background: #fffdf8; border-radius: 8px; border: 1px solid #e3dfd4; border-left: 3px solid ' +
+        (current ? '#55684f' : '#a8a99a') + '; ' + (current ? '' : 'opacity: 0.75;') + '">' +
 
       '<div style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">' +
       '<div>' +
       '<strong style="font-size: 18px;">' + escapeHtml(plan.name) + '</strong>' +
       '<div style="margin-top: 6px;">' +
-        '<span style="display: inline-block; padding: 3px 9px; background: #698167; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + escapeHtml(String(plan.type).toUpperCase()) + '</span> ' +
-        '<span style="display: inline-block; padding: 3px 9px; background: #e9ecef; color: #495057; border-radius: 12px; font-size: 11px; font-weight: 600;">' + escapeHtml(String(plan.route).toUpperCase()) + '</span>' +
-        (current ? '' : ' <span style="display: inline-block; padding: 3px 9px; background: #adb5bd; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + (plan.stopped ? 'STOPPED' : 'FINISHED') + '</span>') +
+        '<span style="display: inline-block; padding: 3px 9px; background: #55684f; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + escapeHtml(String(plan.type).toUpperCase()) + '</span> ' +
+        '<span style="display: inline-block; padding: 3px 9px; background: #e3dfd4; color: #4a4e42; border-radius: 12px; font-size: 11px; font-weight: 600;">' + escapeHtml(String(plan.route).toUpperCase()) + '</span>' +
+        (current ? '' : ' <span style="display: inline-block; padding: 3px 9px; background: #a8a99a; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + (plan.stopped ? 'STOPPED' : 'FINISHED') + '</span>') +
       '</div>' +
       '</div>' +
-      '<button class="small" onclick="deleteTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">&#128465;</button>' +
+      '<button class="small" onclick="deleteTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #f6f4ed; color: #7a7d6e; border: 1px solid #ddd8cb;">' + icon('trash', 15) + '</button>' +
       '</div>' +
 
-      '<div style="margin-top: 12px; padding: 12px; background: ' + (dose.warning ? '#fff3cd' : '#f1f6f0') + '; border-radius: 8px;">' +
-      '<div style="font-size: 17px; font-weight: 600; color: ' + (dose.warning ? '#856404' : '#3f5a45') + ';">' + escapeHtml(dose.text) + ' per dose</div>' +
-      (dose.detail ? '<div style="font-size: 13px; color: #666; margin-top: 3px;">' + escapeHtml(dose.detail) + '</div>' : '') +
+      '<div style="margin-top: 12px; padding: 12px; background: ' + (dose.warning ? '#f6edda' : '#edefe6') + '; border-radius: 8px;">' +
+      '<div style="font-size: 17px; font-weight: 600; color: ' + (dose.warning ? '#7a5a18' : '#3b4a33') + ';">' + escapeHtml(dose.text) + ' per dose</div>' +
+      (dose.detail ? '<div style="font-size: 13px; color: #6b6f60; margin-top: 3px;">' + escapeHtml(dose.detail) + '</div>' : '') +
       '</div>' +
 
       '<p style="margin: 10px 0 4px;">' + escapeHtml(describePlanSchedule(plan)) + '</p>' +
-      '<p style="margin: 0 0 4px; color: #666;">' + escapeHtml(describePlanCourse(plan)) + '</p>' +
-      (plan.prescribedBy ? '<p style="margin: 0 0 4px; color: #666;">Prescribed by ' + escapeHtml(plan.prescribedBy) + '</p>' : '') +
-      (plan.notes ? '<div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; line-height: 1.5;">' + escapeHtml(plan.notes) + '</div>' : '') +
+      '<p style="margin: 0 0 4px; color: #6b6f60;">' + escapeHtml(describePlanCourse(plan)) + '</p>' +
+      (plan.prescribedBy ? '<p style="margin: 0 0 4px; color: #6b6f60;">Prescribed by ' + escapeHtml(plan.prescribedBy) + '</p>' : '') +
+      (plan.notes ? '<div style="margin: 10px 0; padding: 10px; background: #f6f4ed; border-radius: 8px; line-height: 1.5;">' + escapeHtml(plan.notes) + '</div>' : '') +
 
       '<p style="margin: 8px 0; font-weight: 600;">' + progress.given + ' of ' + progress.due + ' doses given' +
-        (progress.missed > 0 ? ' <span style="color: #dc3545;">- ' + progress.missed + ' missed</span>' : '') +
-        (progress.unrecorded > 0 ? ' <span style="color: #fd7e14;">- ' + progress.unrecorded + ' not recorded</span>' : '') +
+        (progress.missed > 0 ? ' <span style="color: #a2482f;">- ' + progress.missed + ' missed</span>' : '') +
+        (progress.unrecorded > 0 ? ' <span style="color: #b5702a;">- ' + progress.unrecorded + ' not recorded</span>' : '') +
       '</p>' +
-      (next ? '<p style="margin: 0 0 8px; color: #666;">Next dose: ' + (next.isToday ? 'today' : formatDate(next.date)) + ' at ' + formatTime(next.time) + '</p>' : '');
+      (next ? '<p style="margin: 0 0 8px; color: #6b6f60;">Next dose: ' + (next.isToday ? 'today' : formatDate(next.date)) + ' at ' + formatTime(next.time) + '</p>' : '');
 
     // Today's doses
     if (todayTimes.length > 0) {
-      html += '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e9ecef;">' +
-        '<strong style="font-size: 14px; color: #698167;">Today</strong>';
+      html += '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e3dfd4;">' +
+        '<strong style="font-size: 14px; color: #55684f;">Today</strong>';
       todayTimes.forEach(function(t) {
         var status = getTreatmentDoseStatus(animal, plan, t, today);
         var log = findTreatmentLog(animal, plan.id, today, t);
@@ -2339,12 +2417,12 @@ function updateTreatmentPlansDisplay(animal) {
           '<strong style="min-width: 75px;">' + formatTime(t) + '</strong>' +
           '<span class="status-badge status-' + status.class + '">' + status.text + '</span>' +
           (status.class === 'completed' || status.text === 'Missed' ?
-            '<button class="small" onclick="undoTreatmentDose(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #6c757d; color: white;">Undo</button>' :
-            '<button class="small" onclick="markTreatmentDose(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #28a745; color: white;">Give</button>' +
-            '<button class="small" onclick="markTreatmentDoseMissed(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #dc3545; color: white;">Missed</button>') +
-          '<button class="small" onclick="showTreatmentDoseNotes(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #17a2b8; color: white;">' + (hasNotes ? 'Notes*' : 'Notes') + '</button>' +
+            '<button class="small" onclick="undoTreatmentDose(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #7a7d6e; color: white;">Undo</button>' :
+            '<button class="small" onclick="markTreatmentDose(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #4e6b43; color: white;">Give</button>' +
+            '<button class="small" onclick="markTreatmentDoseMissed(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #a2482f; color: white;">Missed</button>') +
+          '<button class="small" onclick="showTreatmentDoseNotes(' + animal.id + ', ' + plan.id + ', \'' + t + '\', \'' + today + '\')" style="background: #4e7c7a; color: white;">' + (hasNotes ? 'Notes*' : 'Notes') + '</button>' +
           '</div>' +
-          (hasNotes ? '<div style="margin: 4px 0 0 83px; font-size: 13px; color: #555;">' + escapeHtml(log.notes) + '</div>' : '');
+          (hasNotes ? '<div style="margin: 4px 0 0 83px; font-size: 13px; color: #565a4c;">' + escapeHtml(log.notes) + '</div>' : '');
       });
       html += '</div>';
     }
@@ -2352,9 +2430,9 @@ function updateTreatmentPlansDisplay(animal) {
     html +=
       '<div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px;">' +
       (plan.stopped ?
-        '<button class="small" onclick="resumeTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #698167; color: white;">Resume</button>' :
-        '<button class="small" onclick="stopTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #6c757d; color: white;">Stop course</button>') +
-      '<button class="small" onclick="toggleDoseHistory(' + plan.id + ')" style="background: #698167; color: white;">Dose history</button>' +
+        '<button class="small" onclick="resumeTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #55684f; color: white;">Resume</button>' :
+        '<button class="small" onclick="stopTreatmentPlan(' + animal.id + ', ' + plan.id + ')" style="background: #7a7d6e; color: white;">Stop course</button>') +
+      '<button class="small" onclick="toggleDoseHistory(' + plan.id + ')" style="background: #55684f; color: white;">Dose history</button>' +
       '</div>' +
 
       '<div id="doseHistory-' + plan.id + '" style="display: none; margin-top: 12px;">' + renderDoseHistory(animal, plan) + '</div>' +
@@ -2366,7 +2444,7 @@ function updateTreatmentPlansDisplay(animal) {
 
 function renderDoseHistory(animal, plan) {
   var logs = getTreatmentLogs(animal).filter(function(l) { return l.planId == plan.id; });
-  if (logs.length === 0) return '<p style="color: #666; font-style: italic;">No doses recorded yet.</p>';
+  if (logs.length === 0) return '<p style="color: #6b6f60; font-style: italic;">No doses recorded yet.</p>';
 
   logs.sort(function(a, b) {
     return (b.date + b.scheduledTime).localeCompare(a.date + a.scheduledTime);
@@ -2375,14 +2453,14 @@ function renderDoseHistory(animal, plan) {
   var html = '<table style="width: 100%; border-collapse: collapse; font-size: 14px;">';
   logs.forEach(function(log) {
     var label = log.given ? 'Given' : (log.skipped ? 'Missed' : 'Note only');
-    var colour = log.given ? '#28a745' : (log.skipped ? '#dc3545' : '#6c757d');
+    var colour = log.given ? '#4e6b43' : (log.skipped ? '#a2482f' : '#7a7d6e');
     html +=
-      '<tr style="border-bottom: 1px solid #e9ecef;">' +
-      '<td style="padding: 8px 6px; white-space: nowrap;">' + formatDate(log.date) + '<br><span style="color: #666;">' + formatTime(log.scheduledTime) + '</span></td>' +
+      '<tr style="border-bottom: 1px solid #e3dfd4;">' +
+      '<td style="padding: 8px 6px; white-space: nowrap;">' + formatDate(log.date) + '<br><span style="color: #6b6f60;">' + formatTime(log.scheduledTime) + '</span></td>' +
       '<td style="padding: 8px 6px;"><span style="color: ' + colour + '; font-weight: 600;">' + label + '</span>' +
-        (log.actualTime ? ' <span style="color: #666;">at ' + formatTime(log.actualTime) + '</span>' : '') +
-        (log.doseGiven ? '<br><span style="color: #666;">' + escapeHtml(log.doseGiven) + '</span>' : '') +
-        (log.notes ? '<br><span style="color: #555;">' + escapeHtml(log.notes) + '</span>' : '') +
+        (log.actualTime ? ' <span style="color: #6b6f60;">at ' + formatTime(log.actualTime) + '</span>' : '') +
+        (log.doseGiven ? '<br><span style="color: #6b6f60;">' + escapeHtml(log.doseGiven) + '</span>' : '') +
+        (log.notes ? '<br><span style="color: #565a4c;">' + escapeHtml(log.notes) + '</span>' : '') +
       '</td>' +
       '</tr>';
   });
@@ -2455,9 +2533,9 @@ function deleteTreatment(animalId, treatmentId) {
   card.innerHTML = '<h3>Photo Gallery for ' + escapeHtml(animal.name) + '</h3>';
   
   var uploadSection = document.createElement('div');
-  uploadSection.style.cssText = 'margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 12px;';
+  uploadSection.style.cssText = 'margin-bottom: 25px; padding: 20px; background: #f6f4ed; border-radius: 12px;';
   uploadSection.innerHTML = 
-    '<h4 style="margin-top: 0; color: #698167;">Add Photo</h4>' +
+    '<h4 style="margin-top: 0; color: #55684f;">Add Photo</h4>' +
     '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
     '<div><label>Date Taken: <input type="date" id="photoDate-' + animal.id + '" value="' + localToday() + '"></label></div>' +
     '<div><label>Photo: <input type="file" id="photoFile-' + animal.id + '" accept="image/*" style="padding: 8px;"></label></div>' +
@@ -2581,7 +2659,7 @@ function updatePhotoDisplay(animal) {
   galleryDiv.innerHTML = '';
   
   if (!animal.photos || animal.photos.length === 0) {
-    galleryDiv.innerHTML = '<p style="text-align: center; color: #666; font-style: italic; grid-column: 1/-1;">No photos added yet. Upload your first photo above!</p>';
+    galleryDiv.innerHTML = '<p style="text-align: center; color: #6b6f60; font-style: italic; grid-column: 1/-1;">No photos added yet. Upload your first photo above!</p>';
     
     // Update summary
     var summaryDiv = galleryDiv.previousElementSibling;
@@ -2648,8 +2726,8 @@ function updatePhotoDisplay(animal) {
       (photo.caption ? '<div class="photo-info-caption">' + escapeHtml(photo.caption.length > 60 ? photo.caption.substring(0, 60) + '...' : photo.caption) + '</div>' : '') +
       '</div>' +
       '<div class="photo-actions">' +
-      '<button class="small" onclick="event.stopPropagation(); downloadPhoto(' + animal.id + ', ' + photo.id + ')" style="background: #28a745; color: white; border: none;">📥 Save</button>' +
-      '<button class="small" onclick="event.stopPropagation(); deletePhoto(' + animal.id + ', ' + photo.id + ')" style="background: #dc3545; color: white; border: none;">🗑️</button>' +
+      '<button class="small" onclick="event.stopPropagation(); downloadPhoto(' + animal.id + ', ' + photo.id + ')" style="background: #4e6b43; color: white; border: none;"><span class="btn-label">' + icon('download', 14) + 'Save</span></button>' +
+      '<button class="small" onclick="event.stopPropagation(); deletePhoto(' + animal.id + ', ' + photo.id + ')" style="background: #a2482f; color: white; border: none;">' + icon('trash', 14) + '</button>' +
       '</div>';
     
     galleryDiv.appendChild(photoCard);
@@ -2673,14 +2751,14 @@ function showPhotoModal(animalId, photoId) {
   
   modal.innerHTML = 
     '<div class="photo-modal-content">' +
-    '<button class="photo-modal-close" onclick="closePhotoModal()">✕ Close</button>' +
+    '<button class="photo-modal-close" onclick="closePhotoModal()"><span class="btn-label">' + icon('close', 15) + 'Close</span></button>' +
     '<img src="' + photo.imageData + '" alt="' + escapeHtml(photo.caption || 'Animal photo') + '">' +
     '<div class="photo-modal-info">' +
     '<strong style="font-size: 16px;">Date: ' + formatDate(photo.date) + '</strong>' +
-    (photo.caption ? '<p style="margin-top: 10px; line-height: 1.6;">' + escapeHtml(photo.caption) + '</p>' : '<p style="margin-top: 10px; color: #666; font-style: italic;">No caption</p>') +
+    (photo.caption ? '<p style="margin-top: 10px; line-height: 1.6;">' + escapeHtml(photo.caption) + '</p>' : '<p style="margin-top: 10px; color: #6b6f60; font-style: italic;">No caption</p>') +
     '<div style="margin-top: 15px; display: flex; gap: 10px;">' +
-    '<button onclick="downloadPhoto(' + animalId + ', ' + photoId + ')" style="background: #28a745;">📥 Download Photo</button>' +
-    '<button onclick="deletePhoto(' + animalId + ', ' + photoId + '); closePhotoModal();" style="background: #dc3545;">🗑️ Delete Photo</button>' +
+    '<button onclick="downloadPhoto(' + animalId + ', ' + photoId + ')" style="background: #4e6b43;"><span class="btn-label">' + icon('download', 15) + 'Download Photo</span></button>' +
+    '<button onclick="deletePhoto(' + animalId + ', ' + photoId + '); closePhotoModal();" style="background: #a2482f;"><span class="btn-label">' + icon('trash', 15) + 'Delete Photo</span></button>' +
     '</div>' +
     '</div>' +
     '</div>';
@@ -2765,10 +2843,10 @@ function updateHealthDisplay(animal) {
   var historyDiv = document.getElementById('healthHistory-' + animal.id);
   if (!historyDiv) return;
   
-  historyDiv.innerHTML = '<h4 style="color: #698167;">Health History</h4>';
+  historyDiv.innerHTML = '<h4 style="color: #55684f;">Health History</h4>';
   
   if (!animal.healthEntries || animal.healthEntries.length === 0) {
-    historyDiv.innerHTML += '<p style="color: #666; font-style: italic;">No health entries recorded yet.</p>';
+    historyDiv.innerHTML += '<p style="color: #6b6f60; font-style: italic;">No health entries recorded yet.</p>';
     return;
   }
   
@@ -2797,8 +2875,8 @@ function updateHealthDisplay(animal) {
       '<div class="summary-number">' + vetVisits + '</div>' +
       '<div class="summary-label">Vet Visits</div>' +
       '</div>' +
-      '<div class="summary-card" style="' + (urgentEntries > 0 ? 'border-color: #dc3545;' : '') + '">' +
-      '<div class="summary-number" style="' + (urgentEntries > 0 ? 'color: #dc3545;' : '') + '">' + urgentEntries + '</div>' +
+      '<div class="summary-card" style="' + (urgentEntries > 0 ? 'border-color: #a2482f;' : '') + '">' +
+      '<div class="summary-number" style="' + (urgentEntries > 0 ? 'color: #a2482f;' : '') + '">' + urgentEntries + '</div>' +
       '<div class="summary-label">Urgent/Concerns</div>' +
       '</div>';
   }
@@ -2811,33 +2889,33 @@ function updateHealthDisplay(animal) {
   
   sorted.forEach(function(entry) {
     var div = document.createElement('div');
-    div.style.cssText = 'padding: 15px; margin: 10px 0; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); ' + 
-      (entry.urgent ? 'border-left: 4px solid #dc3545;' : 'border-left: 4px solid #698167;');
+    div.style.cssText = 'padding: 15px 16px; margin: 10px 0; background: #fffdf8; border-radius: 8px; border: 1px solid #e3dfd4; ' + 
+      (entry.urgent ? 'border-left: 4px solid #a2482f;' : 'border-left: 4px solid #55684f;');
     
     var typeColor = {
-      'General Check': '#17a2b8',
-      'Symptom': '#ffc107',
-      'Vet Visit': '#6f42c1',
-      'Medication': '#28a745',
-      'Injury': '#dc3545',
-      'Improvement': '#20c997',
-      'Concern': '#fd7e14'
+      'General Check': '#4e7c7a',
+      'Symptom': '#c08a2e',
+      'Vet Visit': '#6b5b8a',
+      'Medication': '#4e6b43',
+      'Injury': '#a2482f',
+      'Improvement': '#4e8c74',
+      'Concern': '#b5702a'
     };
     
-    var color = typeColor[entry.type] || '#698167';
+    var color = typeColor[entry.type] || '#55684f';
     
     div.innerHTML = 
       '<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">' +
       '<div>' +
       '<strong style="font-size: 16px;">' + formatDate(entry.date) + '</strong>' +
-      (entry.time ? ' <span style="color: #666;">at ' + formatTime(entry.time) + '</span>' : '') +
+      (entry.time ? ' <span style="color: #6b6f60;">at ' + formatTime(entry.time) + '</span>' : '') +
       '<br>' +
       '<span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: ' + color + '; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">' + entry.type.toUpperCase() + '</span>' +
-      (entry.urgent ? ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #dc3545; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">⚠️ URGENT</span>' : '') +
+      (entry.urgent ? ' <span style="display: inline-block; margin-top: 5px; padding: 4px 10px; background: #a2482f; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">URGENT</span>' : '') +
      '</div>' +
-'<button class="small" onclick="deleteHealthEntry(' + animal.id + ', ' + entry.id + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>' +
+'<button class="small" onclick="deleteHealthEntry(' + animal.id + ', ' + entry.id + ')" style="background: #f6f4ed; color: #7a7d6e; border: 1px solid #ddd8cb;">' + icon('trash', 15) + '</button>' +
 '</div>' +
-      '<div style="margin-top: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; line-height: 1.6;">' +
+      '<div style="margin-top: 10px; padding: 12px; background: #f6f4ed; border-radius: 8px; line-height: 1.6;">' +
       escapeHtml(entry.notes) +
       '</div>';
     
@@ -2880,13 +2958,13 @@ function showScheduleSection(animal, container) {
   // Schedule management section
   var scheduleControls = document.createElement('div');
   scheduleControls.innerHTML = 
-    '<div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">' +
+    '<div style="margin-bottom: 20px; padding: 15px; background: #f6f4ed; border-radius: 10px;">' +
     '<h4>Schedule Management</h4>' +
     '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">' +
     '<div><label>Current Weight (g): <input type="number" id="scheduleWeight-' + animal.id + '" value="' + (currentWeight || '') + '" placeholder="Enter current weight"></label></div>' +
     '<div style="display: flex; align-items: end; gap: 10px;">' +
     '<button onclick="updateScheduleForWeight(' + animal.id + ')">Update Schedule</button>' +
-    '<button onclick="addCustomFeedingTime(' + animal.id + ')" style="background: #28a745;">Add Custom Time</button>' +
+    '<button onclick="addCustomFeedingTime(' + animal.id + ')" style="background: #4e6b43;">Add Custom Time</button>' +
     '</div>' +
     '</div>' +
     '</div>';
@@ -2981,12 +3059,12 @@ function addCustomFeedingTime(animalId) {
   
   var modalHtml = 
     '<div id="feedingTimeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
-    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; width: 90%;">' +
+    '<div style="background: #fffdf8; padding: 28px; border-radius: 10px; max-width: 400px; width: 90%;">' +
     '<h3 style="margin-top: 0;">Add Feeding Time</h3>' +
     '<label>Time: <select id="newFeedingTime" style="margin-top: 10px;">' + generateTimeOptions() + '</select></label>' +
     '<label>Description: <input type="text" id="newFeedingDescription" value="Custom feed" style="margin-top: 15px;"></label>' +
     '<div style="margin-top: 20px; text-align: right;">' +
-    '<button onclick="closeFeedingTimeModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="closeFeedingTimeModal()" style="background: #7a7d6e; margin-right: 10px;">Cancel</button>' +
     '<button onclick="saveFeedingTime(' + animalId + ')">Add Time</button>' +
     '</div>' +
     '</div>' +
@@ -3063,7 +3141,7 @@ function updateScheduleDisplay(animal) {
   scheduleDiv.innerHTML = '';
   
   if (!animal.feedingTimes || animal.feedingTimes.length === 0) {
-    scheduleDiv.innerHTML = '<p style="text-align: center; color: #666; font-style: italic; grid-column: 1/-1;">No feeding schedule set. Enter a current weight to generate a schedule.</p>';
+    scheduleDiv.innerHTML = '<p style="text-align: center; color: #6b6f60; font-style: italic; grid-column: 1/-1;">No feeding schedule set. Enter a current weight to generate a schedule.</p>';
     return;
   }
   
@@ -3077,8 +3155,8 @@ function updateScheduleDisplay(animal) {
     // Get today's feeding log for this time to show notes
     var todayLog = getTodayFeedingLogForTime(animal, feedTime.time);
     var hasNotes = todayLog && todayLog.notes && todayLog.notes.trim();
-    var notesIcon = hasNotes ? '📝' : '📝';
-    var notesColor = hasNotes ? '#28a745' : '#6c757d';
+    var notesIcon = icon('note', 16);
+    var notesColor = hasNotes ? '#4e6b43' : '#7a7d6e';
     
     card.innerHTML = 
       '<div class="feeding-time-header">' +
@@ -3098,10 +3176,10 @@ function updateScheduleDisplay(animal) {
       (hasNotes ? '<div class="notes-preview"><strong>Notes:</strong> ' + escapeHtml(todayLog.notes.length > 60 ? todayLog.notes.substring(0, 60) + '...' : todayLog.notes) + '</div>' : '') +
       '<div class="feeding-actions">' +
       (status.class === 'completed' ? 
-        '<button onclick="unmarkFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')" style="background: #6c757d;">Undo</button>' :
+        '<button onclick="unmarkFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')" style="background: #7a7d6e;">Undo</button>' :
         '<button onclick="markFeedingComplete(' + animal.id + ', \'' + feedTime.time + '\')">Complete</button>'
       ) +
-      '<button onclick="deleteFeedingTime(' + animal.id + ', ' + feedTime.id + ')" style="background: #dc3545;">Delete</button>' +
+      '<button onclick="deleteFeedingTime(' + animal.id + ', ' + feedTime.id + ')" style="background: #a2482f;">Delete</button>' +
       '</div>';
     
     scheduleDiv.appendChild(card);
@@ -3127,17 +3205,17 @@ function showFeedingNotes(animalId, scheduledTime) {
   
   var modalHtml = 
     '<div id="feedingNotesModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">' +
-    '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+    '<div style="background: #fffdf8; padding: 28px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
     '<h3 style="margin-top: 0;">Feeding Notes - ' + formatTime(scheduledTime) + '</h3>' +
-    '<p style="color: #666; margin-bottom: 20px;">Date: ' + formatDate(today) + '</p>' +
+    '<p style="color: #6b6f60; margin-bottom: 20px;">Date: ' + formatDate(today) + '</p>' +
     (isCompleted ? 
-      '<div style="margin-bottom: 15px; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;"><strong>✓ Feeding completed</strong> at ' + (todayLog.actualTime ? formatTime(todayLog.actualTime) : 'unknown time') + '</div>' :
-      '<div style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;"><strong>⏳ Feeding not completed yet</strong></div>'
+      '<div style="margin-bottom: 15px; padding: 10px; background: #e4ebdd; border: 1px solid #c6d3ba; border-radius: 5px; color: #33482c;"><strong>Feeding completed</strong> at ' + (todayLog.actualTime ? formatTime(todayLog.actualTime) : 'unknown time') + '</div>' :
+      '<div style="margin-bottom: 15px; padding: 10px; background: #f6edda; border: 1px solid #e6d6a9; border-radius: 5px; color: #7a5a18;"><strong>Feeding not completed yet</strong></div>'
     ) +
     '<label style="display: block; margin-bottom: 10px; font-weight: 600;">Notes:</label>' +
-    '<textarea id="feedingNotesText" placeholder="Record any feeding observations, issues, amounts consumed, behavior, etc..." style="width: 100%; height: 120px; padding: 12px; border: 2px solid #e1e8ed; border-radius: 8px; font-family: inherit; resize: vertical;">' + currentNotes + '</textarea>' +
+    '<textarea id="feedingNotesText" placeholder="Record any feeding observations, issues, amounts consumed, behavior, etc..." style="width: 100%; height: 120px; padding: 12px; border: 2px solid #ddd8cb; border-radius: 8px; font-family: inherit; resize: vertical;">' + currentNotes + '</textarea>' +
     '<div style="margin-top: 20px; text-align: right;">' +
-    '<button onclick="closeFeedingNotesModal()" style="background: #6c757d; margin-right: 10px;">Cancel</button>' +
+    '<button onclick="closeFeedingNotesModal()" style="background: #7a7d6e; margin-right: 10px;">Cancel</button>' +
     '<button onclick="saveFeedingNotes(' + animalId + ', \'' + scheduledTime + '\')">Save Notes</button>' +
     '</div>' +
     '</div>' +
@@ -3454,7 +3532,7 @@ function showWeightHistoryForAnimal(animal) {
   history.innerHTML = '<h4>Weight History for ' + escapeHtml(animal.name) + '</h4>';
   
   if (!animal.weights || animal.weights.length === 0) {
-    history.innerHTML += '<p style="color: #666; font-style: italic;">No weight records yet.</p>';
+    history.innerHTML += '<p style="color: #6b6f60; font-style: italic;">No weight records yet.</p>';
     return;
   }
   
@@ -3492,16 +3570,16 @@ function showWeightHistoryForAnimal(animal) {
   
   sorted.forEach(function(w, index) {
     var div = document.createElement('div');
-    div.style.cssText = 'padding: 10px; margin: 5px 0; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;';
+    div.style.cssText = 'padding: 10px 12px; margin: 5px 0; background: #fffdf8; border-radius: 6px; border: 1px solid #e3dfd4; display: flex; justify-content: space-between; align-items: center;';
     
     var weightChange = '';
     if (index < sorted.length - 1) {
       var prevWeight = sorted[index + 1].weight;
       var change = w.weight - prevWeight;
       if (change > 0) {
-        weightChange = ' <span style="color: #28a745;">(+' + change.toFixed(0) + 'g)</span>';
+        weightChange = ' <span style="color: #4e6b43;">(+' + change.toFixed(0) + 'g)</span>';
       } else if (change < 0) {
-        weightChange = ' <span style="color: #dc3545;">(' + change.toFixed(0) + 'g)</span>';
+        weightChange = ' <span style="color: #a2482f;">(' + change.toFixed(0) + 'g)</span>';
       }
     }
     
@@ -3511,7 +3589,7 @@ function showWeightHistoryForAnimal(animal) {
       w.weight + 'g' + weightChange +
       '</div>' +
       '<div style="display: flex; gap: 5px;">' +
-      '<button class="small" onclick="deleteWeightForAnimal(' + animal.id + ', \'' + w.date + '\', ' + w.weight + ')" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">🗑️</button>' +
+      '<button class="small" onclick="deleteWeightForAnimal(' + animal.id + ', \'' + w.date + '\', ' + w.weight + ')" style="background: #f6f4ed; color: #7a7d6e; border: 1px solid #ddd8cb;">' + icon('trash', 15) + '</button>' +
       '</div>';
     
     history.appendChild(div);
@@ -3701,10 +3779,9 @@ function showDailySchedule() {
   
   scheduleItems.forEach(function(item) {
     var statusIcon = '';
-    if (item.status.class === 'completed') statusIcon = '✓';
+    if (item.status.class === 'completed') statusIcon = icon('check', 12);
     else if (item.status.class === 'overdue') statusIcon = '!';
-    else if (item.status.class === 'upcoming') statusIcon = '⋯';
-    else statusIcon = '○';
+    else statusIcon = '';
     
     timelineHtml += 
       '<div class="timeline-item" data-type="' + item.type + '" data-status="' + item.status.class + '">' +
@@ -3714,7 +3791,7 @@ function showDailySchedule() {
       '<div>' +
       '<div class="timeline-animal">' + escapeHtml(item.animal.name) + '</div>' +
       '<div class="timeline-type">' + 
-      (item.type === 'feeding' ? '🍼 Feeding' : '💊 Treatment') + 
+      (item.type === 'feeding' ? icon('bottle', 14) + 'Feeding' : icon('pill', 14) + 'Treatment') + 
       ' • ' + formatTime(item.time) + 
       '</div>' +
       '</div>' +
@@ -3737,15 +3814,15 @@ function showDailySchedule() {
       
       if (item.status.class === 'completed') {
         timelineHtml += 
-          '<button class="small" onclick="unmarkFeedingComplete(' + item.animal.id + ', \'' + item.feedTime.time + '\'); showDailySchedule();" style="background: #6c757d; color: white;">Undo</button>';
+          '<button class="small" onclick="unmarkFeedingComplete(' + item.animal.id + ', \'' + item.feedTime.time + '\'); showDailySchedule();" style="background: #7a7d6e; color: white;">Undo</button>';
       } else {
         timelineHtml += 
-          '<button class="small" onclick="markFeedingComplete(' + item.animal.id + ', \'' + item.feedTime.time + '\'); showDailySchedule();" style="background: #28a745; color: white;">Mark Complete</button>';
+          '<button class="small" onclick="markFeedingComplete(' + item.animal.id + ', \'' + item.feedTime.time + '\'); showDailySchedule();" style="background: #4e6b43; color: white;">Mark Complete</button>';
       }
       
       timelineHtml += 
-        '<button class="small" onclick="showFeedingNotes(' + item.animal.id + ', \'' + item.feedTime.time + '\')" style="background: #17a2b8; color: white;">Add Notes</button>' +
-        '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'schedule\');" style="background: #698167; color: white;">View Animal</button>' +
+        '<button class="small" onclick="showFeedingNotes(' + item.animal.id + ', \'' + item.feedTime.time + '\')" style="background: #4e7c7a; color: white;">Add Notes</button>' +
+        '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'schedule\');" style="background: #55684f; color: white;">View Animal</button>' +
         '</div>';
     } else {
       var plan = item.plan;
@@ -3754,9 +3831,9 @@ function showDailySchedule() {
       timelineHtml += 
         '<div class="timeline-details">' +
         '<strong>' + escapeHtml(plan.name) + '</strong> (' + escapeHtml(plan.type) + ')<br>' +
-        'Dose: <strong>' + escapeHtml(item.dose.text) + '</strong>' + (item.dose.detail ? ' <span style="color: #666;">- ' + escapeHtml(item.dose.detail) + '</span>' : '') + '<br>' +
+        'Dose: <strong>' + escapeHtml(item.dose.text) + '</strong>' + (item.dose.detail ? ' <span style="color: #6b6f60;">- ' + escapeHtml(item.dose.detail) + '</span>' : '') + '<br>' +
         'Route: ' + escapeHtml(plan.route) + '<br>' +
-        (course ? '<span style="color: #666;">' + escapeHtml(course) + '</span><br>' : '');
+        (course ? '<span style="color: #6b6f60;">' + escapeHtml(course) + '</span><br>' : '');
       
       if (plan.notes) {
         timelineHtml += escapeHtml(plan.notes) + '<br>';
@@ -3771,16 +3848,16 @@ function showDailySchedule() {
       
       if (item.status.class === 'completed' || item.status.text === 'Missed') {
         timelineHtml += 
-          '<button class="small" onclick="undoTreatmentDose(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #6c757d; color: white;">Undo</button>';
+          '<button class="small" onclick="undoTreatmentDose(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #7a7d6e; color: white;">Undo</button>';
       } else {
         timelineHtml += 
-          '<button class="small" onclick="markTreatmentDose(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #28a745; color: white;">Mark Given</button>' +
-          '<button class="small" onclick="markTreatmentDoseMissed(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #dc3545; color: white;">Missed</button>';
+          '<button class="small" onclick="markTreatmentDose(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #4e6b43; color: white;">Mark Given</button>' +
+          '<button class="small" onclick="markTreatmentDoseMissed(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #a2482f; color: white;">Missed</button>';
       }
       
       timelineHtml += 
-        '<button class="small" onclick="showTreatmentDoseNotes(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #17a2b8; color: white;">Add Notes</button>' +
-        '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'treatments\');" style="background: #698167; color: white;">View Animal</button>' +
+        '<button class="small" onclick="showTreatmentDoseNotes(' + item.animal.id + ', ' + plan.id + ', \'' + item.time + '\', \'' + todayLocal + '\')" style="background: #4e7c7a; color: white;">Add Notes</button>' +
+        '<button class="small" onclick="showAnimalDetail(' + item.animal.id + '); showAnimalSection(' + item.animal.id + ', \'treatments\');" style="background: #55684f; color: white;">View Animal</button>' +
         '</div>';
     }
     
