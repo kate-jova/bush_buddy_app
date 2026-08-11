@@ -85,6 +85,38 @@
 
     .icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
+    .weight-chart {
+      margin: 16px 0 4px;
+      padding: 14px 10px 6px;
+      background: #fffdf8;
+      border: 1px solid #e3dfd4;
+      border-radius: 8px;
+    }
+
+    .weight-chart svg { display: block; width: 100%; height: auto; }
+
+    .weight-chart text {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      fill: #6b6f60;
+    }
+
+    .weight-chart-stats {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 22px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #6b6f60;
+    }
+
+    .weight-chart-stats strong {
+      font-family: inherit;
+      font-size: 16px;
+      color: #3b4a33;
+      font-weight: 600;
+    }
+
     .accordion-chevron { line-height: 0; }
     .accordion-chevron svg { transition: transform 0.2s ease; }
     .accordion-header.open .accordion-chevron svg { transform: rotate(180deg); }
@@ -774,6 +806,10 @@
   </div>
 
   <div class="main-nav">
+    <button class="nav-tab" onclick="showTab('add')">
+      <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.2v7.6M8.2 12h7.6"/></svg></div>
+      <div class="nav-tab-text">Add New<br>Animal</div>
+    </button>
     <button class="nav-tab active" onclick="showTab('home')">
       <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="13.2" r="6"/><circle cx="5.6" cy="7.6" r="2.7"/><circle cx="18.4" cy="7.6" r="2.7"/><ellipse cx="12" cy="14" rx="1.7" ry="2.1"/><circle cx="9.4" cy="11.2" r="0.75" fill="currentColor" stroke="none"/><circle cx="14.6" cy="11.2" r="0.75" fill="currentColor" stroke="none"/></svg></div>
       <div class="nav-tab-text">Your<br>Animals</div>
@@ -781,10 +817,6 @@
     <button class="nav-tab" onclick="showTab('daily')">
       <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M8 3.2v4.4M16 3.2v4.4M3.5 10.5h17"/></svg></div>
       <div class="nav-tab-text">Today's<br>Schedule</div>
-    </button>
-    <button class="nav-tab" onclick="showTab('add')">
-      <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.2v7.6M8.2 12h7.6"/></svg></div>
-      <div class="nav-tab-text">Add New<br>Animal</div>
     </button>
     <button class="nav-tab" onclick="showTab('export')">
       <div class="nav-tab-icon"><svg class="icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.8" y="3.8" width="18.4" height="4.8" rx="1.2"/><path d="M4.4 8.6V19a1.6 1.6 0 0 0 1.6 1.6h12a1.6 1.6 0 0 0 1.6-1.6V8.6"/><path d="M10 12.4h4"/></svg></div>
@@ -880,6 +912,13 @@
 var animals = [];
 
 // Add error logging for debugging
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('resize', function() {
+    clearTimeout(window._bbChartTimer);
+    window._bbChartTimer = setTimeout(redrawWeightCharts, 250);
+  });
+}
+
 window.onerror = function(msg, url, lineNo, columnNo, error) {
   console.error('JavaScript Error:', msg, 'at line', lineNo);
   // A blocking alert mid-feed is worse than useless to a carer holding a possum.
@@ -3525,6 +3564,164 @@ function showFeedCalcForAnimal(animal) {
   }
 }
 
+var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function shortDate(dateStr) {
+  var d = parseLocalDate(dateStr);
+  return d.getDate() + ' ' + MONTH_NAMES[d.getMonth()];
+}
+
+function niceStep(range, targetTicks) {
+  var raw = range / (targetTicks || 4);
+  if (raw <= 0) return 1;
+  var mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+  var norm = raw / mag;
+  var mult = norm <= 1 ? 1 : (norm <= 2 ? 2 : (norm <= 5 ? 5 : 10));
+  return mult * mag;
+}
+
+function sortedWeights(animal) {
+  return (animal.weights || []).slice().sort(function(a, b) {
+    return parseLocalDate(a.date) - parseLocalDate(b.date);
+  });
+}
+
+function weightChartSvg(animal, width) {
+  var pts = sortedWeights(animal);
+  if (pts.length < 2) return '';
+
+  var W = Math.max(280, Math.min(Math.round(width) || 640, 880));
+  var narrow = W < 430;
+  var H = narrow ? 190 : 240;
+  var padL = 46, padR = 14, padT = 16, padB = 28;
+  var plotW = W - padL - padR;
+  var plotH = H - padT - padB;
+
+  var t0 = parseLocalDate(pts[0].date).getTime();
+  var t1 = parseLocalDate(pts[pts.length - 1].date).getTime();
+  var span = (t1 - t0) || 1;
+
+  var values = pts.map(function(p) { return Number(p.weight); });
+  var lo = Math.min.apply(null, values);
+  var hi = Math.max.apply(null, values);
+  if (lo === hi) { lo -= 5; hi += 5; }
+
+  var step = niceStep(hi - lo, 4);
+  var yMin = Math.floor(lo / step) * step;
+  var yMax = Math.ceil(hi / step) * step;
+  if (yMax <= yMin) yMax = yMin + step;
+
+  function px(p) { return padL + (parseLocalDate(p.date).getTime() - t0) / span * plotW; }
+  function py(v) { return padT + (yMax - v) / (yMax - yMin) * plotH; }
+
+  var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" ' +
+    'aria-label="Weight over time for ' + escapeHtml(animal.name) + '">'];
+
+  // horizontal gridlines and their labels
+  for (var v = yMin; v <= yMax + 0.0001; v += step) {
+    var gy = py(v);
+    svg.push('<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + gy.toFixed(1) +
+      '" stroke="#e3dfd4" stroke-width="1"/>');
+    svg.push('<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" font-size="11" text-anchor="end">' +
+      Math.round(v) + '</text>');
+  }
+
+  // the line, and a soft wash beneath it
+  var line = '';
+  pts.forEach(function(p, i) {
+    line += (i === 0 ? 'M' : 'L') + px(p).toFixed(1) + ',' + py(Number(p.weight)).toFixed(1) + ' ';
+  });
+  var base = padT + plotH;
+  svg.push('<path d="' + line + 'L' + px(pts[pts.length - 1]).toFixed(1) + ',' + base +
+    ' L' + px(pts[0]).toFixed(1) + ',' + base + ' Z" fill="rgba(85,104,79,0.10)" stroke="none"/>');
+  svg.push('<path d="' + line.trim() + '" fill="none" stroke="#55684f" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"/>');
+
+  // points - dropped when there are so many they would merge into a smudge
+  if (pts.length <= 60) {
+    pts.forEach(function(p, i) {
+      var last = i === pts.length - 1;
+      svg.push('<circle cx="' + px(p).toFixed(1) + '" cy="' + py(Number(p.weight)).toFixed(1) + '" r="' +
+        (last ? 4.5 : 3) + '" fill="' + (last ? '#55684f' : '#fffdf8') + '" stroke="#55684f" stroke-width="1.6">' +
+        '<title>' + shortDate(p.date) + ' - ' + p.weight + ' g</title></circle>');
+    });
+  }
+
+  // most recent weight, called out above its point
+  var lastPt = pts[pts.length - 1];
+  var lx = px(lastPt);
+  var ly = py(Number(lastPt.weight));
+  svg.push('<text x="' + Math.min(lx, W - padR - 4).toFixed(1) + '" y="' + Math.max(ly - 12, padT + 10).toFixed(1) +
+    '" font-size="12" font-weight="600" text-anchor="' + (lx > W - padR - 40 ? 'end' : 'middle') +
+    '" fill="#3b4a33">' + lastPt.weight + ' g</text>');
+
+  // baseline and date labels
+  svg.push('<line x1="' + padL + '" y1="' + base + '" x2="' + (W - padR) + '" y2="' + base +
+    '" stroke="#ddd8cb" stroke-width="1"/>');
+  svg.push('<text x="' + padL + '" y="' + (H - 8) + '" font-size="11" text-anchor="start">' +
+    shortDate(pts[0].date) + '</text>');
+  svg.push('<text x="' + (W - padR) + '" y="' + (H - 8) + '" font-size="11" text-anchor="end">' +
+    shortDate(lastPt.date) + '</text>');
+  if (!narrow && pts.length > 2) {
+    var mid = pts[Math.floor(pts.length / 2)];
+    var mx = px(mid);
+    if (mx > padL + 45 && mx < W - padR - 45) {
+      svg.push('<text x="' + mx.toFixed(1) + '" y="' + (H - 8) + '" font-size="11" text-anchor="middle">' +
+        shortDate(mid.date) + '</text>');
+    }
+  }
+
+  svg.push('</svg>');
+  return svg.join('');
+}
+
+function weightChartStats(animal) {
+  var pts = sortedWeights(animal);
+  if (pts.length < 2) return '';
+
+  var first = pts[0];
+  var last = pts[pts.length - 1];
+  var change = Number(last.weight) - Number(first.weight);
+  var days = Math.round((parseLocalDate(last.date) - parseLocalDate(first.date)) / 86400000);
+
+  // recent trend - the last week matters more than the whole stay
+  var cutoff = parseLocalDate(last.date).getTime() - 7 * 86400000;
+  var window = pts.filter(function(p) { return parseLocalDate(p.date).getTime() >= cutoff; });
+  var rate = null, rateDays = 0;
+  if (window.length >= 2) {
+    rateDays = Math.round((parseLocalDate(last.date) - parseLocalDate(window[0].date)) / 86400000);
+    if (rateDays > 0) rate = (Number(last.weight) - Number(window[0].weight)) / rateDays;
+  }
+  if (rate === null && days > 0) { rate = change / days; rateDays = days; }
+
+  function tinted(n, suffix) {
+    var colour = n > 0 ? '#4e6b43' : (n < 0 ? '#a2482f' : '#6b6f60');
+    var sign = n > 0 ? '+' : '';
+    return '<span style="color: ' + colour + '; font-weight: 600;">' + sign + n.toFixed(n % 1 === 0 ? 0 : 1) +
+      suffix + '</span>';
+  }
+
+  var html = '<div class="weight-chart-stats">' +
+    '<span><strong>' + last.weight + ' g</strong> current</span>' +
+    '<span>' + tinted(change, ' g') + ' since ' + shortDate(first.date) +
+      (days > 0 ? ' (' + days + ' day' + (days === 1 ? '' : 's') + ')' : '') + '</span>';
+  if (rate !== null) {
+    html += '<span>' + tinted(rate, ' g/day') + ' over the last ' + rateDays +
+      ' day' + (rateDays === 1 ? '' : 's') + '</span>';
+  }
+  return html + '</div>';
+}
+
+function redrawWeightCharts() {
+  var holders = document.querySelectorAll('[data-weight-chart]');
+  for (var i = 0; i < holders.length; i++) {
+    var holder = holders[i];
+    var id = holder.getAttribute('data-weight-chart');
+    var animal = animals.find(function(a) { return a.id == id; });
+    if (animal) holder.innerHTML = weightChartSvg(animal, holder.clientWidth || 640);
+  }
+}
+
 function showWeightHistoryForAnimal(animal) {
   var history = document.getElementById('weightHistory-' + animal.id);
   if (!history) return;
@@ -3566,7 +3763,14 @@ function showWeightHistoryForAnimal(animal) {
     }
   }
   
-  history.innerHTML += '<div style="margin-top: 15px;"><strong>Weight Records:</strong></div>';
+  if (animal.weights.length > 1) {
+    history.innerHTML += '<div class="weight-chart" data-weight-chart="' + animal.id + '"></div>' +
+      weightChartStats(animal);
+  } else {
+    history.innerHTML += '<p style="color: #6b6f60;">Add a second weight to see the trend over time.</p>';
+  }
+
+  history.innerHTML += '<div style="margin-top: 20px;"><strong>Weight Records:</strong></div>';
   
   sorted.forEach(function(w, index) {
     var div = document.createElement('div');
@@ -3594,6 +3798,8 @@ function showWeightHistoryForAnimal(animal) {
     
     history.appendChild(div);
   });
+
+  redrawWeightCharts();
 }
 
 function deleteWeightForAnimal(animalId, date, weight) {
